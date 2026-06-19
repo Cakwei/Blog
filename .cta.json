@@ -1,0 +1,28 @@
+{
+  "projectName": "blog",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "includeExamples": false,
+  "tailwind": true,
+  "addOnOptions": {
+    "prisma": {
+      "database": "mysql"
+    }
+  },
+  "envVarValues": {},
+  "git": false,
+  "install": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "biome",
+    "nitro",
+    "prisma",
+    "form",
+    "shadcn",
+    "better-auth",
+    "tanstack-query"
+  ]
+}
