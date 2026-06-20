@@ -1,5 +1,5 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import type { QueryClient } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
@@ -7,15 +7,35 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import type { Session } from "better-auth";
+import { useEffect } from "react";
 import { Button } from "#/components/ui/button";
+import BetterAuthHeader from "#/integrations/better-auth/header-user";
+import { getFreshServerSession } from "#/lib/utils";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
+	session: Session;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+	beforeLoad: async ({ location }) => {
+		const session = await getFreshServerSession();
+
+		if (location.pathname === "/login") {
+			return;
+		}
+
+		if (session) {
+			// confirm("inside");
+			return { session };
+		}
+
+		// Testing purposes
+		// throw redirect({ to: "/login" });
+	},
 	head: () => ({
 		meta: [
 			{
@@ -26,7 +46,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "TanStack Start Starter",
+				title: "Charlee's Blog",
 			},
 		],
 		links: [
@@ -40,6 +60,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+	const { session } = Route.useRouteContext();
+
 	return (
 		<html lang="en">
 			<head>
@@ -65,16 +87,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								</Link>
 							</nav>
 						</div>
+						{/* Showed depending not logged in OR logged in */}
+						{session ? (
+							<BetterAuthHeader />
+						) : (
+							<div className="flex items-center gap-4">
+								<Link to="/login">
+									<Button>Log in </Button>
+								</Link>
 
-						<div className="flex items-center gap-4">
-							<Link to="/login">
-								<Button>Log in </Button>
-							</Link>
-
-							<Link to="/register">
-								<Button>Sign up </Button>
-							</Link>
-						</div>
+								<Link to="/register">
+									<Button>Sign up </Button>
+								</Link>
+							</div>
+						)}
 					</div>
 				</header>
 				{children}
@@ -83,10 +109,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					<div className="container mx-auto px-4">
 						<div className="grid md:grid-cols-4 gap-8">
 							<div className="col-span-2">
-								<h2 className="text-lg font-bold mb-4">STARTBLOG</h2>
+								<span className="text-xl text-[#318F97] font-bold tracking-tighter">
+									Charlee's<span className="text-primary"> Blog</span>
+								</span>
 								<p className="text-sm text-muted-foreground max-w-xs">
-									Built with TanStack Start and BetterAuth. High-performance,
-									type-safe blogging.
+									Built with TanStack Start and BetterAuth
 								</p>
 							</div>
 							<div>

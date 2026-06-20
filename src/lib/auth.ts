@@ -1,9 +1,14 @@
-import { betterAuth } from 'better-auth'
-import { tanstackStartCookies } from 'better-auth/tanstack-start'
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
+import { prisma } from "../../prisma/seed";
 
 export const auth = betterAuth({
-  emailAndPassword: {
-    enabled: true,
-  },
-  plugins: [tanstackStartCookies()],
-})
+	database: prismaAdapter(prisma, {
+		provider: "mysql",
+	}),
+	emailAndPassword: {
+		enabled: true,
+	},
+	plugins: [tanstackStartCookies()],
+});

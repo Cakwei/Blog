@@ -1,18 +1,15 @@
-import { createServerFn } from "@tanstack/react-start";
-import { MOCK_POSTS } from "#/lib/const";
+import { createFileRoute } from "@tanstack/react-router";
+import { auth } from "#/lib/auth";
 
-export const getPosts = createServerFn({ method: "GET" }).handler(async () => {
-	return MOCK_POSTS;
+export const Route = createFileRoute("/api/auth/$")({
+	server: {
+		handlers: {
+			GET: async ({ request }: { request: Request }) => {
+				return await auth.handler(request);
+			},
+			POST: async ({ request }: { request: Request }) => {
+				return await auth.handler(request);
+			},
+		},
+	},
 });
-
-export const getPostById = createServerFn({ method: "GET" })
-	// 1. Define what input the function expects
-	.validator((postId: string) => postId)
-	// 2. Destructure 'data' (which is the postId) from the context object
-	.handler(async ({ data: postId }) => {
-		const post = MOCK_POSTS.find((p) => p.id === postId);
-		if (!post) {
-			throw new Error("Post not found");
-		}
-		return post;
-	});

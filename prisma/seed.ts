@@ -1,13 +1,15 @@
 import { PrismaClient } from '../src/generated/prisma/client.js'
 
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
-const adapter = new PrismaMariaDb({
+export const adapter = new PrismaMariaDb({
   host: 'localhost',
   port: 3306,
   connectionLimit: 5,
+  user:'root',
+  database: 'blog'
 })
 
-const prisma = new PrismaClient({ adapter })
+export const prisma = new PrismaClient({ adapter })
 
 async function main() {
   console.log('🌱 Seeding database...')

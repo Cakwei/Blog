@@ -6,3 +6,8 @@ export type Post = {
 	category: string;
 	image: string;
 };
+
+export type AuthFormData = {
+	email: string;
+	password: string;
+};

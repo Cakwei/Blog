@@ -2,7 +2,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getPostById } from "../api/auth/$";
+import { getPostById } from "../api/posts/$";
 
 export const Route = createFileRoute("/posts/$postId")({
 	loader: async ({ params }) => await getPostById({ data: params.postId }),

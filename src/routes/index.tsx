@@ -1,7 +1,7 @@
 // import { getPosts } from '../utils/api'
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { Post } from "#/lib/types";
-import { getPosts } from "./api/auth/$";
+import { getPosts } from "./api/posts/$";
 
 export const Route = createFileRoute("/")({
 	loader: async () => await getPosts(),
