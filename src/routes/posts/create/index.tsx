@@ -1,14 +1,15 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
 
 export const Route = createFileRoute("/posts/create/")({
 	component: NewPostPage,
 });
 
 function NewPostPage() {
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 py-12">
+		<div className="max-w-6xl mx-auto px-4 py-12 h-auto">
 			<Link
 				to="/posts"
 				className="text-sm text-gray-500 hover:text-blue-600 transition-colors mb-4 inline-block"
@@ -16,6 +17,9 @@ function NewPostPage() {
 				← Back to your posts
 			</Link>
 			<h1 className="text-3xl font-bold mb-8">New post</h1>
+			<div className="w-full">
+				<SimpleEditor />
+			</div>
 		</div>
 	);
 }

@@ -20,6 +20,7 @@
   --inset-glint: rgba(255, 255, 255, 0.82);
   --kicker: rgba(47, 106, 74, 0.9);
   --bg-base: #e7f3ec;
+  height:auto;
   --header-bg: rgba(251, 255, 248, 0.84);
   --chip-bg: rgba(255, 255, 255, 0.8);
   --chip-line: rgba(47, 106, 74, 0.18);
@@ -160,19 +161,29 @@
 html,
 body,
 #app {
+  /* Fix: Force layouts to handle overflow dynamically on dynamic long copy edits */
   min-height: 100%;
+  height: auto; 
 }
 
 body {
   margin: 0;
   color: var(--sea-ink);
   font-family: var(--font-sans);
+  
+  /* Fix: Use background-color with theme variables here instead of Tailwind layers */
   background-color: var(--bg-base);
-  background:
+  
+  /* Fix: Swapped from shorthand 'background' to 'background-image' to prevent masking properties */
+  background-image:
     radial-gradient(1100px 620px at -8% -10%, var(--hero-a), transparent 58%),
     radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
     radial-gradient(720px 380px at 50% 115%, rgba(79, 184, 178, 0.1), transparent 68%),
     linear-gradient(180deg, color-mix(in oklab, var(--sand) 68%, white) 0%, var(--foam) 44%, var(--bg-base) 100%);
+  
+  background-attachment: scroll;
+  background-size: 100% auto;
+  
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -203,6 +214,7 @@ body::after {
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 28px 28px;
   mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
+  height: 100%;
 }
 
 a {
@@ -341,7 +353,7 @@ a {
     @apply border-border outline-ring/50;
   }
   body {
-    background-color: var(--background);
+    /* Fix: Removed 'background-color: var(--background);' which overrode your custom styles */
     color: var(--foreground);
   }
 }

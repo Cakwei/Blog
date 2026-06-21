@@ -50,7 +50,7 @@ export default function BetterAuthHeader() {
 							</div>
 						)}
 					</DropdownMenuTrigger>
-					<DropdownMenuContent>
+					<DropdownMenuContent className="mr-3.5">
 						<DropdownMenuGroup>
 							<DropdownMenuLabel className="font-bold">
 								My Account
