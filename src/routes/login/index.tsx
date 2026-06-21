@@ -36,7 +36,7 @@ function LoginPage() {
 
 	const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
-
+		console.log(name, value);
 		setFormData((prevData) => ({
 			...prevData, // Copy previous state
 			[name]: value, // Use ES6 computed property name [key]
@@ -80,7 +80,12 @@ function LoginPage() {
 							type="password"
 						/>
 					</div>
-					<Button onClick={() => signIn(formData)} className="w-full">
+					<Button
+						onClick={() => {
+							signIn(formData);
+						}}
+						className="w-full"
+					>
 						Sign In
 					</Button>
 				</CardContent>

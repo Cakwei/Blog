@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
+import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
+import { Route as PostsCreateIndexRouteImport } from './routes/posts/create/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -25,6 +27,11 @@ const RegisterIndexRoute = RegisterIndexRouteImport.update({
   path: '/register/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PostsIndexRoute = PostsIndexRouteImport.update({
+  id: '/posts/',
+  path: '/posts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
@@ -33,6 +40,11 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/posts/$postId',
   path: '/posts/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsCreateIndexRoute = PostsCreateIndexRouteImport.update({
+  id: '/posts/create/',
+  path: '/posts/create/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -45,44 +57,68 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/login/': typeof LoginIndexRoute
+  '/posts/': typeof PostsIndexRoute
   '/register/': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/posts/create/': typeof PostsCreateIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/login': typeof LoginIndexRoute
+  '/posts': typeof PostsIndexRoute
   '/register': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/posts/create': typeof PostsCreateIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/login/': typeof LoginIndexRoute
+  '/posts/': typeof PostsIndexRoute
   '/register/': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/posts/create/': typeof PostsCreateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts/$postId' | '/login/' | '/register/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/posts/$postId'
+    | '/login/'
+    | '/posts/'
+    | '/register/'
+    | '/api/auth/$'
+    | '/posts/create/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts/$postId' | '/login' | '/register' | '/api/auth/$'
+  to:
+    | '/'
+    | '/posts/$postId'
+    | '/login'
+    | '/posts'
+    | '/register'
+    | '/api/auth/$'
+    | '/posts/create'
   id:
     | '__root__'
     | '/'
     | '/posts/$postId'
     | '/login/'
+    | '/posts/'
     | '/register/'
     | '/api/auth/$'
+    | '/posts/create/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  PostsIndexRoute: typeof PostsIndexRoute
   RegisterIndexRoute: typeof RegisterIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  PostsCreateIndexRoute: typeof PostsCreateIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -101,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/posts/': {
+      id: '/posts/'
+      path: '/posts'
+      fullPath: '/posts/'
+      preLoaderRoute: typeof PostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login/': {
       id: '/login/'
       path: '/login'
@@ -113,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/posts/$postId'
       fullPath: '/posts/$postId'
       preLoaderRoute: typeof PostsPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/create/': {
+      id: '/posts/create/'
+      path: '/posts/create'
+      fullPath: '/posts/create/'
+      preLoaderRoute: typeof PostsCreateIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -129,8 +179,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   LoginIndexRoute: LoginIndexRoute,
+  PostsIndexRoute: PostsIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  PostsCreateIndexRoute: PostsCreateIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

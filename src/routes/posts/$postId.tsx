@@ -1,10 +1,24 @@
 // app/routes/posts.$postId.tsx
 import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { prisma } from "#/db";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getPostById } from "../api/posts/$";
+
+export const getPostById = createServerFn({ method: "GET" })
+	// FIX: Change (postId) to ({ data: postId })
+	.validator((postId: string) => postId)
+	.handler(async ({ data: postId }) => {
+		const post = await prisma.post.findUnique({
+			where: { id: postId },
+		});
+
+		if (!post) throw new Error("Post not found");
+		return post;
+	});
 
 export const Route = createFileRoute("/posts/$postId")({
+	// This stays exactly how you want it!
 	loader: async ({ params }) => await getPostById({ data: params.postId }),
 	component: PostPage,
 });
@@ -23,9 +37,9 @@ function PostPage() {
 				</h1>
 				<div className="text-muted-foreground">
 					Published on{" "}
-					{new Date(post.date).toLocaleDateString("en-US", {
-						month: "long",
+					{new Date(post.date).toLocaleDateString("en-MY", {
 						day: "numeric",
+						month: "long",
 						year: "numeric",
 					})}
 				</div>

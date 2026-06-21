@@ -1,4 +1,3 @@
-import { redirect } from "@tanstack/react-router";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient();
@@ -17,10 +16,11 @@ export const signUp = async (formData: { email: string; password: string }) => {
 			name: "User",
 			email: formData.email,
 			password: formData.password,
+			callbackURL: "/login",
 		},
 		{
 			onSuccess: () => {
-				throw redirect({ to: "/login" });
+				window.location.href = "/login";
 			},
 		},
 	);

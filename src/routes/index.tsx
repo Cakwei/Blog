@@ -1,10 +1,22 @@
 // import { getPosts } from '../utils/api'
-import { createFileRoute, Link } from "@tanstack/react-router";
-import type { Post } from "#/lib/types";
-import { getPosts } from "./api/posts/$";
 
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { prisma } from "#/db";
+import { MOCK_POSTS } from "#/lib/const";
+
+export const getRandomPosts = createServerFn().handler(async () => {
+	// This runs only on the server
+	const posts = prisma.post.findMany({
+		take: 10,
+	});
+	return posts;
+});
 export const Route = createFileRoute("/")({
-	loader: async () => await getPosts(),
+	loader: async () => {
+		const posts = await getRandomPosts();
+		return posts && posts.length >= 1 ? posts : MOCK_POSTS;
+	},
 	component: HomePage,
 });
 
@@ -19,13 +31,13 @@ function HomePage() {
 			<section className="mb-16">
 				<Link
 					to="/posts/$postId"
-					params={{ postId: featuredPost.id }}
+					params={{ postId: featuredPost?.id }}
 					className="group grid md:grid-cols-2 gap-8 items-center"
 				>
 					<div className="overflow-hidden rounded-2xl">
 						<img
-							src={featuredPost.image}
-							alt={featuredPost.title}
+							src={featuredPost?.image}
+							alt={featuredPost?.title}
 							className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
 						/>
 					</div>
@@ -34,13 +46,15 @@ function HomePage() {
 							Featured Post
 						</span>
 						<h1 className="text-4xl font-bold mt-2 mb-4 group-hover:text-blue-600 transition-colors">
-							{featuredPost.title}
+							{featuredPost?.title}
 						</h1>
-						<p className="text-gray-600 text-lg mb-4">{featuredPost.excerpt}</p>
+						<p className="text-gray-600 text-lg mb-4">
+							{featuredPost?.excerpt}
+						</p>
 						<div className="flex items-center text-sm text-gray-500">
-							<span>{featuredPost.date}</span>
+							<span>{new Date(featuredPost?.date).toDateString()}</span>
 							<span className="mx-2">•</span>
-							<span>{featuredPost.category}</span>
+							<span>{featuredPost?.category}</span>
 						</div>
 					</div>
 				</Link>
@@ -55,7 +69,7 @@ function HomePage() {
 			</div>
 
 			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-				{remainingPosts.map((post: Post) => (
+				{remainingPosts.map((post) => (
 					<article key={post.id} className="group">
 						<Link to="/posts/$postId" params={{ postId: post.id }}>
 							<div className="overflow-hidden rounded-xl mb-4">
@@ -72,7 +86,9 @@ function HomePage() {
 								{post.title}
 							</h3>
 							<p className="text-gray-600 line-clamp-2 mb-4">{post.excerpt}</p>
-							<p className="text-sm text-gray-400">{post.date}</p>
+							<p className="text-sm text-gray-400">
+								{new Date(post.date).toDateString()}
+							</p>
 						</Link>
 					</article>
 				))}

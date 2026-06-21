@@ -1,5 +1,5 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { QueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { Session } from "better-auth";
-import { useEffect } from "react";
 import { Button } from "#/components/ui/button";
 import BetterAuthHeader from "#/integrations/better-auth/header-user";
 import { getFreshServerSession } from "#/lib/utils";
@@ -17,7 +16,7 @@ import appCss from "../styles.css?url";
 
 interface MyRouterContext {
 	queryClient: QueryClient;
-	session: Session;
+	session?: Session;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -69,8 +68,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				{/* HEADER */}
-				<header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-					<div className="container mx-auto px-4 h-16 flex items-center justify-between">
+				<header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 left-0 z-50  w-full px-5">
+					<div className="h-16 w-full flex items-center justify-between">
 						<div className="flex items-center gap-8">
 							<Link to="/" className="text-xl font-bold tracking-tighter">
 								Charlee's<span className="text-primary"> Blog</span>

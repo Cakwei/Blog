@@ -5,6 +5,8 @@ const adapter = new PrismaMariaDb({
 	host: "localhost",
 	port: 3306,
 	connectionLimit: 5,
+	database: "blog",
+	user: "root",
 });
 
 declare global {
