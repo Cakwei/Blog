@@ -9,8 +9,8 @@ export const adapter = new PrismaMariaDb({
   database: 'blog'
 })
 
-const tempId = 'LAadQqhJakDFV5LoVbKVawMNQa4M4J0N'
-export const prisma = new PrismaClient({ adapter })
+const tempId = '8wH0VMCStmArnBpmkxLRAW76DKUxj2rS'
+export const prisma = new PrismaClient({ adapter }	)
 
 async function main() {
   console.log('🌱 Seeding database...')

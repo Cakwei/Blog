@@ -1,5 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { Button } from "#/components/ui/button";
+import { Skeleton } from "#/components/ui/skeleton";
 import { prisma } from "#/db";
 import type { Post } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
@@ -12,17 +15,30 @@ const getOwnPosts = createServerFn().handler(async () => {
 			userId: session?.user.id,
 		},
 	});
+
 	return posts;
 });
 
+const postsQueryOptions = () =>
+	queryOptions({
+		queryKey: ["posts"],
+		queryFn: () => getOwnPosts(),
+	});
+
 export const Route = createFileRoute("/posts/")({
-	loader: async () => await getOwnPosts(),
+	loader: async ({ context }) => {
+		context.queryClient.ensureQueryData(postsQueryOptions());
+	},
 	component: AdminPostsPage,
 });
 
 function AdminPostsPage() {
-	const posts = Route.useLoaderData();
-
+	const {
+		data: posts,
+		isSuccess,
+		isLoading,
+	} = useSuspenseQuery(postsQueryOptions());
+	const navigate = useNavigate();
 	return (
 		<div className="max-w-6xl mx-auto px-4 py-12">
 			<div className="flex justify-between items-end mb-10">
@@ -32,23 +48,30 @@ function AdminPostsPage() {
 						Create, edit, and publish your articles.
 					</p>
 				</div>
-				<Link
-					to="/posts/create"
-					className="px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors whitespace-nowrap"
+				<Button
+					onClick={() => navigate({ to: "/posts/create" })}
+					className="px-5 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors whitespace-nowrap"
 				>
 					New post
-				</Link>
+				</Button>
 			</div>
 
-			{posts.length === 0 ? (
-				<EmptyState />
-			) : (
+			{!isLoading && isSuccess && posts.length !== 0 && (
 				<div className="border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
 					{posts.map((post) => (
 						<PostRow key={post.id} post={post} />
 					))}
 				</div>
 			)}
+
+			{isLoading && (
+				<div className="border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
+					<Skeleton className="w-full h-[50vw]" />
+					dd
+				</div>
+			)}
+
+			{!isLoading && isSuccess && posts.length === 0 && <EmptyState />}
 		</div>
 	);
 }
@@ -112,15 +135,9 @@ function EmptyState() {
 	return (
 		<div className="text-center py-20 border border-dashed border-gray-200 rounded-2xl">
 			<h3 className="text-lg font-bold text-gray-900 mb-2">No posts yet</h3>
-			<p className="text-gray-500 mb-6">
+			<p className="text-gray-500 mb-6 text-sm">
 				Write your first post to see it here.
 			</p>
-			<Link
-				to="/posts/create"
-				className="inline-block px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
-			>
-				New post
-			</Link>
 		</div>
 	);
 }
