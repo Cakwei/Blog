@@ -28,11 +28,7 @@ export type PostInput = Omit<Post, "id" | "date"> & {
 	date?: string;
 };
 
-export const CATEGORIES = [
-	"Technology",
-	"Design",
-	"Engineering",
-	"Product",
-	"Medical",
-	"Culture",
-];
+export type EditorSavingContenxt = {
+	isSaving: boolean;
+	setIsSaving: (saving: boolean) => void;
+};

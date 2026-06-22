@@ -27,3 +27,12 @@ export const MOCK_POSTS: Post[] = [
 		image: "https://picsum.photos/seed/post3/800/450",
 	},
 ];
+
+export const CATEGORIES = [
+	"Technology",
+	"Design",
+	"Engineering",
+	"Product",
+	"Medical",
+	"Culture",
+];

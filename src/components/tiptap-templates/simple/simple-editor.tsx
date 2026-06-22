@@ -9,7 +9,13 @@ import { Selection } from "@tiptap/extensions";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
-import { useEffect, useRef, useState } from "react";
+import {
+	type Dispatch,
+	type SetStateAction,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { HorizontalRule } from "#/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 // --- Tiptap Node ---
 import { ImageUploadNode } from "#/components/tiptap-node/image-upload-node/image-upload-node-extension";
@@ -67,6 +73,7 @@ import "#/components/tiptap-templates/simple/simple-editor.scss";
 
 import content from "#/components/tiptap-templates/simple/data/content.json";
 import "#/index.css";
+import { useEditorSavingState } from "#/routes/posts/create";
 
 /**
  * Handles image upload with progress tracking and abort capability.
@@ -248,14 +255,19 @@ const MobileToolbarContent = ({
 	</>
 );
 
-export function SimpleEditor() {
+export function SimpleEditor({
+	setData,
+}: {
+	setData: Dispatch<SetStateAction<any>>;
+}) {
+	const { setIsSaving } = useEditorSavingState();
+	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const isMobile = useIsBreakpoint();
 	const { height } = useWindowSize();
 	const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
 		"main",
 	);
 	const toolbarRef = useRef<HTMLDivElement>(null);
-
 	const editor = useEditor({
 		immediatelyRender: false,
 		editorProps: {
@@ -293,7 +305,27 @@ export function SimpleEditor() {
 				onError: (error) => console.error("Upload failed:", error),
 			}),
 		],
-		content,
+		// content,
+		onUpdate: ({ editor }) => {
+			// 2. Immediately clear any existing timer when user types
+			if (saveTimeoutRef.current) {
+				clearTimeout(saveTimeoutRef.current);
+			}
+
+			// 3. Immediately show "Saving..." feedback to the user
+			setIsSaving(true);
+
+			// 4. Set a new timer to execute after 1000ms of inactivity
+			saveTimeoutRef.current = setTimeout(() => {
+				const json = editor.getJSON();
+
+				// 5. Trigger your actual save / TanStack mutation here
+				setData(json);
+
+				// 6. Turn off the saving state once saved
+				setIsSaving(false);
+			}, 350); // 1 second debounce window
+		},
 	});
 
 	const rect = useCursorVisibility({
@@ -308,7 +340,7 @@ export function SimpleEditor() {
 	}, [isMobile, mobileView]);
 
 	return (
-		<div className="">
+		<div className="bg-white">
 			<EditorContext.Provider value={{ editor }}>
 				<Toolbar
 					ref={toolbarRef}
