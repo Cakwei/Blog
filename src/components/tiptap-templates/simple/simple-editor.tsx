@@ -40,7 +40,6 @@ import { ArrowLeftIcon } from "#/components/tiptap-icons/arrow-left-icon";
 import { HighlighterIcon } from "#/components/tiptap-icons/highlighter-icon";
 import { LinkIcon } from "#/components/tiptap-icons/link-icon";
 // --- Components ---
-import { ThemeToggle } from "#/components/tiptap-templates/simple/theme-toggle";
 import { BlockquoteButton } from "#/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "#/components/tiptap-ui/code-block-button";
 import {
@@ -71,7 +70,6 @@ import { MAX_FILE_SIZE } from "#/lib/tiptap-utils";
 // --- Styles ---
 import "#/components/tiptap-templates/simple/simple-editor.scss";
 
-import content from "#/components/tiptap-templates/simple/data/content.json";
 import "#/index.css";
 import { useEditorSavingState } from "#/routes/posts/create";
 
@@ -100,51 +98,49 @@ export const handleImageUpload = async (
 		);
 	}
 
-	// ==========================================
-	// DEVELOPMENT ENVIRONMENT (Testing Locals)
-	// ==========================================
-	if (process.env.NODE_ENV === "development") {
-		// Simulate network latency tracking for testing the Tiptap UI loader state
-		for (let progress = 0; progress <= 100; progress += 20) {
-			if (abortSignal?.aborted) {
-				throw new Error("Upload cancelled");
-			}
-			await new Promise((resolve) => setTimeout(resolve, 150));
-			onProgress?.({ progress });
+	// 2. Base64 Conversion with Progress Tracking & Cancel Support
+	return new Promise((resolve, reject) => {
+		// Handle immediate termination if already cancelled
+		if (abortSignal?.aborted) {
+			return reject(new Error("Upload cancelled"));
 		}
 
-		// Returns a temporary pointer to your local computer memory
-		return URL.createObjectURL(file);
-	}
+		const reader = new FileReader();
 
-	// ==========================================
-	// PRODUCTION ENVIRONMENT (Real Server API)
-	// ==========================================
-	const formData = new FormData();
-	formData.append("file", file);
+		// Track processing progress for the Tiptap loader UI
+		reader.onprogress = (event) => {
+			if (event.lengthComputable) {
+				const progress = Math.round((event.loaded / event.total) * 100);
+				onProgress?.({ progress });
+			}
+		};
 
-	try {
-		const response = await fetch("/api/upload", {
-			method: "POST",
-			body: formData,
-			signal: abortSignal, // Links Tiptap's UI abort button to the fetch trigger
+		// Fire success callback when base64 generation completes
+		reader.onload = (event) => {
+			if (abortSignal?.aborted) {
+				return reject(new Error("Upload cancelled"));
+			}
+			if (event.target?.result) {
+				resolve(event.target.result as string);
+			} else {
+				reject(new Error("Failed to convert image to Base64"));
+			}
+		};
+
+		// Intercept internal local reading errors
+		reader.onerror = () => {
+			reject(new Error("Error reading local image file"));
+		};
+
+		// Listen to Tiptap's UI abort signal to stop reading the file
+		abortSignal?.addEventListener("abort", () => {
+			reader.abort();
+			reject(new Error("Upload cancelled"));
 		});
 
-		if (!response.ok) {
-			throw new Error("Failed to upload image to production server");
-		}
-
-		const data = await response.json();
-
-		// NOTE: Change 'data.url' to match your backend response key
-		// (e.g., data.secure_url, data.path, etc.)
-		return data.url;
-	} catch (error) {
-		if (error instanceof Error && error.name === "AbortError") {
-			throw new Error("Upload cancelled");
-		}
-		throw error;
-	}
+		// Trigger the binary string reader engine
+		reader.readAsDataURL(file);
+	});
 };
 
 const MainToolbarContent = ({
@@ -268,6 +264,8 @@ export function SimpleEditor({
 		"main",
 	);
 	const toolbarRef = useRef<HTMLDivElement>(null);
+	const { setEditor } = useEditorSavingState();
+
 	const editor = useEditor({
 		immediatelyRender: false,
 		editorProps: {
@@ -292,7 +290,9 @@ export function SimpleEditor({
 			TaskList,
 			TaskItem.configure({ nested: true }),
 			Highlight.configure({ multicolor: true }),
-			Image,
+			Image.configure({
+				allowBase64: true,
+			}),
 			Typography,
 			Superscript,
 			Subscript,
@@ -306,6 +306,9 @@ export function SimpleEditor({
 			}),
 		],
 		// content,
+		onCreate: () => {
+			setEditor(editor);
+		},
 		onUpdate: ({ editor }) => {
 			// 2. Immediately clear any existing timer when user types
 			if (saveTimeoutRef.current) {

@@ -1,3 +1,5 @@
+import type { Editor } from "@tiptap/core";
+import type { Dispatch, SetStateAction } from "react";
 export type AuthFormData = {
 	email: string;
 	password: string;
@@ -28,7 +30,10 @@ export type PostInput = Omit<Post, "id" | "date"> & {
 	date?: string;
 };
 
-export type EditorSavingContenxt = {
+export interface EditorSavingContenxt {
 	isSaving: boolean;
 	setIsSaving: (saving: boolean) => void;
-};
+	//downloadFile: (editor: Editor) => Promise<void>;
+	editor: Editor | null;
+	setEditor: Dispatch<SetStateAction<Editor | null>>;
+}
