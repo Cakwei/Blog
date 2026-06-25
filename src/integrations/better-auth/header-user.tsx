@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "#/components/ui/button";
 import {
 	DropdownMenu,
@@ -15,6 +15,9 @@ import { authClient } from "#/lib/auth-client";
 export default function BetterAuthHeader() {
 	const { data: session, isPending } = authClient.useSession();
 	const navigate = useNavigate();
+	const pathname = useLocation({
+		select: (location) => location.pathname,
+	});
 	if (isPending) {
 		return (
 			<div className="flex items-center gap-5">
@@ -23,11 +26,12 @@ export default function BetterAuthHeader() {
 			</div>
 		);
 	}
-
+	
 	if (session?.user) {
 		return (
 			<div className="flex items-center gap-5">
 				<Button
+					className={`${pathname === "/posts" ? "hidden" : ""}`}
 					onClick={() => {
 						navigate({ to: "/posts" });
 					}}

@@ -78,13 +78,14 @@ model Verification {
 }
 
 model Post {
-  id       String @id
+  id       Int @id @default(autoincrement())
   title    String
   excerpt  String @db.Text
   date     DateTime
   category String
   image    String  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  content  Json
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

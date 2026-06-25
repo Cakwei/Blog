@@ -8,7 +8,7 @@ import { prisma } from "#/db";
 
 const getRandomPosts = createServerFn().handler(async () => {
 	// This runs only on the server
-	const posts = prisma.post.findMany({
+	const posts = await prisma.post.findMany({
 		take: 10,
 	});
 	return posts;
@@ -40,7 +40,7 @@ function HomePage() {
 					<section className="mb-16">
 						<Link
 							to="/posts/$postId"
-							params={{ postId: featuredPost?.id }}
+							params={{ postId: featuredPost?.id.toString() }}
 							className="group grid md:grid-cols-2 gap-8 items-center"
 						>
 							<div className="overflow-hidden rounded-2xl">
@@ -79,7 +79,10 @@ function HomePage() {
 					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{remainingPosts.map((post) => (
 							<article key={post.id} className="group">
-								<Link to="/posts/$postId" params={{ postId: post.id }}>
+								<Link
+									to="/posts/$postId"
+									params={{ postId: post?.id.toString() }}
+								>
 									<div className="overflow-hidden rounded-xl mb-4">
 										<img
 											src={post.image}
@@ -118,7 +121,10 @@ function HomePage() {
 					<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{remainingPosts.map((post) => (
 							<article key={post.id} className="group">
-								<Link to="/posts/$postId" params={{ postId: post.id }}>
+								<Link
+									to="/posts/$postId"
+									params={{ postId: post?.id.toString() }}
+								>
 									<div className="overflow-hidden rounded-xl mb-4">
 										<Skeleton className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform duration-300" />
 									</div>

@@ -20,12 +20,22 @@ export type PostModel = runtime.Types.Result.DefaultSelection<Prisma.$PostPayloa
 
 export type AggregatePost = {
   _count: PostCountAggregateOutputType | null
+  _avg: PostAvgAggregateOutputType | null
+  _sum: PostSumAggregateOutputType | null
   _min: PostMinAggregateOutputType | null
   _max: PostMaxAggregateOutputType | null
 }
 
+export type PostAvgAggregateOutputType = {
+  id: number | null
+}
+
+export type PostSumAggregateOutputType = {
+  id: number | null
+}
+
 export type PostMinAggregateOutputType = {
-  id: string | null
+  id: number | null
   title: string | null
   excerpt: string | null
   date: Date | null
@@ -35,7 +45,7 @@ export type PostMinAggregateOutputType = {
 }
 
 export type PostMaxAggregateOutputType = {
-  id: string | null
+  id: number | null
   title: string | null
   excerpt: string | null
   date: Date | null
@@ -52,9 +62,18 @@ export type PostCountAggregateOutputType = {
   category: number
   image: number
   userId: number
+  content: number
   _all: number
 }
 
+
+export type PostAvgAggregateInputType = {
+  id?: true
+}
+
+export type PostSumAggregateInputType = {
+  id?: true
+}
 
 export type PostMinAggregateInputType = {
   id?: true
@@ -84,6 +103,7 @@ export type PostCountAggregateInputType = {
   category?: true
   image?: true
   userId?: true
+  content?: true
   _all?: true
 }
 
@@ -125,6 +145,18 @@ export type PostAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: PostAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: PostSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: PostMinAggregateInputType
@@ -155,19 +187,24 @@ export type PostGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: PostCountAggregateInputType | true
+  _avg?: PostAvgAggregateInputType
+  _sum?: PostSumAggregateInputType
   _min?: PostMinAggregateInputType
   _max?: PostMaxAggregateInputType
 }
 
 export type PostGroupByOutputType = {
-  id: string
+  id: number
   title: string
   excerpt: string
   date: Date
   category: string
   image: string
   userId: string
+  content: runtime.JsonValue
   _count: PostCountAggregateOutputType | null
+  _avg: PostAvgAggregateOutputType | null
+  _sum: PostSumAggregateOutputType | null
   _min: PostMinAggregateOutputType | null
   _max: PostMaxAggregateOutputType | null
 }
@@ -191,13 +228,14 @@ export type PostWhereInput = {
   AND?: Prisma.PostWhereInput | Prisma.PostWhereInput[]
   OR?: Prisma.PostWhereInput[]
   NOT?: Prisma.PostWhereInput | Prisma.PostWhereInput[]
-  id?: Prisma.StringFilter<"Post"> | string
+  id?: Prisma.IntFilter<"Post"> | number
   title?: Prisma.StringFilter<"Post"> | string
   excerpt?: Prisma.StringFilter<"Post"> | string
   date?: Prisma.DateTimeFilter<"Post"> | Date | string
   category?: Prisma.StringFilter<"Post"> | string
   image?: Prisma.StringFilter<"Post"> | string
   userId?: Prisma.StringFilter<"Post"> | string
+  content?: Prisma.JsonFilter<"Post">
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -209,12 +247,13 @@ export type PostOrderByWithRelationInput = {
   category?: Prisma.SortOrder
   image?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  content?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   _relevance?: Prisma.PostOrderByRelevanceInput
 }
 
 export type PostWhereUniqueInput = Prisma.AtLeast<{
-  id?: string
+  id?: number
   AND?: Prisma.PostWhereInput | Prisma.PostWhereInput[]
   OR?: Prisma.PostWhereInput[]
   NOT?: Prisma.PostWhereInput | Prisma.PostWhereInput[]
@@ -224,6 +263,7 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   category?: Prisma.StringFilter<"Post"> | string
   image?: Prisma.StringFilter<"Post"> | string
   userId?: Prisma.StringFilter<"Post"> | string
+  content?: Prisma.JsonFilter<"Post">
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
 
@@ -235,91 +275,99 @@ export type PostOrderByWithAggregationInput = {
   category?: Prisma.SortOrder
   image?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  content?: Prisma.SortOrder
   _count?: Prisma.PostCountOrderByAggregateInput
+  _avg?: Prisma.PostAvgOrderByAggregateInput
   _max?: Prisma.PostMaxOrderByAggregateInput
   _min?: Prisma.PostMinOrderByAggregateInput
+  _sum?: Prisma.PostSumOrderByAggregateInput
 }
 
 export type PostScalarWhereWithAggregatesInput = {
   AND?: Prisma.PostScalarWhereWithAggregatesInput | Prisma.PostScalarWhereWithAggregatesInput[]
   OR?: Prisma.PostScalarWhereWithAggregatesInput[]
   NOT?: Prisma.PostScalarWhereWithAggregatesInput | Prisma.PostScalarWhereWithAggregatesInput[]
-  id?: Prisma.StringWithAggregatesFilter<"Post"> | string
+  id?: Prisma.IntWithAggregatesFilter<"Post"> | number
   title?: Prisma.StringWithAggregatesFilter<"Post"> | string
   excerpt?: Prisma.StringWithAggregatesFilter<"Post"> | string
   date?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   category?: Prisma.StringWithAggregatesFilter<"Post"> | string
   image?: Prisma.StringWithAggregatesFilter<"Post"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Post"> | string
+  content?: Prisma.JsonWithAggregatesFilter<"Post">
 }
 
 export type PostCreateInput = {
-  id: string
   title: string
   excerpt: string
   date: Date | string
   category: string
   image: string
+  content: Prisma.JsonNullValueInput | runtime.InputJsonValue
   user: Prisma.UserCreateNestedOneWithoutPostsInput
 }
 
 export type PostUncheckedCreateInput = {
-  id: string
+  id?: number
   title: string
   excerpt: string
   date: Date | string
   category: string
   image: string
   userId: string
+  content: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   excerpt?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneRequiredWithoutPostsNestedInput
 }
 
 export type PostUncheckedUpdateInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   excerpt?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostCreateManyInput = {
-  id: string
+  id?: number
   title: string
   excerpt: string
   date: Date | string
   category: string
   image: string
   userId: string
+  content: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostUpdateManyMutationInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   excerpt?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostUncheckedUpdateManyInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   excerpt?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostListRelationFilter = {
@@ -346,6 +394,11 @@ export type PostCountOrderByAggregateInput = {
   category?: Prisma.SortOrder
   image?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  content?: Prisma.SortOrder
+}
+
+export type PostAvgOrderByAggregateInput = {
+  id?: Prisma.SortOrder
 }
 
 export type PostMaxOrderByAggregateInput = {
@@ -366,6 +419,10 @@ export type PostMinOrderByAggregateInput = {
   category?: Prisma.SortOrder
   image?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+}
+
+export type PostSumOrderByAggregateInput = {
+  id?: Prisma.SortOrder
 }
 
 export type PostCreateNestedManyWithoutUserInput = {
@@ -411,21 +468,22 @@ export type PostUncheckedUpdateManyWithoutUserNestedInput = {
 }
 
 export type PostCreateWithoutUserInput = {
-  id: string
   title: string
   excerpt: string
   date: Date | string
   category: string
   image: string
+  content: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostUncheckedCreateWithoutUserInput = {
-  id: string
+  id?: number
   title: string
   excerpt: string
   date: Date | string
   category: string
   image: string
+  content: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostCreateOrConnectWithoutUserInput = {
@@ -458,49 +516,53 @@ export type PostScalarWhereInput = {
   AND?: Prisma.PostScalarWhereInput | Prisma.PostScalarWhereInput[]
   OR?: Prisma.PostScalarWhereInput[]
   NOT?: Prisma.PostScalarWhereInput | Prisma.PostScalarWhereInput[]
-  id?: Prisma.StringFilter<"Post"> | string
+  id?: Prisma.IntFilter<"Post"> | number
   title?: Prisma.StringFilter<"Post"> | string
   excerpt?: Prisma.StringFilter<"Post"> | string
   date?: Prisma.DateTimeFilter<"Post"> | Date | string
   category?: Prisma.StringFilter<"Post"> | string
   image?: Prisma.StringFilter<"Post"> | string
   userId?: Prisma.StringFilter<"Post"> | string
+  content?: Prisma.JsonFilter<"Post">
 }
 
 export type PostCreateManyUserInput = {
-  id: string
+  id?: number
   title: string
   excerpt: string
   date: Date | string
   category: string
   image: string
+  content: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostUpdateWithoutUserInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   excerpt?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostUncheckedUpdateWithoutUserInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   excerpt?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type PostUncheckedUpdateManyWithoutUserInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.StringFieldUpdateOperationsInput | string
   excerpt?: Prisma.StringFieldUpdateOperationsInput | string
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -513,6 +575,7 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   category?: boolean
   image?: boolean
   userId?: boolean
+  content?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
@@ -526,9 +589,10 @@ export type PostSelectScalar = {
   category?: boolean
   image?: boolean
   userId?: boolean
+  content?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "excerpt" | "date" | "category" | "image" | "userId", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "excerpt" | "date" | "category" | "image" | "userId" | "content", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -539,13 +603,14 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: string
+    id: number
     title: string
     excerpt: string
     date: Date
     category: string
     image: string
     userId: string
+    content: runtime.JsonValue
   }, ExtArgs["result"]["post"]>
   composites: {}
 }
@@ -916,13 +981,14 @@ export interface Prisma__PostClient<T, Null = never, ExtArgs extends runtime.Typ
  * Fields of the Post model
  */
 export interface PostFieldRefs {
-  readonly id: Prisma.FieldRef<"Post", 'String'>
+  readonly id: Prisma.FieldRef<"Post", 'Int'>
   readonly title: Prisma.FieldRef<"Post", 'String'>
   readonly excerpt: Prisma.FieldRef<"Post", 'String'>
   readonly date: Prisma.FieldRef<"Post", 'DateTime'>
   readonly category: Prisma.FieldRef<"Post", 'String'>
   readonly image: Prisma.FieldRef<"Post", 'String'>
   readonly userId: Prisma.FieldRef<"Post", 'String'>
+  readonly content: Prisma.FieldRef<"Post", 'Json'>
 }
     
 

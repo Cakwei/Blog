@@ -1,2 +1,14 @@
 @import "./styles/_variables.scss";
 @import "./styles/_keyframe-animations.scss";
+
+.prose mark {
+	/* 1. Tell Tailwind to respect the inline style attribute background */
+	background-color: inherit !important;
+
+	/* 2. Do the same for text color so dark highlights stay readable */
+	color: inherit !important;
+
+	/* Optional visual polish: round the edges of the highlight slightly */
+	border-radius: 0.125rem;
+	padding: 0 0.125rem;
+}

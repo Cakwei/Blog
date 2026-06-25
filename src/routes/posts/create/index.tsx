@@ -1,5 +1,8 @@
 // #/routes/posts/create.tsx
+
+import { Upload } from "@aws-sdk/lib-storage";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import type { Editor } from "@tiptap/core";
 import {
 	createContext,
@@ -10,10 +13,45 @@ import {
 } from "react";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
 import { Button } from "#/components/ui/button";
+import ImageUploader from "#/components/ui/fileUpload";
+import { prisma } from "#/db";
+import { s3Client } from "#/lib/s3";
 import type { EditorSavingContenxt } from "#/lib/types";
+import { getFreshServerSession } from "#/lib/utils";
+
 export const Route = createFileRoute("/posts/create/")({
 	component: NewPostPage,
 });
+
+const saveFileToDB = createServerFn({ method: "POST" })
+	.validator((data: { jsonContent: any; blogImg: any }) => data)
+	.handler(async ({ data }) => {
+		try {
+			if (!data.jsonContent || !data.blogImg) return;
+
+			// Fetch user session
+			const session = await getFreshServerSession();
+
+			if (!session) return;
+
+			console.log("bye" + data.blogImg);
+
+			// Upload to DB
+			await prisma.post.create({
+				data: {
+					title: "bom",
+					excerpt: "",
+					date: new Date().toISOString(),
+					userId: session?.user.id,
+					category: "",
+					image: data.blogImg || "",
+					content: data.jsonContent,
+				},
+			});
+		} catch (e) {
+			console.error(e);
+		}
+	});
 
 function NewPostPage() {
 	return (
@@ -23,10 +61,55 @@ function NewPostPage() {
 	);
 }
 
+async function uploadImgToS3(file: File) {
+	const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+	const BUCKET_NAME = "blog";
+
+	if (!file?.name) return;
+
+	if (file.size > MAX_FILE_SIZE) {
+		throw new Error(
+			`File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`,
+		);
+	}
+
+	// 2. Generate Unique S3 Key using crypto.randomUUID()
+	const uuid = crypto.randomUUID();
+	const cleanFileName = file.name.replace(/\s+/g, "-");
+	const s3Key = `${uuid}-${cleanFileName}`;
+
+	try {
+		// 3. Initialize the Managed Upload Instance
+		const uploader = new Upload({
+			client: s3Client,
+			params: {
+				Bucket: BUCKET_NAME,
+				Key: s3Key,
+				Body: file,
+				ContentType: file.type,
+			},
+			// Configuration optimized for both small and large assets
+			queueSize: 4,
+			partSize: 5 * 1024 * 1024, // 5MB parts
+		});
+
+		// 6. Execute and Wait for Resolution
+		await uploader.done();
+
+		// 7. Return URL to Tiptap image node src attribute
+		return `https://s3.cakwei.dev/${BUCKET_NAME}/${s3Key}`;
+	} catch (e) {
+		console.error(e);
+		return "gyatt";
+	}
+}
+
 function NewPostForm() {
 	const [data, setData] = useState();
+	const [blogHeroImg, setBlogHeroImg] = useState<File | null>(null);
 	const { isSaving, editor } = useEditorSavingState();
 
+	/*
 	async function downloadFile() {
 		if (!editor) return;
 
@@ -49,6 +132,10 @@ function NewPostForm() {
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
 	}
+*/
+	async function setBlogHeroIMG(file: File) {
+		if (file) setBlogHeroImg(file);
+	}
 
 	useEffect(() => {
 		console.log("Layout reading state:", isSaving);
@@ -67,10 +154,26 @@ function NewPostForm() {
 				{isSaving ? (
 					<Button disabled>Saving...</Button>
 				) : (
-					<Button onClick={downloadFile}>Save my blog</Button>
+					<Button
+						onClick={async () => {
+							if (!blogHeroImg) return;
+							const blogHeroImgUrl = await uploadImgToS3(blogHeroImg);
+							await saveFileToDB({
+								data: {
+									jsonContent: editor?.getJSON(),
+									blogImg: blogHeroImgUrl,
+								},
+							});
+						}}
+					>
+						Save my blog
+					</Button>
 				)}
 			</div>
-
+			<div>
+				<ImageUploader onImageReadyForS3={setBlogHeroIMG} />
+				<hr className="border-t border-gray-300 mb-5" />
+			</div>
 			<div className="w-full">
 				<SimpleEditor setData={setData} />
 			</div>
@@ -84,15 +187,25 @@ export const EditorSavingContext = createContext<EditorSavingContenxt>({
 	///	downloadFile: async () => {},
 	editor: null,
 	setEditor: () => {},
+	// blogHeroImgUrl: "",
+	// setBlogHeroImgUrl: () => {},
 });
 
 export const EditorProvider = ({ children }: { children: ReactNode }) => {
 	const [isSaving, setIsSaving] = useState(false);
 	const [editor, setEditor] = useState<Editor | null>(null);
+	// const [blogHeroImgUrl, setBlogHeroImgUrl] = useState<string | null>(null);
 
 	return (
 		<EditorSavingContext.Provider
-			value={{ isSaving, setIsSaving, editor, setEditor }}
+			value={{
+				isSaving,
+				setIsSaving,
+				editor,
+				setEditor,
+				// blogHeroImgUrl,
+				// setBlogHeroImgUrl,
+			}}
 		>
 			{children}
 		</EditorSavingContext.Provider>

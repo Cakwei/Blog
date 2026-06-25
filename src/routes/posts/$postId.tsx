@@ -1,19 +1,42 @@
 // app/routes/posts.$postId.tsx
+
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { generateHTML, type JSONContent } from "@tiptap/core";
+import { Blockquote } from "@tiptap/extension-blockquote";
+import { Bold } from "@tiptap/extension-bold";
+import { Code } from "@tiptap/extension-code";
+import { CodeBlock } from "@tiptap/extension-code-block";
+import { Document } from "@tiptap/extension-document";
+import { Heading } from "@tiptap/extension-heading";
+import { Highlight } from "@tiptap/extension-highlight";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import { Image } from "@tiptap/extension-image";
+import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { Paragraph } from "@tiptap/extension-paragraph";
+import { Subscript } from "@tiptap/extension-subscript";
+import { Superscript } from "@tiptap/extension-superscript";
+import { Text } from "@tiptap/extension-text";
+import TextAlign from "@tiptap/extension-text-align";
+import Typography from "@tiptap/extension-typography";
+import { Selection } from "@tiptap/extensions";
+import StarterKit from "@tiptap/starter-kit";
+import DOMPurify from "dompurify";
 import { prisma } from "#/db";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import "#/index.css";
 
 export const getPostById = createServerFn({ method: "GET" })
 	// FIX: Change (postId) to ({ data: postId })
 	.validator((postId: string) => postId)
 	.handler(async ({ data: postId }) => {
 		const post = await prisma.post.findUnique({
-			where: { id: postId },
+			where: { id: parseInt(postId, 10) },
 		});
 
 		if (!post) throw new Error("Post not found");
+		// console.log('Gyatt, ' + JSON.stringify(post.content))
 		return post;
 	});
 
@@ -26,6 +49,28 @@ export const Route = createFileRoute("/posts/$postId")({
 function PostPage() {
 	const post = Route.useLoaderData();
 
+	const content = generateHTML(post.content as JSONContent, [
+		StarterKit.configure({
+			horizontalRule: false,
+			link: {
+				openOnClick: false,
+				enableClickSelection: true,
+			},
+		}),
+		HorizontalRule,
+		TextAlign.configure({ types: ["heading", "paragraph"] }),
+		TaskList,
+		TaskItem.configure({ nested: true }),
+		Highlight.configure({ multicolor: true }),
+		Image.configure({
+			allowBase64: true,
+		}),
+		Typography,
+		Superscript,
+		Subscript,
+		Selection,
+	]);
+	const sanitizedContent = DOMPurify.sanitize(content);
 	return (
 		<article className="container max-w-3xl mx-auto py-20 px-4">
 			<div className="space-y-4 text-center mb-12">
@@ -56,7 +101,7 @@ function PostPage() {
 					{post.excerpt}
 				</p>
 				<Separator className="my-8" />
-				{/* Placeholder for real content */}
+				{/* Placeholder for real content 
 				<div className="space-y-6 text-lg leading-7">
 					<p>
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
@@ -71,8 +116,13 @@ function PostPage() {
 						cupidatat non proident, sunt in culpa qui officia deserunt mollit
 						anim id est laborum.
 					</p>
-				</div>
+				</div>*/}
 			</div>
+			<div
+				/* biome-ignore lint/security/noDangerouslySetInnerHtml: Gyatt */
+				dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+				className="prose prose-li:marker:text-black prose-quotes:text-black prose-blockquote:border-black"
+			></div>
 		</article>
 	);
 }

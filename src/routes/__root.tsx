@@ -131,7 +131,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							</div>
 						</div>
 						<div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-							© {new Date().getFullYear()} StartBlog Inc.
+							© {new Date().getFullYear()} Charlee Tan. All rights reserved.
 						</div>
 					</div>
 				</footer>

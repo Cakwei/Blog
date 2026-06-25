@@ -36,4 +36,6 @@ export interface EditorSavingContenxt {
 	//downloadFile: (editor: Editor) => Promise<void>;
 	editor: Editor | null;
 	setEditor: Dispatch<SetStateAction<Editor | null>>;
+	// blogHeroImgUrl: string | null;
+	// setBlogHeroImgUrl: Dispatch<SetStateAction<string | null>>;
 }

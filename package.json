@@ -21,6 +21,8 @@
     "db:seed": "dotenv -e .env -- prisma db seed"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1075.0",
+    "@aws-sdk/lib-storage": "^3.1075.0",
     "@floating-ui/react": "^0.27.19",
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
@@ -52,6 +54,7 @@
     "better-auth": "^1.6.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.11",
     "lodash.throttle": "^4.1.1",
     "lucide-react": "^1.21.0",
     "nitro": "npm:nitro-nightly@latest",

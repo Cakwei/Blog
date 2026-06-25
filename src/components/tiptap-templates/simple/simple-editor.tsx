@@ -1,3 +1,4 @@
+import { Upload } from "@aws-sdk/lib-storage";
 import { Highlight } from "@tiptap/extension-highlight";
 import { Image } from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
@@ -71,6 +72,7 @@ import { MAX_FILE_SIZE } from "#/lib/tiptap-utils";
 import "#/components/tiptap-templates/simple/simple-editor.scss";
 
 import "#/index.css";
+import { s3Client } from "#/lib/s3";
 import { useEditorSavingState } from "#/routes/posts/create";
 
 /**
@@ -82,7 +84,8 @@ import { useEditorSavingState } from "#/routes/posts/create";
  * @param abortSignal Optional AbortSignal for cancelling the upload
  * @returns Promise resolving to the URL of the uploaded image
  */
-export const handleImageUpload = async (
+// OLD handleImageUpload
+/*export const handleImageUpload = async (
 	file: File,
 	onProgress?: (event: { progress: number }) => void,
 	abortSignal?: AbortSignal,
@@ -142,6 +145,76 @@ export const handleImageUpload = async (
 		reader.readAsDataURL(file);
 	});
 };
+*/
+
+export const handleImageUpload = async (
+	file: File,
+	onProgress?: (event: { progress: number }) => void,
+	abortSignal?: AbortSignal,
+): Promise<string> => {
+	const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+	const BUCKET_NAME = "blog";
+
+	// 1. Structural File Validation
+	if (!file) throw new Error("No file provided");
+	if (file.size > MAX_FILE_SIZE) {
+		throw new Error(
+			`File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`,
+		);
+	}
+
+	// 2. Generate Unique S3 Key using crypto.randomUUID()
+	const uuid = crypto.randomUUID();
+	const cleanFileName = file.name.replace(/\s+/g, "-");
+	const s3Key = `${uuid}-${cleanFileName}`;
+
+	try {
+		// 3. Initialize the Managed Upload Instance
+		const uploader = new Upload({
+			client: s3Client,
+			params: {
+				Bucket: BUCKET_NAME,
+				Key: s3Key,
+				Body: file,
+				ContentType: file.type,
+			},
+			// Configuration optimized for both small and large assets
+			queueSize: 4,
+			partSize: 5 * 1024 * 1024, // 5MB parts
+		});
+
+		// 4. Attach the Lib-Storage Progress Listener
+		uploader.on("httpUploadProgress", (progress) => {
+			if (progress.loaded && progress.total) {
+				const percentage = Math.round((progress.loaded / progress.total) * 100);
+				onProgress?.({ progress: percentage });
+			}
+		});
+
+		// 5. Handle Tiptap UI Deletion / Abort Events Mid-Stream
+		if (abortSignal) {
+			if (abortSignal.aborted) {
+				uploader.abort();
+				throw new Error("Upload cancelled");
+			}
+			
+			abortSignal.addEventListener("abort", () => {
+				uploader.abort();
+			});
+		}
+
+		// 6. Execute and Wait for Resolution
+		await uploader.done();
+
+		// 7. Return URL to Tiptap image node src attribute
+		return `https://s3.cakwei.dev/${BUCKET_NAME}/${s3Key}`;
+	} catch (error: any) {
+		if (error.name === "AbortError" || abortSignal?.aborted) {
+			throw new Error("Upload cancelled");
+		}
+		throw new Error(`AWS S3 Upload Failed: ${error.message}`);
+	}
+};
 
 const MainToolbarContent = ({
 	onHighlighterClick,
@@ -181,11 +254,10 @@ const MainToolbarContent = ({
 				<MarkButton type="strike" />
 				<MarkButton type="code" />
 				<MarkButton type="underline" />
-				{!isMobile ? (
-					<ColorHighlightPopover />
-				) : (
-					<ColorHighlightPopoverButton onClick={onHighlighterClick} />
-				)}
+				{!isMobile
+					? /* 	<ColorHighlightPopover />
+						 */ null
+					: /*<ColorHighlightPopoverButton onClick={onHighlighterClick} >*/ null}
 				{!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
 			</ToolbarGroup>
 
@@ -286,6 +358,7 @@ export function SimpleEditor({
 				},
 			}),
 			HorizontalRule,
+
 			TextAlign.configure({ types: ["heading", "paragraph"] }),
 			TaskList,
 			TaskItem.configure({ nested: true }),
