@@ -3,20 +3,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { generateHTML, type JSONContent } from "@tiptap/core";
-import { Blockquote } from "@tiptap/extension-blockquote";
-import { Bold } from "@tiptap/extension-bold";
-import { Code } from "@tiptap/extension-code";
-import { CodeBlock } from "@tiptap/extension-code-block";
-import { Document } from "@tiptap/extension-document";
-import { Heading } from "@tiptap/extension-heading";
 import { Highlight } from "@tiptap/extension-highlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { Image } from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { Paragraph } from "@tiptap/extension-paragraph";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
-import { Text } from "@tiptap/extension-text";
 import TextAlign from "@tiptap/extension-text-align";
 import Typography from "@tiptap/extension-typography";
 import { Selection } from "@tiptap/extensions";
@@ -100,7 +92,7 @@ function PostPage() {
 				<p className="text-xl leading-relaxed italic text-muted-foreground mb-8">
 					{post.excerpt}
 				</p>
-				<Separator className="my-8" />
+				<Separator className="mb-5 bg-neutral-300" />
 				{/* Placeholder for real content 
 				<div className="space-y-6 text-lg leading-7">
 					<p>

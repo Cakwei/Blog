@@ -357,3 +357,10 @@ a {
     color: var(--foreground);
   }
 }
+
+[data-resize-handle] {
+  background-color: #3b82f6; /* Tailwind's blue-500 */
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+}

@@ -197,7 +197,7 @@ export const handleImageUpload = async (
 				uploader.abort();
 				throw new Error("Upload cancelled");
 			}
-			
+
 			abortSignal.addEventListener("abort", () => {
 				uploader.abort();
 			});
@@ -364,6 +364,14 @@ export function SimpleEditor({
 			TaskItem.configure({ nested: true }),
 			Highlight.configure({ multicolor: true }),
 			Image.configure({
+				resize: {
+					enabled: true,
+					directions: ["top", "bottom", "left", "right"], // can be any direction or diagonal combination
+					minWidth: 50,
+					minHeight: 50,
+					alwaysPreserveAspectRatio: true,
+				},
+
 				allowBase64: true,
 			}),
 			Typography,
