@@ -69,19 +69,23 @@ function PostPage() {
 
 	const sanitizedContent = sanitize(content);
 	return (
-		<article className="container max-w-3xl mx-auto py-20 px-4 bg-[#e7f3ec]">
+		<article className="container max-w-3xl mx-auto py-20 px-4 bg-black">
 			<div className="space-y-4 text-center mb-5">
 				<div className="flex w-full gap-2.5 justify-center ">
 					{post.category.split(",").map((cat) => (
-						<Badge key={cat} variant="secondary" className="px-3 py-1">
-							{cat}
+						<Badge
+							key={cat}
+							variant="secondary"
+							className="rounded-full bg-black border border-white px-3.5 py-1 text-xs font-bold text-white captitalize"
+						>
+							{cat || "No tag"}
 						</Badge>
 					))}
 				</div>
-				<h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+				<h1 className="text-4xl md:text-5xl text-white font-extrabold tracking-tight">
 					{post.title}
 				</h1>
-				<div className="text-muted-foreground">
+				<div className="text-neutral-300">
 					Published on{" "}
 					{new Date(post.date).toLocaleDateString("en", {
 						day: "numeric",
@@ -95,21 +99,21 @@ function PostPage() {
 				<img
 					src={post.image}
 					alt={post.title}
-					className="w-auto h-auto aspect-fit object-cover rounded-xl border shadow-lg"
+					className="w-auto h-auto aspect-fit object-cover rounded-xl border border-neutral-700 shadow-lg"
 				/>
 			</div>
 
-			<div className="prose prose-slate max-w-none lg:prose-xl">
-				<p className="text-xl leading-relaxed italic text-muted-foreground mb-8">
+			<div className="prose prose-slate max-w-none lg:prose-xl mt-2.5">
+				<p className="text-xl leading-relaxed italic text-neutral-400">
 					{post.excerpt}
 				</p>
-				<Separator className="bg-neutral-300" />
+				<Separator className="bg-neutral-700 border-neutral-300" />
 			</div>
 
 			<div
 				/* biome-ignore lint/security/noDangerouslySetInnerHtml: Gyatt */
 				dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-				className="prose prose-li:marker:text-black prose-quotes:text-black prose-blockquote:border-black mt-5"
+				className="prose prose-li:marker:text-neutral-300 prose-quotes:text-neutral-300 prose-blockquote:border-black mt-5"
 			></div>
 		</article>
 	);

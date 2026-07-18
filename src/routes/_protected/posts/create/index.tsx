@@ -172,20 +172,21 @@ function NewPostForm() {
 	}, [isSaving]);
 */
 	return (
-		<div className="max-w-6xl  bg-[#e7f3ec] mx-auto px-4 py-12 h-auto">
+		<div className="max-w-6xl bg-black mx-auto px-4 py-12 h-auto">
 			<Link
 				to="/posts"
-				className="text-sm text-gray-500 hover:text-blue-600 transition-colors mb-5 inline-block"
+				className="text-sm text-white hover:text-blue-600 transition-colors mb-5 inline-block"
 			>
-				← Back to your posts
+				<span className="text-white hover:underline">← Back to your posts</span>
 			</Link>
 			<div className="flex justify-between mb-5">
-				<h1 className="text-3xl font-bold">New post</h1>
+				<h1 className="text-3xl font-bold text-white">New post</h1>
 				{isSaving ? (
 					<Button disabled>Saving...</Button>
 				) : (
 					<Button
 						ref={createBtnRef}
+						className="bg-white text-black font-semibold hover:bg-white/90"
 						onClick={async () => {
 							if (!blogHeroImg) return;
 
@@ -223,7 +224,10 @@ function NewPostForm() {
 					}}
 					items={CATEGORIES}
 				>
-					<ComboboxChips ref={anchor} className="w-full max-w-sm bg-white">
+					<ComboboxChips
+						ref={anchor}
+						className="w-full bg-black max-w-sm border-neutral-700"
+					>
 						<ComboboxValue>
 							{(values) => (
 								<>
@@ -231,7 +235,7 @@ function NewPostForm() {
 										<ComboboxChip key={value}>{value}</ComboboxChip>
 									))}
 									<ComboboxChipsInput
-										className="text-black"
+										className="text-white"
 										placeholder={`${Array.isArray(tags) && tags.length > 0 ? "" : "Select tag(s)"}`}
 									/>
 								</>

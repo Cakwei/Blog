@@ -54,16 +54,19 @@ export default function BetterAuthHeader() {
 							</div>
 						)}
 					</DropdownMenuTrigger>
-					<DropdownMenuContent className="mr-3.5">
+					<DropdownMenuContent className="mr-3.5 border-neutral-700 bg-neutral-900 ">
 						<DropdownMenuGroup>
-							<DropdownMenuLabel className="font-bold">
+							<DropdownMenuLabel className="font-bold text-white">
 								My Account
 							</DropdownMenuLabel>
-							<DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
+							<DropdownMenuItem
+								className="text-white"
+								onClick={() => navigate({ to: "/profile" })}
+							>
 								Profile
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
+						<DropdownMenuSeparator className="bg-neutral-700" />
 						<DropdownMenuGroup>
 							<DropdownMenuItem
 								onClick={() => {

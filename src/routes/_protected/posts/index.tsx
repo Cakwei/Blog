@@ -15,7 +15,7 @@ const getOwnPosts = createServerFn().handler(async () => {
 			userId: session?.user.id,
 		},
 	});
-	console.log(JSON.stringify(posts));
+	// console.log(JSON.stringify(posts));
 	return posts;
 });
 
@@ -41,24 +41,24 @@ function AdminPostsPage() {
 
 	const navigate = useNavigate();
 	return (
-		<div className="max-w-6xl bg-[#e7f3ec] mx-auto px-4 py-12">
+		<div className="max-w-6xl bg-black mx-auto px-4 py-12">
 			<div className="flex justify-between items-end mb-10">
 				<div>
-					<h1 className="text-3xl font-bold">Your posts</h1>
-					<p className="text-gray-500 mt-1">
+					<h1 className="text-3xl text-white font-extrabold">Your posts</h1>
+					<p className="text-neutral-300 mt-1">
 						Create, edit, and publish your articles.
 					</p>
 				</div>
 				<Button
 					onClick={() => navigate({ to: "/posts/create" })}
-					className="px-5 bg-black text-white font-semibold transition-colors whitespace-nowrap"
+					className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
 				>
 					New post
 				</Button>
 			</div>
 
 			{!isLoading && isSuccess && posts.length !== 0 && (
-				<div className="rounded-2xl overflow-hidden divide-y divide-gray-100">
+				<div className="rounded-2xl overflow-hidden divide-y divide-neutral-700">
 					{posts.map((post) => (
 						<PostRow key={post.id} post={post} />
 					))}
@@ -81,7 +81,7 @@ function PostRow({ post }: { post: Post }) {
 	const isDraft = post.status === "draft";
 
 	return (
-		<div className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group">
+		<div className="flex items-center gap-4 px-5 py-4 hover:bg-neutral-900 transition-colors group">
 			<div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
 				{post.image && (
 					<img src={post.image} alt="" className="w-full h-full object-cover" />
@@ -99,12 +99,12 @@ function PostRow({ post }: { post: Post }) {
 					>
 						{isDraft ? "Draft" : "Published"}
 					</span>
-					<span className="text-xs font-bold text-blue-500">
+					<span className="text-xs font-bold text-white flex gap-1.5">
 						{post.category ? (
 							post.category.split(",").map((cat) => (
 								<span
 									key={cat}
-									className={`text-xs font-semibold px-2 py-0.5 rounded-full
+									className={`rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white captitalize
 						`}
 								>
 									{capitalize(cat)}
@@ -112,18 +112,18 @@ function PostRow({ post }: { post: Post }) {
 							))
 						) : (
 							<span
-								className={`text-xs font-semibold px-2 py-0.5 rounded-full
-						`}
+								className={`rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white captitalize
+							`}
 							>
 								No tags
 							</span>
 						)}
 					</span>
 				</div>
-				<h3 className="font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+				<h3 className="font-bold text-white truncate hover:text-white/90 transition-colors">
 					{post.title}
 				</h3>
-				<p className="text-sm text-gray-400">
+				<p className="text-sm text-neutral-400">
 					{new Date(post.date).toLocaleDateString("en-MY")}
 				</p>
 			</div>
@@ -132,16 +132,16 @@ function PostRow({ post }: { post: Post }) {
 				<Link
 					to="/posts/$postId"
 					params={{ postId: post.id.toString() }}
-					className="px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+					className="px-3 py-2 text-sm font-semibold rounded-lg transition-colors"
 				>
-					View
+					<span className="text-white hover:bg-none hover:underline">View</span>
 				</Link>
 				<Link
 					to="/posts/edit/$postId"
 					params={{ postId: post.id.toString() }}
-					className="px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+					className="px-3 py-2 text-sm font-semibold text-white rounded-lg transition-colors"
 				>
-					Edit
+					<span className="text-white hover:bg-none hover:underline">Edit</span>
 				</Link>
 			</div>
 		</div>

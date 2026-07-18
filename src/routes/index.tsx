@@ -54,7 +54,7 @@ function HomePage() {
 								<span className="text-white font-extrabold uppercase tracking-wider text-sm">
 									Featured Post
 								</span>
-								<h1 className="text-4xl font-bold mt-2 mb-4 group-hover:text-neutral-400 text-white transition-colors">
+								<h1 className="text-4xl font-bold mt-2 mb-4 group-hover:underline group-hover:underline-offset-5 text-white transition-colors">
 									{featuredPost?.title}
 								</h1>
 								<p className="text-neutral-300 text-lg mb-4">
@@ -74,8 +74,11 @@ function HomePage() {
 						<h2 className="text-2xl text-white font-extrabold">
 							Latest Articles
 						</h2>
-						<Link to="/" className="text-white hover:underline hover:text-white active:text-white">
-							View all
+						<Link
+							to="/"
+							className="text-white hover:underline hover:text-white active:text-white"
+						>
+							<span className="text-white hover:underline">View all</span>
 						</Link>
 					</div>
 
@@ -98,25 +101,25 @@ function HomePage() {
 											post.category.split(",").map((cat) => (
 												<span
 													key={cat}
-													className="text-xs font-bold text-blue-500 uppercase"
+													className="rounded-full border px-3.5 py-1 text-xs font-bold text-white captitalize"
 												>
 													{cat}
 												</span>
 											))
 										) : (
-											<span className="text-xs font-bold text-blue-500 uppercase">
+											<span className="rounded-full border px-3.5 py-1 text-xs font-bold text-white captitalize">
 												{"No category"}
 											</span>
 										)}
 									</div>
 
-									<h3 className="text-xl font-bold mt-2 mb-2 group-hover:text-blue-600 transition-colors">
+									<h3 className="text-xl font-bold mt-2 mb-2 group-hover:underline underline-offset-5 text-white transition-colors">
 										{post.title}
 									</h3>
-									<p className="text-gray-600 line-clamp-2 mb-4">
+									<p className="text-neutral-300 line-clamp-2 mb-4">
 										{post.excerpt}
 									</p>
-									<p className="text-sm text-gray-400">
+									<p className="text-sm text-neutral-400">
 										{new Date(post.date).toDateString()}
 									</p>
 								</Link>

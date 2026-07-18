@@ -212,7 +212,7 @@ export default function ImageUploader({
 					className={`relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl transition-all duration-200 p-6 text-center
             ${isValidating ? "border-amber-400 bg-amber-50/30 cursor-wait" : ""}
             ${!isValidating && isDragActive ? "border-blue-500 bg-blue-50/50 scale-[0.99] cursor-pointer" : ""}
-            ${!isValidating && !isDragActive ? "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 cursor-pointer" : ""}
+            ${!isValidating && !isDragActive ? "border-neutral-700  hover:border-gray-400/90 cursor-pointer" : ""}
           `}
 				>
 					<div className="flex flex-col items-center justify-center">
@@ -231,14 +231,15 @@ export default function ImageUploader({
 								<div className="p-3 mb-3 rounded-full bg-gray-200 text-gray-600">
 									<Upload className="w-6 h-6" />
 								</div>
-								<p className="mb-1 text-sm text-gray-700 font-medium">
-									<span className="text-blue-600 hover:underline">
+								<p className="mb-1 text-sm text-white font-medium">
+									<span className="text-white hover:underline">
 										Click to browse
 									</span>{" "}
 									or drag & drop
 								</p>
-								<p className="text-xs text-gray-500">
-									Secure validation enabled: PNG, JPG, GIF max {maxSizeMB}MB
+								<p className="text-xs text-neutral-300">
+									Secure validation enabled: PNG, JPG, GIF. Maximum of{" "}
+									{maxSizeMB}MB
 								</p>
 							</>
 						)}
@@ -247,7 +248,7 @@ export default function ImageUploader({
 			) : (
 				/* Image Preview State */
 				<div className="space-y-2">
-					<div className="relative w-full h-64 border border-gray-200 bg-gray-900 rounded-xl overflow-hidden shadow-sm group">
+					<div className="relative w-full h-64 border border-neutral-700 border-gray-200 bg-gray-900 rounded-xl overflow-hidden shadow-sm group">
 						<img
 							src={previewUrl}
 							alt="Sanitized Preview"
@@ -256,21 +257,21 @@ export default function ImageUploader({
 						<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
 							<Button
 								onClick={() => fileInputRef.current?.click()}
-								className="p-2 bg-white text-gray-800 rounded-full text-sm font-medium flex items-center gap-1.5 hover:scale-105 transition-transform"
+								className="p-2 bg-white text-gray-800 hover:bg-white/90 rounded-full text-sm font-medium flex items-center gap-1.5 hover:scale-105 transition-transform"
 							>
 								<ImageIcon className="w-4 h-4" /> Change
 							</Button>
 							<Button
 								onClick={removeImage}
-								className="p-2 bg-red-600 text-white rounded-full text-sm font-medium flex items-center gap-1.5 hover:scale-105 transition-transform"
+								className="p-2 bg-red-600 hover:bg-red-600/90 text-white rounded-full text-sm font-medium flex items-center gap-1.5 hover:scale-105 transition-transform"
 							>
 								<X className="w-4 h-4" /> Remove
 							</Button>
 						</div>
 					</div>
-					<div className="flex items-center gap-1.5 text-xs font-medium text-green-700 px-1">
-						<ShieldCheck className="w-3.5 h-3.5" /> File structure verified &
-						sanitized for S3 upload.
+					<div className="flex items-center gap-1.5 text-xs font-medium text-white px-1">
+						<ShieldCheck className="w-3.5 h-3.5 text-white" /> File structure
+						verified & sanitized for S3 upload
 					</div>
 				</div>
 			)}
