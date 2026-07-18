@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { revokeSessions } from "better-auth/api";
 import { type MouseEvent, type SubmitEvent, useState } from "react";
 import { Button } from "#/components/ui/button";
 import {
@@ -167,19 +166,19 @@ function ProfilePage() {
 		});
 	}
 	return (
-		<div className="max-w-6xl mx-auto px-4 py-12">
+		<div className="max-w-6xl mx-auto px-4 py-12 bg-black">
 			<div className="mb-12">
-				<span className="text-blue-600 font-semibold uppercase tracking-wider text-sm">
+				<span className="text-white font-bold uppercase tracking-wider text-sm">
 					Account Settings
 				</span>
-				<h1 className="text-4xl font-bold mt-2">Personal Profile</h1>
-				<p className="text-gray-600 text-lg mt-2">
+				<h1 className="text-4xl text-white font-bold mt-2">Personal Profile</h1>
+				<p className="text-neutral-300 text-lg mt-2">
 					Manage your Better Auth account credentials and details.
 				</p>
 			</div>
 
 			<div className="grid md:grid-cols-3 gap-8 items-start">
-				<Card className="border-gray-200 shadow-none rounded-2xl bg-gray-50/50">
+				<Card className="border-neutral-700 shadow-none rounded-2xl bg-neutral-900">
 					<CardHeader className="text-center pb-2">
 						{user?.image ? (
 							<img
@@ -192,10 +191,12 @@ function ProfilePage() {
 								{name.charAt(0).toUpperCase() || "U"}
 							</div>
 						)}
-						<CardTitle className="text-xl font-bold">
+						<CardTitle className="text-xl text-white font-bold">
 							{name || "User Profile"}
 						</CardTitle>
-						<CardDescription className="text-gray-500">{email}</CardDescription>
+						<CardDescription className="text-neutral-300">
+							{email}
+						</CardDescription>
 					</CardHeader>
 				</Card>
 
@@ -213,12 +214,12 @@ function ProfilePage() {
 							</div>
 						)}
 
-						<Card className="border-gray-200 shadow-none rounded-2xl">
+						<Card className="border-neutral-700 shadow-none rounded-2xl bg-neutral-900">
 							<CardHeader>
-								<CardTitle className="text-xl font-bold">
+								<CardTitle className="text-xl text-white font-bold">
 									Personal Information
 								</CardTitle>
-								<CardDescription>
+								<CardDescription className="text-neutral-300">
 									Update your active account names and identifiers.
 								</CardDescription>
 							</CardHeader>
@@ -226,7 +227,7 @@ function ProfilePage() {
 								<div className="space-y-2">
 									<Label
 										htmlFor="name"
-										className="text-sm font-semibold text-gray-700"
+										className="text-sm font-semibold text-white"
 									>
 										Full Name
 									</Label>
@@ -236,13 +237,13 @@ function ProfilePage() {
 										value={name}
 										onChange={(e) => setName(e.target.value)}
 										required
-										className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+										className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
 									/>
 								</div>
 								<div className="space-y-2">
 									<Label
 										htmlFor="email"
-										className="text-sm font-semibold text-gray-700"
+										className="text-sm font-semibold text-white"
 									>
 										Email Address
 									</Label>
@@ -252,18 +253,18 @@ function ProfilePage() {
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
 										required
-										className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+										className="border-neutral-700 text-neutral-300 focus:border-blue-500 focus:ring-blue-500"
 									/>
 								</div>
 							</CardContent>
 						</Card>
 
-						<Card className="border-gray-200 shadow-none rounded-2xl">
+						<Card className="border-neutral-700 bg-neutral-900 shadow-none rounded-2xl">
 							<CardHeader>
-								<CardTitle className="text-xl font-bold">
+								<CardTitle className="text-xl text-white font-bold">
 									Security & Password
 								</CardTitle>
-								<CardDescription>
+								<CardDescription className="text-neutral-300">
 									Leave blank if you wish to preserve your existing security
 									configurations.
 								</CardDescription>
@@ -272,7 +273,7 @@ function ProfilePage() {
 								<div className="space-y-2">
 									<Label
 										htmlFor="current-password"
-										className="text-sm font-semibold text-gray-700"
+										className="text-sm font-semibold text-white"
 									>
 										Current Password
 									</Label>
@@ -282,14 +283,14 @@ function ProfilePage() {
 										value={currentPassword}
 										onChange={(e) => setCurrentPassword(e.target.value)}
 										required={!!newPassword}
-										className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+										className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
 									/>
 								</div>
 								<div className="grid sm:grid-cols-2 gap-4">
 									<div className="space-y-2">
 										<Label
 											htmlFor="new-password"
-											className="text-sm font-semibold text-gray-700"
+											className="text-sm font-semibold text-white"
 										>
 											New Password
 										</Label>
@@ -298,13 +299,13 @@ function ProfilePage() {
 											type="password"
 											value={newPassword}
 											onChange={(e) => setNewPassword(e.target.value)}
-											className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+											className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
 										/>
 									</div>
 									<div className="space-y-2">
 										<Label
 											htmlFor="confirm-password"
-											className="text-sm font-semibold text-gray-700"
+											className="text-sm font-semibold text-white"
 										>
 											Confirm New Password
 										</Label>
@@ -313,7 +314,7 @@ function ProfilePage() {
 											type="password"
 											value={confirmPassword}
 											onChange={(e) => setConfirmPassword(e.target.value)}
-											className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+											className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
 										/>
 									</div>
 								</div>

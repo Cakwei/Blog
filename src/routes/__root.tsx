@@ -68,11 +68,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				{/* HEADER */}
-				<header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 left-0 z-50  w-full px-5">
+				<header className="border-b backdrop-blur sticky top-0 left-0 z-50 border-neutral-700 w-full px-5 bg-black">
 					<div className="h-16 w-full flex items-center justify-between">
 						<div className="flex items-center gap-8">
 							<Link to="/" className="text-xl font-bold tracking-tighter">
-								Charlee's<span className="text-primary"> Blog</span>
+								Charlee's<span className="text-white"> Blog</span>
 							</Link>
 							<nav className="hidden md:flex gap-6 text-sm font-medium">
 								<Link to="/" className="transition-colors hover:text-primary">
@@ -104,33 +104,35 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				</header>
 				{children}
 				{/* FOOTER */}
-				<footer className="border-t py-12 bg-slate-50/50">
+				<footer className="border-t py-12 bg-black border-neutral-700">
 					<div className="container mx-auto px-4">
 						<div className="grid md:grid-cols-4 gap-8">
 							<div className="col-span-2">
 								<span className="text-xl text-[#318F97] font-bold tracking-tighter">
-									Charlee's<span className="text-primary"> Blog</span>
+									Charlee's<span className="text-white"> Blog</span>
 								</span>
-								<p className="text-sm text-muted-foreground max-w-xs">
+								<p className="text-sm text-neutral-300 max-w-xs">
 									Built with TanStack Start and BetterAuth
 								</p>
 							</div>
 							<div>
-								<h3 className="text-sm font-semibold mb-4">Resources</h3>
-								<ul className="space-y-2 text-sm text-muted-foreground">
+								<h3 className="text-sm font-semibold mb-4 text-white">
+									Resources
+								</h3>
+								<ul className="space-y-2 text-sm text-neutral-300">
 									<li>Documentation</li>
 									<li>Components</li>
 								</ul>
 							</div>
 							<div>
-								<h3 className="text-sm font-semibold mb-4">Legal</h3>
-								<ul className="space-y-2 text-sm text-muted-foreground">
+								<h3 className="text-sm font-semibold mb-4 text-white">Legal</h3>
+								<ul className="space-y-2 text-sm text-neutral-300">
 									<li>Privacy</li>
 									<li>Terms</li>
 								</ul>
 							</div>
 						</div>
-						<div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
+						<div className="mt-12 pt-8 border-t text-center border-neutral-700 text-sm text-neutral-300">
 							© {new Date().getFullYear()} Charlee Tan. All rights reserved.
 						</div>
 					</div>

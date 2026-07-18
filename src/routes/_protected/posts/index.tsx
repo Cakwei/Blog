@@ -15,7 +15,7 @@ const getOwnPosts = createServerFn().handler(async () => {
 			userId: session?.user.id,
 		},
 	});
-
+	console.log(JSON.stringify(posts));
 	return posts;
 });
 
@@ -26,7 +26,7 @@ const postsQueryOptions = () =>
 	});
 
 export const Route = createFileRoute("/_protected/posts/")({
-	loader: async ({ context }) => {
+	beforeLoad: async ({ context }) => {
 		context.queryClient.ensureQueryData(postsQueryOptions());
 	},
 	component: AdminPostsPage,

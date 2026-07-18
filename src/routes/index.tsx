@@ -21,7 +21,7 @@ const postsQueryOptions = () =>
 	});
 
 export const Route = createFileRoute("/")({
-	loader: async ({ context }) => {
+	beforeLoad: async ({ context }) => {
 		context.queryClient.ensureQueryData(postsQueryOptions());
 	},
 	component: HomePage,
@@ -33,11 +33,11 @@ function HomePage() {
 	const remainingPosts = posts.slice(1);
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 py-12 bg-[#e7f3ec]">
+		<div className="max-w-6xl mx-auto px-4 py-12 bg-black">
 			{/* Hero Section */}
 			{isSuccess ? (
 				<>
-					<section className="mb-16">
+					<section className="">
 						<Link
 							to="/posts/$postId"
 							params={{ postId: featuredPost?.id.toString() }}
@@ -51,27 +51,30 @@ function HomePage() {
 								/>
 							</div>
 							<div>
-								<span className="text-blue-600 font-semibold uppercase tracking-wider text-sm">
+								<span className="text-white font-extrabold uppercase tracking-wider text-sm">
 									Featured Post
 								</span>
-								<h1 className="text-4xl font-bold mt-2 mb-4 group-hover:text-blue-600 transition-colors">
+								<h1 className="text-4xl font-bold mt-2 mb-4 group-hover:text-neutral-400 text-white transition-colors">
 									{featuredPost?.title}
 								</h1>
-								<p className="text-gray-600 text-lg mb-4">
+								<p className="text-neutral-300 text-lg mb-4">
 									{featuredPost?.excerpt}
 								</p>
-								<div className="flex items-center text-sm text-gray-500">
+								<div className="flex items-center text-sm text-neutral-400">
 									<span>{new Date(featuredPost?.date).toDateString()}</span>
 									<span className="mx-2">•</span>
 									<span>{featuredPost?.category || "Category not set"}</span>
 								</div>
 							</div>
 						</Link>
+						<hr className="my-10 border-neutral-700"></hr>
 					</section>
 					{/* Grid Section */}
 					<div className="flex justify-between items-end mb-8">
-						<h2 className="text-2xl font-bold">Latest Articles</h2>
-						<Link to="/" className="text-blue-600 hover:underline">
+						<h2 className="text-2xl text-white font-extrabold">
+							Latest Articles
+						</h2>
+						<Link to="/" className="text-white hover:underline hover:text-white active:text-white">
 							View all
 						</Link>
 					</div>

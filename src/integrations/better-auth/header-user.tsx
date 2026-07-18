@@ -31,7 +31,7 @@ export default function BetterAuthHeader() {
 		return (
 			<div className="flex items-center gap-5">
 				<Button
-					className={`${pathname === "/posts" ? "hidden" : ""}`}
+					className={`${pathname === "/posts" ? "hidden" : ""} bg-white text-black hover:bg-white/90 `}
 					onClick={() => {
 						navigate({ to: "/posts" });
 					}}
@@ -54,7 +54,7 @@ export default function BetterAuthHeader() {
 							</div>
 						)}
 					</DropdownMenuTrigger>
-					<DropdownMenuContent className="mr-3.5" >
+					<DropdownMenuContent className="mr-3.5">
 						<DropdownMenuGroup>
 							<DropdownMenuLabel className="font-bold">
 								My Account
