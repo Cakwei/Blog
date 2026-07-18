@@ -73,7 +73,7 @@ import "#/components/tiptap-templates/simple/simple-editor.scss";
 
 import "#/index.css";
 import { s3Client } from "#/lib/s3";
-import { useEditorSavingState } from "#/routes/posts/create";
+import { useEditorSavingState } from "#/routes/_protected/posts/create";
 
 /**
  * Handles image upload with progress tracking and abort capability.

@@ -1,6 +1,9 @@
+import type { JsonValue } from "@prisma/client/runtime/client";
 import type { Editor } from "@tiptap/core";
 import type { Dispatch, SetStateAction } from "react";
 export type AuthFormData = {
+	fullName?: string;
+	username?: string;
 	email: string;
 	password: string;
 };
@@ -15,10 +18,10 @@ export interface PostFormProps {
 export type PostStatus = "draft" | "published";
 
 export interface Post {
-	id: string;
+	id: number;
 	title: string;
 	excerpt: string;
-	content?: string; // full body — markdown or HTML, your call
+	content?: string | JsonValue | undefined | null;
 	image: string;
 	category: string;
 	date: Date; // ISO string, e.g. "2026-06-20"

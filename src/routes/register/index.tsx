@@ -1,7 +1,7 @@
 // app/routes/login.tsx
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { type ChangeEvent, useEffect, useState } from "react";
-import { signUp } from "#/lib/auth-client";
+import { authClient } from "#/lib/auth-client";
 import type { AuthFormData } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/register/")({
-	component: LoginPage,
+	component: RegisterPage,
 	beforeLoad: async () => {
 		const session = await getFreshServerSession();
 
@@ -28,11 +28,35 @@ export const Route = createFileRoute("/register/")({
 	},
 });
 
-function LoginPage() {
+function RegisterPage() {
+	const [isRegisterError, setIsRegisterError] = useState<boolean>(false);
 	const [formData, setFormData] = useState<AuthFormData>({
+		fullName: "",
+		username: "",
 		email: "",
 		password: "",
 	});
+
+	const signUp = async (formData: AuthFormData) => {
+		await authClient.signUp.email(
+			{
+				name: formData.fullName,
+				username: formData.username,
+				displayUsername: formData.username,
+				email: formData.email,
+				password: formData.password,
+				callbackURL: "/login",
+			},
+			{
+				onSuccess: () => {
+					window.location.href = "/login";
+				},
+				onError: () => {
+					setIsRegisterError(true);
+				},
+			},
+		);
+	};
 
 	const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
@@ -60,24 +84,52 @@ function LoginPage() {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
+						<Label htmlFor="fullName">Full Name</Label>
+						<Input
+							name="fullName"
+							id="fullName"
+							type="text"
+							placeholder="Charlee Tan"
+							onChange={handleInput}
+						/>
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="username">Username</Label>
+						<Input
+							name="username"
+							id="username"
+							type="text"
+							placeholder="Cakwei"
+							onChange={handleInput}
+						/>
+					</div>
+					<div className="space-y-2">
 						<Label htmlFor="email">Email</Label>
 						<Input
 							name="email"
 							id="email"
 							type="email"
-							placeholder="m@example.com"
+							placeholder="charlee@cakwei.dev"
 							onChange={handleInput}
 						/>
 					</div>
-					<div className="space-y-2">
-						<Label htmlFor="password">Password</Label>
-						<Input
-							id="password"
-							name="password"
-							type="password"
-							onChange={handleInput}
-						/>
+					<div>
+						<div className="space-y-2">
+							<Label htmlFor="password">Password</Label>
+							<Input
+								id="password"
+								name="password"
+								type="password"
+								onChange={handleInput}
+							/>
+						</div>
+						{isRegisterError ? (
+							<span className="text-red-500 text-xs">
+								Account with this username already exists
+							</span>
+						) : null}
 					</div>
+
 					<Button onClick={() => signUp(formData)} className="w-full">
 						Sign Up
 					</Button>

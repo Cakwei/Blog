@@ -18,7 +18,8 @@
     "db:push": "dotenv -e .env -- prisma db push",
     "db:migrate": "dotenv -e .env -- prisma migrate dev",
     "db:studio": "dotenv -e .env -- prisma studio",
-    "db:seed": "dotenv -e .env -- prisma db seed"
+    "db:seed": "dotenv -e .env -- prisma db seed",
+    "db:reset": "dotenv -e .env -- prisma db push --force-reset"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1075.0",
@@ -48,13 +49,14 @@
     "@tiptap/extension-text-align": "^3.27.1",
     "@tiptap/extension-typography": "^3.27.1",
     "@tiptap/extensions": "^3.27.1",
+    "@tiptap/html": "^3.27.1",
     "@tiptap/pm": "^3.27.1",
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "better-auth": "^1.6.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dompurify": "^3.4.11",
+    "isomorphic-dompurify": "^3.18.0",
     "lodash.throttle": "^4.1.1",
     "lucide-react": "^1.21.0",
     "nitro": "npm:nitro-nightly@latest",

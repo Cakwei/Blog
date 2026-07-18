@@ -1,8 +1,7 @@
 // app/routes/posts.$postId.tsx
-
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { generateHTML, type JSONContent } from "@tiptap/core";
+import type { JSONContent } from "@tiptap/core";
 import { Highlight } from "@tiptap/extension-highlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { Image } from "@tiptap/extension-image";
@@ -12,8 +11,9 @@ import { Superscript } from "@tiptap/extension-superscript";
 import TextAlign from "@tiptap/extension-text-align";
 import Typography from "@tiptap/extension-typography";
 import { Selection } from "@tiptap/extensions";
+import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
-import DOMPurify from "dompurify";
+import { sanitize } from "isomorphic-dompurify";
 import { prisma } from "#/db";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -28,20 +28,25 @@ export const getPostById = createServerFn({ method: "GET" })
 		});
 
 		if (!post) throw new Error("Post not found");
-		// console.log('Gyatt, ' + JSON.stringify(post.content))
 		return post;
 	});
 
 export const Route = createFileRoute("/posts/$postId")({
-	// This stays exactly how you want it!
 	loader: async ({ params }) => await getPostById({ data: params.postId }),
 	component: PostPage,
 });
 
 function PostPage() {
 	const post = Route.useLoaderData();
+	const postContent =
+		post.content === null || (post.content && Object.keys(post.content))
+			? JSON.stringify(post.content)
+			: '{"type": "doc", "content": []}';
 
-	const content = generateHTML(post.content as JSONContent, [
+	// Check if postContent obj is empty or not
+	// TRUE: Continue w/ wtv is added from user @ tiptapEditor
+	// FALSE: Return ""
+	const content = generateHTML(JSON.parse(postContent) as JSONContent, [
 		StarterKit.configure({
 			horizontalRule: false,
 			link: {
@@ -62,7 +67,8 @@ function PostPage() {
 		Subscript,
 		Selection,
 	]);
-	const sanitizedContent = DOMPurify.sanitize(content);
+
+	const sanitizedContent = sanitize(content);
 	return (
 		<article className="container max-w-3xl mx-auto py-20 px-4">
 			<div className="space-y-4 text-center mb-12">
@@ -74,7 +80,7 @@ function PostPage() {
 				</h1>
 				<div className="text-muted-foreground">
 					Published on{" "}
-					{new Date(post.date).toLocaleDateString("en-MY", {
+					{new Date(post.date).toLocaleDateString("en", {
 						day: "numeric",
 						month: "long",
 						year: "numeric",
@@ -92,28 +98,13 @@ function PostPage() {
 				<p className="text-xl leading-relaxed italic text-muted-foreground mb-8">
 					{post.excerpt}
 				</p>
-				<Separator className="mb-5 bg-neutral-300" />
-				{/* Placeholder for real content 
-				<div className="space-y-6 text-lg leading-7">
-					<p>
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-						eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-						ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-						aliquip ex ea commodo consequat.
-					</p>
-					<h2 className="text-2xl font-bold">Getting Started with TanStack</h2>
-					<p>
-						Duis aute irure dolor in reprehenderit in voluptate velit esse
-						cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-						cupidatat non proident, sunt in culpa qui officia deserunt mollit
-						anim id est laborum.
-					</p>
-				</div>*/}
+				<Separator className="bg-neutral-300" />
 			</div>
+
 			<div
 				/* biome-ignore lint/security/noDangerouslySetInnerHtml: Gyatt */
 				dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-				className="prose prose-li:marker:text-black prose-quotes:text-black prose-blockquote:border-black"
+				className="prose prose-li:marker:text-black prose-quotes:text-black prose-blockquote:border-black mt-5"
 			></div>
 		</article>
 	);

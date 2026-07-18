@@ -26,7 +26,7 @@ export default function BetterAuthHeader() {
 			</div>
 		);
 	}
-	
+
 	if (session?.user) {
 		return (
 			<div className="flex items-center gap-5">
@@ -54,12 +54,14 @@ export default function BetterAuthHeader() {
 							</div>
 						)}
 					</DropdownMenuTrigger>
-					<DropdownMenuContent className="mr-3.5">
+					<DropdownMenuContent className="mr-3.5" >
 						<DropdownMenuGroup>
 							<DropdownMenuLabel className="font-bold">
 								My Account
 							</DropdownMenuLabel>
-							<DropdownMenuItem>Profile</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
+								Profile
+							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>

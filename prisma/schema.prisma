@@ -24,10 +24,14 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
-  posts Post[]
+  posts         Post[]
+
+  username        String?
+  displayUsername String? @db.Text
 
   @@unique([email])
   @@map("user")
+  @@unique([username])
 }
 
 model Session {
@@ -61,6 +65,7 @@ model Account {
   password              String?   @db.Text
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+
   @@index([userId(length: 191)])
   @@map("account")
 }
@@ -78,14 +83,15 @@ model Verification {
 }
 
 model Post {
-  id       Int @id @default(autoincrement())
+  id       Int      @id @default(autoincrement())
   title    String
-  excerpt  String @db.Text
+  excerpt  String   @db.Text
   date     DateTime
   category String
-  image    String  
+  image    String
   userId   String
   content  Json
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 

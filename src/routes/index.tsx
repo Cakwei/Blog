@@ -63,7 +63,7 @@ function HomePage() {
 								<div className="flex items-center text-sm text-gray-500">
 									<span>{new Date(featuredPost?.date).toDateString()}</span>
 									<span className="mx-2">•</span>
-									<span>{featuredPost?.category}</span>
+									<span>{featuredPost?.category || "Category not set"}</span>
 								</div>
 							</div>
 						</Link>

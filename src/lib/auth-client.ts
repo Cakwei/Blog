@@ -1,27 +1,6 @@
+import { usernameClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient();
-
-export const signIn = async (formData: { email: string; password: string }) => {
-	await authClient.signIn.email({
-		email: formData.email,
-		password: formData.password,
-		callbackURL: "/",
-	});
-};
-
-export const signUp = async (formData: { email: string; password: string }) => {
-	await authClient.signUp.email(
-		{
-			name: "User",
-			email: formData.email,
-			password: formData.password,
-			callbackURL: "/login",
-		},
-		{
-			onSuccess: () => {
-				window.location.href = "/login";
-			},
-		},
-	);
-};
+export const authClient = createAuthClient({
+	plugins: [usernameClient()],
+});

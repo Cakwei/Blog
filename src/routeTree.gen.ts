@@ -9,14 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
-import { Route as PostsCreateIndexRouteImport } from './routes/posts/create/index'
+import { Route as ProtectedProfileIndexRouteImport } from './routes/_protected/profile/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ProtectedPostsCreateIndexRouteImport } from './routes/_protected/posts/create/index'
 
+const ProtectedRoute = ProtectedRouteImport.update({
+  id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -42,16 +48,22 @@ const PostsPostIdRoute = PostsPostIdRouteImport.update({
   path: '/posts/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PostsCreateIndexRoute = PostsCreateIndexRouteImport.update({
-  id: '/posts/create/',
-  path: '/posts/create/',
-  getParentRoute: () => rootRouteImport,
+const ProtectedProfileIndexRoute = ProtectedProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => ProtectedRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedPostsCreateIndexRoute =
+  ProtectedPostsCreateIndexRouteImport.update({
+    id: '/posts/create/',
+    path: '/posts/create/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,7 +72,8 @@ export interface FileRoutesByFullPath {
   '/posts/': typeof PostsIndexRoute
   '/register/': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/posts/create/': typeof PostsCreateIndexRoute
+  '/profile/': typeof ProtectedProfileIndexRoute
+  '/posts/create/': typeof ProtectedPostsCreateIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,17 +82,20 @@ export interface FileRoutesByTo {
   '/posts': typeof PostsIndexRoute
   '/register': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/posts/create': typeof PostsCreateIndexRoute
+  '/profile': typeof ProtectedProfileIndexRoute
+  '/posts/create': typeof ProtectedPostsCreateIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_protected': typeof ProtectedRouteWithChildren
   '/posts/$postId': typeof PostsPostIdRoute
   '/login/': typeof LoginIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/register/': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/posts/create/': typeof PostsCreateIndexRoute
+  '/_protected/profile/': typeof ProtectedProfileIndexRoute
+  '/_protected/posts/create/': typeof ProtectedPostsCreateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,6 +106,7 @@ export interface FileRouteTypes {
     | '/posts/'
     | '/register/'
     | '/api/auth/$'
+    | '/profile/'
     | '/posts/create/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,30 +116,40 @@ export interface FileRouteTypes {
     | '/posts'
     | '/register'
     | '/api/auth/$'
+    | '/profile'
     | '/posts/create'
   id:
     | '__root__'
     | '/'
+    | '/_protected'
     | '/posts/$postId'
     | '/login/'
     | '/posts/'
     | '/register/'
     | '/api/auth/$'
-    | '/posts/create/'
+    | '/_protected/profile/'
+    | '/_protected/posts/create/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProtectedRoute: typeof ProtectedRouteWithChildren
   PostsPostIdRoute: typeof PostsPostIdRoute
   LoginIndexRoute: typeof LoginIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
   RegisterIndexRoute: typeof RegisterIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  PostsCreateIndexRoute: typeof PostsCreateIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -158,12 +185,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/create/': {
-      id: '/posts/create/'
-      path: '/posts/create'
-      fullPath: '/posts/create/'
-      preLoaderRoute: typeof PostsCreateIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_protected/profile/': {
+      id: '/_protected/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProtectedProfileIndexRouteImport
+      parentRoute: typeof ProtectedRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -172,17 +199,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/posts/create/': {
+      id: '/_protected/posts/create/'
+      path: '/posts/create'
+      fullPath: '/posts/create/'
+      preLoaderRoute: typeof ProtectedPostsCreateIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
+interface ProtectedRouteChildren {
+  ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute
+  ProtectedPostsCreateIndexRoute: typeof ProtectedPostsCreateIndexRoute
+}
+
+const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedProfileIndexRoute: ProtectedProfileIndexRoute,
+  ProtectedPostsCreateIndexRoute: ProtectedPostsCreateIndexRoute,
+}
+
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
+  ProtectedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProtectedRoute: ProtectedRouteWithChildren,
   PostsPostIdRoute: PostsPostIdRoute,
   LoginIndexRoute: LoginIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  PostsCreateIndexRoute: PostsCreateIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

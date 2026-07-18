@@ -19,7 +19,7 @@ import { s3Client } from "#/lib/s3";
 import type { EditorSavingContenxt } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
 
-export const Route = createFileRoute("/posts/create/")({
+export const Route = createFileRoute("/_protected/posts/create/")({
 	component: NewPostPage,
 });
 
@@ -33,8 +33,6 @@ const saveFileToDB = createServerFn({ method: "POST" })
 			const session = await getFreshServerSession();
 
 			if (!session) return;
-
-			console.log("bye" + data.blogImg);
 
 			// Upload to DB
 			await prisma.post.create({
@@ -136,11 +134,11 @@ function NewPostForm() {
 	async function setBlogHeroIMG(file: File) {
 		if (file) setBlogHeroImg(file);
 	}
-
+	/*
 	useEffect(() => {
 		console.log("Layout reading state:", isSaving);
 	}, [isSaving]);
-
+*/
 	return (
 		<div className="max-w-6xl mx-auto px-4 py-12 h-auto">
 			<Link

@@ -38,6 +38,7 @@ function AdminPostsPage() {
 		isSuccess,
 		isLoading,
 	} = useSuspenseQuery(postsQueryOptions());
+
 	const navigate = useNavigate();
 	return (
 		<div className="max-w-6xl mx-auto px-4 py-12">
@@ -50,14 +51,14 @@ function AdminPostsPage() {
 				</div>
 				<Button
 					onClick={() => navigate({ to: "/posts/create" })}
-					className="px-5 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors whitespace-nowrap"
+					className="px-5 bg-black text-white font-semibold transition-colors whitespace-nowrap"
 				>
 					New post
 				</Button>
 			</div>
 
 			{!isLoading && isSuccess && posts.length !== 0 && (
-				<div className="border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
+				<div className="rounded-2xl overflow-hidden divide-y divide-gray-100">
 					{posts.map((post) => (
 						<PostRow key={post.id} post={post} />
 					))}
@@ -65,7 +66,7 @@ function AdminPostsPage() {
 			)}
 
 			{isLoading && (
-				<div className="border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
+				<div className="rounded-2xl overflow-hidden divide-y divide-gray-100">
 					<Skeleton className="w-full h-[50vw]" />
 					dd
 				</div>
@@ -113,7 +114,7 @@ function PostRow({ post }: { post: Post }) {
 			<div className="flex items-center gap-2 flex-shrink-0">
 				<Link
 					to="/posts/$postId"
-					params={{ postId: post.id }}
+					params={{ postId: post.id.toString() }}
 					className="px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
 				>
 					View

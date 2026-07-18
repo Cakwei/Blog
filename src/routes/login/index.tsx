@@ -1,7 +1,7 @@
 // app/routes/login.tsx
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { type ChangeEvent, useEffect, useState } from "react";
-import { signIn } from "#/lib/auth-client";
+import { authClient } from "#/lib/auth-client";
 import type { AuthFormData } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,8 @@ export const Route = createFileRoute("/login/")({
 });
 
 function LoginPage() {
+	const [isLoginError, setIsLoginError] = useState<boolean>(false);
+
 	const [formData, setFormData] = useState<AuthFormData>({
 		email: "",
 		password: "",
@@ -36,17 +38,32 @@ function LoginPage() {
 
 	const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
-		console.log(name, value);
 		setFormData((prevData) => ({
 			...prevData, // Copy previous state
-			[name]: value, // Use ES6 computed property name [key]
+			[name]: value,
 		}));
 	};
 
+	const signIn = async (formData: { email: string; password: string }) => {
+		await authClient.signIn.email({
+			email: formData.email,
+			password: formData.password,
+			callbackURL: "/",
+			fetchOptions: {
+				onError: (ctx) => {
+					switch (ctx.error.code) {
+						case "INVALID_EMAIL_OR_PASSWORD":
+							setIsLoginError(true);
+					}
+				},
+			},
+		});
+	};
+	/*
 	useEffect(() => {
 		console.log(formData);
 	}, [formData]);
-
+*/
 	return (
 		<div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
 			<Card className="w-full max-w-md">
@@ -70,15 +87,22 @@ function LoginPage() {
 							placeholder="m@example.com"
 						/>
 					</div>
-					<div className="space-y-2">
-						<Label htmlFor="password">Password</Label>
-						<Input
-							autoComplete="current-password"
-							onChange={handleInput}
-							name="password"
-							id="password"
-							type="password"
-						/>
+					<div>
+						<div className="space-y-2">
+							<Label htmlFor="password">Password</Label>
+							<Input
+								autoComplete="current-password"
+								onChange={handleInput}
+								name="password"
+								id="password"
+								type="password"
+							/>
+						</div>
+						{isLoginError ? (
+							<span className="text-red-500 text-xs">
+								Invalid username or password
+							</span>
+						) : null}
 					</div>
 					<Button
 						onClick={() => {
