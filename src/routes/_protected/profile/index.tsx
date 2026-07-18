@@ -4,9 +4,10 @@ import {
 	useQueryClient,
 	useSuspenseQuery,
 } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { revokeSessions } from "better-auth/api";
+import { type MouseEvent, type SubmitEvent, useState } from "react";
 import { Button } from "#/components/ui/button";
 import {
 	Card,
@@ -19,15 +20,17 @@ import {
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { prisma } from "#/db";
+import { authClient } from "#/lib/auth-client";
+import { getFreshServerSession } from "#/lib/utils";
 
 // Better Auth uses alpha-numeric/cuid String IDs in MySQL
-const CURRENT_USER_ID = "usr_sample123456";
+const loggedInUserEmail = (await getFreshServerSession())?.user.email;
 
 // 1. Server Functions adjusted for Better Auth Schema
 const getUserProfile = createServerFn().handler(async () => {
 	// Better Auth stores core user info in the User model
 	const user = await prisma.user.findUnique({
-		where: { id: CURRENT_USER_ID },
+		where: { email: loggedInUserEmail },
 		select: {
 			id: true,
 			name: true,
@@ -50,7 +53,7 @@ const updateProfileAndId = createServerFn()
 	.handler(async ({ data }) => {
 		// Update user core information
 		const updatedUser = await prisma.user.update({
-			where: { id: CURRENT_USER_ID },
+			where: { id: loggedInUserEmail },
 			data: {
 				name: data.name,
 				email: data.email,
@@ -63,7 +66,7 @@ const updateProfileAndId = createServerFn()
 			// or password hashes attached to internal providers. Adjust targeting to your auth setup:
 			await prisma.account.updateMany({
 				where: {
-					userId: CURRENT_USER_ID,
+					userId: loggedInUserEmail,
 					providerId: "credential", // Default for Better Auth email/password provider
 				},
 				data: {
@@ -90,6 +93,7 @@ export const Route = createFileRoute("/_protected/profile/")({
 });
 
 function ProfilePage() {
+	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { data: user } = useSuspenseQuery(profileQueryOptions());
 
@@ -126,7 +130,7 @@ function ProfilePage() {
 		},
 	});
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setMessage(null);
 
@@ -142,6 +146,26 @@ function ProfilePage() {
 		});
 	};
 
+	async function handleChangePassword(e: MouseEvent<HTMLButtonElement>) {
+		e.preventDefault();
+
+		await authClient.changePassword({
+			newPassword: newPassword,
+			currentPassword: currentPassword,
+			revokeOtherSessions: true,
+			fetchOptions: {
+				onError: ({ error }) => {
+					console.log(error);
+				},
+				onSuccess: (ctx) => {
+					// Revoke all sessions stored in DB and force user to relogin again for security
+					console.log(ctx);
+					authClient.revokeSessions();
+					navigate({ to: "/", reloadDocument: true });
+				},
+			},
+		});
+	}
 	return (
 		<div className="max-w-6xl mx-auto px-4 py-12">
 			<div className="mb-12">
@@ -212,7 +236,7 @@ function ProfilePage() {
 										value={name}
 										onChange={(e) => setName(e.target.value)}
 										required
-										className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+										className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
 									/>
 								</div>
 								<div className="space-y-2">
@@ -228,7 +252,7 @@ function ProfilePage() {
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
 										required
-										className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+										className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
 									/>
 								</div>
 							</CardContent>
@@ -258,7 +282,7 @@ function ProfilePage() {
 										value={currentPassword}
 										onChange={(e) => setCurrentPassword(e.target.value)}
 										required={!!newPassword}
-										className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+										className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
 									/>
 								</div>
 								<div className="grid sm:grid-cols-2 gap-4">
@@ -274,7 +298,7 @@ function ProfilePage() {
 											type="password"
 											value={newPassword}
 											onChange={(e) => setNewPassword(e.target.value)}
-											className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+											className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
 										/>
 									</div>
 									<div className="space-y-2">
@@ -289,7 +313,7 @@ function ProfilePage() {
 											type="password"
 											value={confirmPassword}
 											onChange={(e) => setConfirmPassword(e.target.value)}
-											className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+											className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
 										/>
 									</div>
 								</div>
@@ -298,6 +322,7 @@ function ProfilePage() {
 
 						<div className="flex justify-end gap-4">
 							<Button
+								onClick={handleChangePassword}
 								type="submit"
 								disabled={isPending}
 								className="bg-black text-white font-semibold px-5 transition-colors shadow-none"

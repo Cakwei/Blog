@@ -20,7 +20,6 @@ import { Separator } from "@/components/ui/separator";
 import "#/index.css";
 
 export const getPostById = createServerFn({ method: "GET" })
-	// FIX: Change (postId) to ({ data: postId })
 	.validator((postId: string) => postId)
 	.handler(async ({ data: postId }) => {
 		const post = await prisma.post.findUnique({
@@ -70,11 +69,15 @@ function PostPage() {
 
 	const sanitizedContent = sanitize(content);
 	return (
-		<article className="container max-w-3xl mx-auto py-20 px-4">
-			<div className="space-y-4 text-center mb-12">
-				<Badge variant="secondary" className="px-3 py-1">
-					{post.category}
-				</Badge>
+		<article className="container max-w-3xl mx-auto py-20 px-4 bg-[#e7f3ec]">
+			<div className="space-y-4 text-center mb-5">
+				<div className="flex w-full gap-2.5 justify-center ">
+					{post.category.split(",").map((cat) => (
+						<Badge key={cat} variant="secondary" className="px-3 py-1">
+							{cat}
+						</Badge>
+					))}
+				</div>
 				<h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
 					{post.title}
 				</h1>
@@ -88,11 +91,13 @@ function PostPage() {
 				</div>
 			</div>
 
-			<img
-				src={post.image}
-				alt={post.title}
-				className="w-full aspect-video object-cover rounded-xl mb-12 border shadow-lg"
-			/>
+			<div className="w-full flex justify-center items-center">
+				<img
+					src={post.image}
+					alt={post.title}
+					className="w-auto h-auto aspect-fit object-cover rounded-xl border shadow-lg"
+				/>
+			</div>
 
 			<div className="prose prose-slate max-w-none lg:prose-xl">
 				<p className="text-xl leading-relaxed italic text-muted-foreground mb-8">

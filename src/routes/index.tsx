@@ -33,7 +33,7 @@ function HomePage() {
 	const remainingPosts = posts.slice(1);
 
 	return (
-		<div className="max-w-6xl mx-auto px-4 py-12">
+		<div className="max-w-6xl mx-auto px-4 py-12 bg-[#e7f3ec]">
 			{/* Hero Section */}
 			{isSuccess ? (
 				<>
@@ -90,9 +90,23 @@ function HomePage() {
 											className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform duration-300"
 										/>
 									</div>
-									<span className="text-xs font-bold text-blue-500 uppercase">
-										{post.category}
-									</span>
+									<div className="flex gap-2.5">
+										{post.category ? (
+											post.category.split(",").map((cat) => (
+												<span
+													key={cat}
+													className="text-xs font-bold text-blue-500 uppercase"
+												>
+													{cat}
+												</span>
+											))
+										) : (
+											<span className="text-xs font-bold text-blue-500 uppercase">
+												{"No category"}
+											</span>
+										)}
+									</div>
+
 									<h3 className="text-xl font-bold mt-2 mb-2 group-hover:text-blue-600 transition-colors">
 										{post.title}
 									</h3>

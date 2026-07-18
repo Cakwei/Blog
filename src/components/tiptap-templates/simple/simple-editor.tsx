@@ -424,10 +424,11 @@ export function SimpleEditor({
 	}, [isMobile, mobileView]);
 
 	return (
-		<div className="bg-white">
+		<div className="bg-white rounded-md">
 			<EditorContext.Provider value={{ editor }}>
 				<Toolbar
 					ref={toolbarRef}
+					className="rounded-md"
 					style={{
 						...(isMobile
 							? {

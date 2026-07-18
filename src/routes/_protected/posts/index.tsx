@@ -25,7 +25,7 @@ const postsQueryOptions = () =>
 		queryFn: () => getOwnPosts(),
 	});
 
-export const Route = createFileRoute("/posts/")({
+export const Route = createFileRoute("/_protected/posts/")({
 	loader: async ({ context }) => {
 		context.queryClient.ensureQueryData(postsQueryOptions());
 	},
@@ -41,7 +41,7 @@ function AdminPostsPage() {
 
 	const navigate = useNavigate();
 	return (
-		<div className="max-w-6xl mx-auto px-4 py-12">
+		<div className="max-w-6xl bg-[#e7f3ec] mx-auto px-4 py-12">
 			<div className="flex justify-between items-end mb-10">
 				<div>
 					<h1 className="text-3xl font-bold">Your posts</h1>
@@ -99,8 +99,25 @@ function PostRow({ post }: { post: Post }) {
 					>
 						{isDraft ? "Draft" : "Published"}
 					</span>
-					<span className="text-xs font-bold text-blue-500 uppercase">
-						{post.category}
+					<span className="text-xs font-bold text-blue-500">
+						{post.category ? (
+							post.category.split(",").map((cat) => (
+								<span
+									key={cat}
+									className={`text-xs font-semibold px-2 py-0.5 rounded-full
+						`}
+								>
+									{capitalize(cat)}
+								</span>
+							))
+						) : (
+							<span
+								className={`text-xs font-semibold px-2 py-0.5 rounded-full
+						`}
+							>
+								No tags
+							</span>
+						)}
 					</span>
 				</div>
 				<h3 className="font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
@@ -120,9 +137,8 @@ function PostRow({ post }: { post: Post }) {
 					View
 				</Link>
 				<Link
-					to="/"
-					//to="/posts/$postId/edit"
-					params={{ postId: post.id }}
+					to="/posts/edit/$postId"
+					params={{ postId: post.id.toString() }}
 					className="px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 				>
 					Edit
@@ -141,4 +157,8 @@ function EmptyState() {
 			</p>
 		</div>
 	);
+}
+
+function capitalize(string: string) {
+	return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }

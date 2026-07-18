@@ -12,12 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
-import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as ProtectedProfileIndexRouteImport } from './routes/_protected/profile/index'
+import { Route as ProtectedPostsIndexRouteImport } from './routes/_protected/posts/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ProtectedPostsCreateIndexRouteImport } from './routes/_protected/posts/create/index'
+import { Route as ProtectedPostsEditPostIdRouteImport } from './routes/_protected/posts/edit/$postId'
 
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
@@ -31,11 +32,6 @@ const IndexRoute = IndexRouteImport.update({
 const RegisterIndexRoute = RegisterIndexRouteImport.update({
   id: '/register/',
   path: '/register/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostsIndexRoute = PostsIndexRouteImport.update({
-  id: '/posts/',
-  path: '/posts/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -53,6 +49,11 @@ const ProtectedProfileIndexRoute = ProtectedProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedPostsIndexRoute = ProtectedPostsIndexRouteImport.update({
+  id: '/posts/',
+  path: '/posts/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -64,25 +65,33 @@ const ProtectedPostsCreateIndexRoute =
     path: '/posts/create/',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedPostsEditPostIdRoute =
+  ProtectedPostsEditPostIdRouteImport.update({
+    id: '/posts/edit/$postId',
+    path: '/posts/edit/$postId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/login/': typeof LoginIndexRoute
-  '/posts/': typeof PostsIndexRoute
   '/register/': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/posts/': typeof ProtectedPostsIndexRoute
   '/profile/': typeof ProtectedProfileIndexRoute
+  '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create/': typeof ProtectedPostsCreateIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/login': typeof LoginIndexRoute
-  '/posts': typeof PostsIndexRoute
   '/register': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/posts': typeof ProtectedPostsIndexRoute
   '/profile': typeof ProtectedProfileIndexRoute
+  '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create': typeof ProtectedPostsCreateIndexRoute
 }
 export interface FileRoutesById {
@@ -91,10 +100,11 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/posts/$postId': typeof PostsPostIdRoute
   '/login/': typeof LoginIndexRoute
-  '/posts/': typeof PostsIndexRoute
   '/register/': typeof RegisterIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_protected/posts/': typeof ProtectedPostsIndexRoute
   '/_protected/profile/': typeof ProtectedProfileIndexRoute
+  '/_protected/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/_protected/posts/create/': typeof ProtectedPostsCreateIndexRoute
 }
 export interface FileRouteTypes {
@@ -103,20 +113,22 @@ export interface FileRouteTypes {
     | '/'
     | '/posts/$postId'
     | '/login/'
-    | '/posts/'
     | '/register/'
     | '/api/auth/$'
+    | '/posts/'
     | '/profile/'
+    | '/posts/edit/$postId'
     | '/posts/create/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/posts/$postId'
     | '/login'
-    | '/posts'
     | '/register'
     | '/api/auth/$'
+    | '/posts'
     | '/profile'
+    | '/posts/edit/$postId'
     | '/posts/create'
   id:
     | '__root__'
@@ -124,10 +136,11 @@ export interface FileRouteTypes {
     | '/_protected'
     | '/posts/$postId'
     | '/login/'
-    | '/posts/'
     | '/register/'
     | '/api/auth/$'
+    | '/_protected/posts/'
     | '/_protected/profile/'
+    | '/_protected/posts/edit/$postId'
     | '/_protected/posts/create/'
   fileRoutesById: FileRoutesById
 }
@@ -136,7 +149,6 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   PostsPostIdRoute: typeof PostsPostIdRoute
   LoginIndexRoute: typeof LoginIndexRoute
-  PostsIndexRoute: typeof PostsIndexRoute
   RegisterIndexRoute: typeof RegisterIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -164,13 +176,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/': {
-      id: '/posts/'
-      path: '/posts'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof PostsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login/': {
       id: '/login/'
       path: '/login'
@@ -192,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedProfileIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/posts/': {
+      id: '/_protected/posts/'
+      path: '/posts'
+      fullPath: '/posts/'
+      preLoaderRoute: typeof ProtectedPostsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -206,16 +218,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedPostsCreateIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/posts/edit/$postId': {
+      id: '/_protected/posts/edit/$postId'
+      path: '/posts/edit/$postId'
+      fullPath: '/posts/edit/$postId'
+      preLoaderRoute: typeof ProtectedPostsEditPostIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
   }
 }
 
 interface ProtectedRouteChildren {
+  ProtectedPostsIndexRoute: typeof ProtectedPostsIndexRoute
   ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute
+  ProtectedPostsEditPostIdRoute: typeof ProtectedPostsEditPostIdRoute
   ProtectedPostsCreateIndexRoute: typeof ProtectedPostsCreateIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedPostsIndexRoute: ProtectedPostsIndexRoute,
   ProtectedProfileIndexRoute: ProtectedProfileIndexRoute,
+  ProtectedPostsEditPostIdRoute: ProtectedPostsEditPostIdRoute,
   ProtectedPostsCreateIndexRoute: ProtectedPostsCreateIndexRoute,
 }
 
@@ -228,7 +251,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   PostsPostIdRoute: PostsPostIdRoute,
   LoginIndexRoute: LoginIndexRoute,
-  PostsIndexRoute: PostsIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

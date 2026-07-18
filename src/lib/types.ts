@@ -42,3 +42,9 @@ export interface EditorSavingContenxt {
 	// blogHeroImgUrl: string | null;
 	// setBlogHeroImgUrl: Dispatch<SetStateAction<string | null>>;
 }
+
+export type IResponse = {
+	success: boolean;
+	message: string;
+	data: object;
+};

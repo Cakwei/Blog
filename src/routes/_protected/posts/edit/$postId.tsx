@@ -1,16 +1,10 @@
 // #/routes/posts/create.tsx
 
 import { Upload } from "@aws-sdk/lib-storage";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Editor } from "@tiptap/core";
-import {
-	createContext,
-	type ReactNode,
-	useContext,
-	useRef,
-	useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
 import { Button } from "#/components/ui/button";
 import {
@@ -29,32 +23,23 @@ import ImageUploader from "#/components/ui/fileUpload";
 import { prisma } from "#/db";
 import { CATEGORIES } from "#/lib/const";
 import { s3Client } from "#/lib/s3";
-import type { EditorSavingContenxt, IResponse } from "#/lib/types";
+import type { EditorSavingContenxt } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
 
-export const Route = createFileRoute("/_protected/posts/create/")({
+export const Route = createFileRoute("/_protected/posts/edit/$postId")({
 	component: NewPostPage,
 });
 
 const saveFileToDB = createServerFn({ method: "POST" })
-	.validator(
-		(data: { jsonContent: any; blogImg: any; tags: Array<string> }) => data,
-	)
+	.validator((data: { jsonContent: any; blogImg: any }) => data)
 	.handler(async ({ data }) => {
 		try {
-			if (!data.jsonContent || !data.blogImg || !data.tags) {
-				return {
-					success: false,
-					message: "One or more inputs empty",
-					data: {},
-				};
-			}
+			if (!data.jsonContent || !data.blogImg) return;
 
 			// Fetch user session
 			const session = await getFreshServerSession();
 
-			if (!session)
-				return { success: false, message: "Session not found", data: {} };
+			if (!session) return;
 
 			// Upload to DB
 			await prisma.post.create({
@@ -63,19 +48,13 @@ const saveFileToDB = createServerFn({ method: "POST" })
 					excerpt: "",
 					date: new Date().toISOString(),
 					userId: session?.user.id,
-					category: data.tags.toString(),
+					category: "",
 					image: data.blogImg || "",
 					content: data.jsonContent,
 				},
 			});
-			return {
-				success: true,
-				message: "Successfully uploaded blog to DB",
-				data: {},
-			};
 		} catch (e) {
 			console.error(e);
-			return { success: false, message: "An error has occurred", data: {} };
 		}
 	});
 
@@ -131,45 +110,43 @@ async function uploadImgToS3(file: File) {
 }
 
 function NewPostForm() {
-	const navigate = useNavigate();
-	const createBtnRef = useRef<HTMLButtonElement | null>(null);
 	const anchor = useComboboxAnchor();
-	const [data, setData] = useState();
+	const [data, setData] = useState(null);
 	const [tags, setTags] = useState<any>(null);
 	const [blogHeroImg, setBlogHeroImg] = useState<File | null>(null);
 	const { isSaving, editor } = useEditorSavingState();
 
 	/*
-	async function downloadFile() {
-		if (!editor) return;
+  async function downloadFile() {
+    if (!editor) return;
 
-		const jsonContent = editor.getJSON();
-		const jsonString = JSON.stringify(jsonContent, null, 2);
+    const jsonContent = editor.getJSON();
+    const jsonString = JSON.stringify(jsonContent, null, 2);
 
-		// 3. Create a Blob with the JSON data
-		const blob = new Blob([jsonString], { type: "application/json" });
+    // 3. Create a Blob with the JSON data
+    const blob = new Blob([jsonString], { type: "application/json" });
 
-		// 4. Create a temporary download link
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement("a");
+    // 4. Create a temporary download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
 
-		link.href = url;
-		link.download = "tiptap-content.json";
+    link.href = url;
+    link.download = "tiptap-content.json";
 
-		// 5. Trigger the download and clean up
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
+    // 5. Trigger the download and clean up
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 */
 	async function setBlogHeroIMG(file: File) {
 		if (file) setBlogHeroImg(file);
 	}
 	/*
-	useEffect(() => {
-		console.log("Layout reading state:", isSaving);
-	}, [isSaving]);
+  useEffect(() => {
+    console.log("Layout reading state:", isSaving);
+  }, [isSaving]);
 */
 	return (
 		<div className="max-w-6xl  bg-[#e7f3ec] mx-auto px-4 py-12 h-auto">
@@ -180,33 +157,20 @@ function NewPostForm() {
 				← Back to your posts
 			</Link>
 			<div className="flex justify-between mb-5">
-				<h1 className="text-3xl font-bold">New post</h1>
+				<h1 className="text-3xl font-bold">Edit post</h1>
 				{isSaving ? (
 					<Button disabled>Saving...</Button>
 				) : (
 					<Button
-						ref={createBtnRef}
 						onClick={async () => {
 							if (!blogHeroImg) return;
-
-							if (createBtnRef.current) createBtnRef.current.disabled = true;
 							const blogHeroImgUrl = await uploadImgToS3(blogHeroImg);
-
-							const result: IResponse = await saveFileToDB({
+							await saveFileToDB({
 								data: {
 									jsonContent: editor?.getJSON(),
 									blogImg: blogHeroImgUrl,
-									tags: tags,
 								},
 							});
-
-							if (!result.success && createBtnRef.current) {
-								createBtnRef.current.disabled = false;
-							}
-
-							if (result.success) {
-								navigate({ to: "/posts" });
-							}
 						}}
 					>
 						Save my blog
@@ -219,6 +183,7 @@ function NewPostForm() {
 					multiple
 					autoHighlight
 					onValueChange={(values) => {
+						console.log(JSON.stringify(values));
 						setTags(values);
 					}}
 					items={CATEGORIES}

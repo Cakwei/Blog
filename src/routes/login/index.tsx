@@ -1,6 +1,6 @@
 // app/routes/login.tsx
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { type ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import { authClient } from "#/lib/auth-client";
 import type { AuthFormData } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
@@ -35,6 +35,7 @@ function LoginPage() {
 		email: "",
 		password: "",
 	});
+	const passwordRef = useRef<HTMLInputElement | null>(null);
 
 	const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
@@ -54,6 +55,10 @@ function LoginPage() {
 					switch (ctx.error.code) {
 						case "INVALID_EMAIL_OR_PASSWORD":
 							setIsLoginError(true);
+
+							if (passwordRef.current) {
+								passwordRef.current.value = "";
+							}
 					}
 				},
 			},
@@ -91,6 +96,7 @@ function LoginPage() {
 						<div className="space-y-2">
 							<Label htmlFor="password">Password</Label>
 							<Input
+								ref={passwordRef}
 								autoComplete="current-password"
 								onChange={handleInput}
 								name="password"

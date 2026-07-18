@@ -181,7 +181,7 @@ export default function ImageUploader({
 	};
 
 	return (
-		<div className="w-full max-w-md mx-auto p-4 space-y-3">
+		<div className="w-full max-w-lg mx-auto p-4 space-y-3">
 			<input
 				ref={fileInputRef}
 				type="file"
