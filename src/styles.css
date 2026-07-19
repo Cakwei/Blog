@@ -164,8 +164,7 @@ body,
   /* Fix: Force layouts to handle overflow dynamically on dynamic long copy edits */
   min-height: 100%;
   height: auto; 
-
-background-color: black;
+  background-color: black;
   
 }
 
@@ -177,34 +176,7 @@ body {
   /* Fix: Use background-color with theme variables here instead of Tailwind layers */
  /* background-color: var(--bg-base);
  */
- background-color: black;
   overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-background-color: black;
-  opacity: 0.28;
- 
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-
-background-color: black;
-  z-index: -1;
-  opacity: 0.14;
-
-  height: 100%;
 }
 
 a {

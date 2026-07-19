@@ -43,35 +43,37 @@ function AdminPostsPage() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	return (
-		<div className="max-w-6xl bg-black mx-auto px-4 py-12">
-			<div className="flex justify-between items-end mb-10">
-				<div>
-					<h1 className="text-3xl text-white font-extrabold">Your posts</h1>
-					<p className="text-neutral-300 mt-1">
-						Create, edit, and publish your articles.
-					</p>
+		<div className="bg-black">
+			<div className="max-w-6xl bg-black mx-auto px-4 py-12">
+				<div className="flex justify-between items-end mb-10">
+					<div>
+						<h1 className="text-3xl text-white font-extrabold">Your posts</h1>
+						<p className="text-neutral-300 mt-1">
+							Create, edit, and publish your articles.
+						</p>
+					</div>
+					<Button
+						onClick={() => navigate({ to: "/posts/create" })}
+						className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
+					>
+						New post
+					</Button>
+					{/*<Button
+						onClick={() => {
+							queryClient.clear();
+							//queryClient.removeQueries();
+						}}
+						className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
+					>
+						Reset Cache
+					</Button> */}
 				</div>
-				<Button
-					onClick={() => navigate({ to: "/posts/create" })}
-					className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
-				>
-					New post
-				</Button>
-				{/*<Button
-					onClick={() => {
-						queryClient.clear();
-						//queryClient.removeQueries();
-					}}
-					className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
-				>
-					Reset Cache
-				</Button>*/}
-			</div>
 
-			{/* Suspense handles the loading state cleanly while useSuspenseQuery fetches data */}
-			<Suspense fallback={<Loading />}>
-				<PostListContent />
-			</Suspense>
+				{/* Suspense handles the loading state cleanly while useSuspenseQuery fetches data */}
+				<Suspense fallback={<Loading />}>
+					<PostListContent />
+				</Suspense>
+			</div>
 		</div>
 	);
 }
@@ -168,7 +170,7 @@ function PostRow({ post }: { post: Post }) {
 
 function EmptyState() {
 	return (
-		<div className="text-center py-20 border border-dashed border-neutral-500 rounded-2xl">
+		<div className="text-center py-20 border border-dashed h-[50vh] border-neutral-500 flex justify-center flex-col items-center rounded-2xl">
 			<h3 className="text-lg font-bold text-white mb-2">No posts yet</h3>
 			<p className="text-neutral-300 mb-6 text-sm">
 				Write your first post to see it here.
