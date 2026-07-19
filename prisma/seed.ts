@@ -1,10 +1,10 @@
 import { prisma } from '#/db'
 
-const tempId = '3i7dT5R7ZUlaVaSXOKxdezY3SWkEThn0'
+const tempId = 'FA96EjZ4aTQrdKvruz3kknCgGk5LkcwT'
 
 async function main() {
-  console.log('🌱 Seeding database...')
-  return
+  	console.log('🌱 Seeding database...')
+	return
   // Clear existing todos
    await prisma.post.deleteMany()
   // Create example todos

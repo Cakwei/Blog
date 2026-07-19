@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "#/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import { authClient } from "#/lib/auth-client";
 
 export default function BetterAuthHeader() {
 	const { data: session, isPending } = authClient.useSession();
+	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 	const pathname = useLocation({
 		select: (location) => location.pathname,
@@ -73,6 +75,8 @@ export default function BetterAuthHeader() {
 									authClient.signOut({
 										fetchOptions: {
 											onSuccess: () => {
+												queryClient.clear();
+												queryClient.removeQueries();
 												window.location.href = "/";
 											},
 										},

@@ -166,172 +166,176 @@ function ProfilePage() {
 		});
 	}
 	return (
-		<div className="max-w-6xl mx-auto px-4 py-12 bg-black">
-			<div className="mb-12">
-				<span className="text-white font-bold uppercase tracking-wider text-sm">
-					Account Settings
-				</span>
-				<h1 className="text-4xl text-white font-bold mt-2">Personal Profile</h1>
-				<p className="text-neutral-300 text-lg mt-2">
-					Manage your Better Auth account credentials and details.
-				</p>
-			</div>
+		<div className="bg-black">
+			<div className="max-w-6xl mx-auto px-4 py-12 bg-black">
+				<div className="mb-12">
+					<span className="text-white font-bold uppercase tracking-wider text-sm">
+						Account Settings
+					</span>
+					<h1 className="text-4xl text-white font-bold mt-2">
+						Personal Profile
+					</h1>
+					<p className="text-neutral-300 text-lg mt-2">
+						Manage your Better Auth account credentials and details.
+					</p>
+				</div>
 
-			<div className="grid md:grid-cols-3 gap-8 items-start">
-				<Card className="border-neutral-700 shadow-none rounded-2xl bg-neutral-900">
-					<CardHeader className="text-center pb-2">
-						{user?.image ? (
-							<img
-								src={user.image}
-								alt={name}
-								className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border border-gray-200"
-							/>
-						) : (
-							<div className="w-20 h-20 bg-blue-100 text-blue-600 font-bold text-2xl flex items-center justify-center rounded-full mx-auto mb-4">
-								{name.charAt(0).toUpperCase() || "U"}
-							</div>
-						)}
-						<CardTitle className="text-xl text-white font-bold">
-							{name || "User Profile"}
-						</CardTitle>
-						<CardDescription className="text-neutral-300">
-							{email}
-						</CardDescription>
-					</CardHeader>
-				</Card>
-
-				<div className="md:col-span-2">
-					<form onSubmit={handleSubmit} className="space-y-8">
-						{message && (
-							<div
-								className={`p-4 rounded-xl text-sm font-medium ${
-									message.type === "success"
-										? "bg-green-50 text-green-700 border border-green-200"
-										: "bg-red-50 text-red-700 border border-red-200"
-								}`}
-							>
-								{message.text}
-							</div>
-						)}
-
-						<Card className="border-neutral-700 shadow-none rounded-2xl bg-neutral-900">
-							<CardHeader>
-								<CardTitle className="text-xl text-white font-bold">
-									Personal Information
-								</CardTitle>
-								<CardDescription className="text-neutral-300">
-									Update your active account names and identifiers.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div className="space-y-2">
-									<Label
-										htmlFor="name"
-										className="text-sm font-semibold text-white"
-									>
-										Full Name
-									</Label>
-									<Input
-										id="name"
-										type="text"
-										value={name}
-										onChange={(e) => setName(e.target.value)}
-										required
-										className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
-									/>
+				<div className="grid md:grid-cols-3 gap-8 items-start">
+					<Card className="border-neutral-700 shadow-none rounded-2xl bg-neutral-900">
+						<CardHeader className="text-center pb-2">
+							{user?.image ? (
+								<img
+									src={user.image}
+									alt={name}
+									className="w-20 h-20 rounded-full mx-auto mb-4 object-cover border border-gray-200"
+								/>
+							) : (
+								<div className="w-20 h-20 bg-blue-100 text-blue-600 font-bold text-2xl flex items-center justify-center rounded-full mx-auto mb-4">
+									{name.charAt(0).toUpperCase() || "U"}
 								</div>
-								<div className="space-y-2">
-									<Label
-										htmlFor="email"
-										className="text-sm font-semibold text-white"
-									>
-										Email Address
-									</Label>
-									<Input
-										id="email"
-										type="email"
-										value={email}
-										onChange={(e) => setEmail(e.target.value)}
-										required
-										className="border-neutral-700 text-neutral-300 focus:border-blue-500 focus:ring-blue-500"
-									/>
-								</div>
-							</CardContent>
-						</Card>
+							)}
+							<CardTitle className="text-xl text-white font-bold">
+								{name || "User Profile"}
+							</CardTitle>
+							<CardDescription className="text-neutral-300">
+								{email}
+							</CardDescription>
+						</CardHeader>
+					</Card>
 
-						<Card className="border-neutral-700 bg-neutral-900 shadow-none rounded-2xl">
-							<CardHeader>
-								<CardTitle className="text-xl text-white font-bold">
-									Security & Password
-								</CardTitle>
-								<CardDescription className="text-neutral-300">
-									Leave blank if you wish to preserve your existing security
-									configurations.
-								</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								<div className="space-y-2">
-									<Label
-										htmlFor="current-password"
-										className="text-sm font-semibold text-white"
-									>
-										Current Password
-									</Label>
-									<Input
-										id="current-password"
-										type="password"
-										value={currentPassword}
-										onChange={(e) => setCurrentPassword(e.target.value)}
-										required={!!newPassword}
-										className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
-									/>
+					<div className="md:col-span-2">
+						<form onSubmit={handleSubmit} className="space-y-8">
+							{message && (
+								<div
+									className={`p-4 rounded-xl text-sm font-medium ${
+										message.type === "success"
+											? "bg-green-50 text-green-700 border border-green-200"
+											: "bg-red-50 text-red-700 border border-red-200"
+									}`}
+								>
+									{message.text}
 								</div>
-								<div className="grid sm:grid-cols-2 gap-4">
+							)}
+
+							<Card className="border-neutral-700 shadow-none rounded-2xl bg-neutral-900">
+								<CardHeader>
+									<CardTitle className="text-xl text-white font-bold">
+										Personal Information
+									</CardTitle>
+									<CardDescription className="text-neutral-300">
+										Update your active account names and identifiers.
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-4">
 									<div className="space-y-2">
 										<Label
-											htmlFor="new-password"
+											htmlFor="name"
 											className="text-sm font-semibold text-white"
 										>
-											New Password
+											Full Name
 										</Label>
 										<Input
-											id="new-password"
-											type="password"
-											value={newPassword}
-											onChange={(e) => setNewPassword(e.target.value)}
+											id="name"
+											type="text"
+											value={name}
+											onChange={(e) => setName(e.target.value)}
+											required
 											className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
 										/>
 									</div>
 									<div className="space-y-2">
 										<Label
-											htmlFor="confirm-password"
+											htmlFor="email"
 											className="text-sm font-semibold text-white"
 										>
-											Confirm New Password
+											Email Address
 										</Label>
 										<Input
-											id="confirm-password"
+											id="email"
+											type="email"
+											value={email}
+											onChange={(e) => setEmail(e.target.value)}
+											required
+											className="border-neutral-700 text-neutral-300 focus:border-blue-500 focus:ring-blue-500"
+										/>
+									</div>
+								</CardContent>
+							</Card>
+
+							<Card className="border-neutral-700 bg-neutral-900 shadow-none rounded-2xl">
+								<CardHeader>
+									<CardTitle className="text-xl text-white font-bold">
+										Security & Password
+									</CardTitle>
+									<CardDescription className="text-neutral-300">
+										Leave blank if you wish to preserve your existing security
+										configurations.
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<div className="space-y-2">
+										<Label
+											htmlFor="current-password"
+											className="text-sm font-semibold text-white"
+										>
+											Current Password
+										</Label>
+										<Input
+											id="current-password"
 											type="password"
-											value={confirmPassword}
-											onChange={(e) => setConfirmPassword(e.target.value)}
+											value={currentPassword}
+											onChange={(e) => setCurrentPassword(e.target.value)}
+											required={!!newPassword}
 											className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
 										/>
 									</div>
-								</div>
-							</CardContent>
-						</Card>
+									<div className="grid sm:grid-cols-2 gap-4">
+										<div className="space-y-2">
+											<Label
+												htmlFor="new-password"
+												className="text-sm font-semibold text-white"
+											>
+												New Password
+											</Label>
+											<Input
+												id="new-password"
+												type="password"
+												value={newPassword}
+												onChange={(e) => setNewPassword(e.target.value)}
+												className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label
+												htmlFor="confirm-password"
+												className="text-sm font-semibold text-white"
+											>
+												Confirm New Password
+											</Label>
+											<Input
+												id="confirm-password"
+												type="password"
+												value={confirmPassword}
+												onChange={(e) => setConfirmPassword(e.target.value)}
+												className="border-neutral-700 focus:border-blue-500 focus:ring-blue-500 text-neutral-300"
+											/>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
 
-						<div className="flex justify-end gap-4">
-							<Button
-								onClick={handleChangePassword}
-								type="submit"
-								disabled={isPending}
-								className="bg-black text-white font-semibold px-5 transition-colors shadow-none"
-							>
-								{isPending ? "Updating Account..." : "Save Changes"}
-							</Button>
-						</div>
-					</form>
+							<div className="flex justify-end gap-4">
+								<Button
+									onClick={handleChangePassword}
+									type="submit"
+									disabled={isPending}
+									className="bg-white hover:bg-white/90 text-black font-semibold px-5 transition-colors shadow-none"
+								>
+									{isPending ? "Updating Account..." : "Save Changes"}
+								</Button>
+							</div>
+						</form>
+					</div>
 				</div>
 			</div>
 		</div>

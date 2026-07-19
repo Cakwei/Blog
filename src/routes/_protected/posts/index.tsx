@@ -1,8 +1,14 @@
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import {
+	queryOptions,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import type { Session } from "better-auth";
+import { Suspense } from "react";
 import { Button } from "#/components/ui/button";
-import { Skeleton } from "#/components/ui/skeleton";
+import { Loading } from "#/components/ui/loading";
 import { prisma } from "#/db";
 import type { Post } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
@@ -15,31 +21,27 @@ const getOwnPosts = createServerFn().handler(async () => {
 			userId: session?.user.id,
 		},
 	});
-	// console.log(JSON.stringify(posts));
+	console.log(JSON.stringify(posts));
 	return posts;
 });
 
-const postsQueryOptions = () =>
+const postsQueryOptions = (userId: string) =>
 	queryOptions({
-		queryKey: ["posts"],
+		queryKey: ["posts", userId],
 		queryFn: () => getOwnPosts(),
 	});
 
 export const Route = createFileRoute("/_protected/posts/")({
 	beforeLoad: async ({ context }) => {
-		context.queryClient.ensureQueryData(postsQueryOptions());
+		const userId = context.user.id;
+		context.queryClient.fetchQuery(postsQueryOptions(userId));
 	},
 	component: AdminPostsPage,
 });
 
 function AdminPostsPage() {
-	const {
-		data: posts,
-		isSuccess,
-		isLoading,
-	} = useSuspenseQuery(postsQueryOptions());
-
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	return (
 		<div className="max-w-6xl bg-black mx-auto px-4 py-12">
 			<div className="flex justify-between items-end mb-10">
@@ -55,24 +57,40 @@ function AdminPostsPage() {
 				>
 					New post
 				</Button>
+				{/*<Button
+					onClick={() => {
+						queryClient.clear();
+						//queryClient.removeQueries();
+					}}
+					className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
+				>
+					Reset Cache
+				</Button>*/}
 			</div>
 
-			{!isLoading && isSuccess && posts.length !== 0 && (
-				<div className="rounded-2xl overflow-hidden divide-y divide-neutral-700">
-					{posts.map((post) => (
-						<PostRow key={post.id} post={post} />
-					))}
-				</div>
-			)}
+			{/* Suspense handles the loading state cleanly while useSuspenseQuery fetches data */}
+			<Suspense fallback={<Loading />}>
+				<PostListContent />
+			</Suspense>
+		</div>
+	);
+}
 
-			{isLoading && (
-				<div className="rounded-2xl overflow-hidden divide-y divide-gray-100">
-					<Skeleton className="w-full h-[50vw]" />
-					dd
-				</div>
-			)}
+// Extracted the query logic into a separate component so Suspense can catch the loading promise
+function PostListContent() {
+	const { session }: { session: Session } = Route.useRouteContext();
+	const userId = session.userId;
+	const { data: posts } = useSuspenseQuery(postsQueryOptions(userId));
 
-			{!isLoading && isSuccess && posts.length === 0 && <EmptyState />}
+	if (posts.length === 0) {
+		return <EmptyState />;
+	}
+
+	return (
+		<div className="rounded-2xl overflow-hidden divide-y divide-neutral-700">
+			{posts.map((post) => (
+				<PostRow key={post.id} post={post} />
+			))}
 		</div>
 	);
 }
@@ -105,7 +123,7 @@ function PostRow({ post }: { post: Post }) {
 								<span
 									key={cat}
 									className={`rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white captitalize
-						`}
+                        `}
 								>
 									{capitalize(cat)}
 								</span>
@@ -113,7 +131,7 @@ function PostRow({ post }: { post: Post }) {
 						) : (
 							<span
 								className={`rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white captitalize
-							`}
+                            `}
 							>
 								No tags
 							</span>
@@ -150,9 +168,9 @@ function PostRow({ post }: { post: Post }) {
 
 function EmptyState() {
 	return (
-		<div className="text-center py-20 border border-dashed border-gray-200 rounded-2xl">
-			<h3 className="text-lg font-bold text-gray-900 mb-2">No posts yet</h3>
-			<p className="text-gray-500 mb-6 text-sm">
+		<div className="text-center py-20 border border-dashed border-neutral-500 rounded-2xl">
+			<h3 className="text-lg font-bold text-white mb-2">No posts yet</h3>
+			<p className="text-neutral-300 mb-6 text-sm">
 				Write your first post to see it here.
 			</p>
 		</div>

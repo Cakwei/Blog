@@ -75,7 +75,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								Charlee's<span className="text-white"> Blog</span>
 							</Link>
 							<nav className="hidden md:flex gap-6 text-sm font-medium">
-								<Link to="/" className="transition-colors hover:text-primary">
+								{/*<Link to="/" className="transition-colors hover:text-primary">
 									Articles
 								</Link>
 								<Link
@@ -83,7 +83,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 									className="transition-colors hover:text-primary text-muted-foreground"
 								>
 									About
-								</Link>
+								</Link>*/}
 							</nav>
 						</div>
 						{/* Showed depending not logged in OR logged in */}
@@ -92,11 +92,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						) : (
 							<div className="flex items-center gap-4">
 								<Link to="/login">
-									<Button>Log in </Button>
+									<Button className="bg-white font-semibold border text-black hover:bg-white/90 border-neutral-700">
+										Log in{" "}
+									</Button>
 								</Link>
 
 								<Link to="/register">
-									<Button>Sign up </Button>
+									<Button className="bg-white font-semibold border text-black hover:bg-white/90 border-neutral-700">
+										Sign up{" "}
+									</Button>
 								</Link>
 							</div>
 						)}

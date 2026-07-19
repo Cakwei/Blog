@@ -70,20 +70,23 @@ function LoginPage() {
 	}, [formData]);
 */
 	return (
-		<div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
-			<Card className="w-full max-w-md">
+		<div className="flex bg-black border border-neutral-700 items-center justify-center min-h-[calc(100vh-64px)]">
+			<Card className="w-full max-w-md bg-neutral-900 border border-neutral-700">
 				<CardHeader className="space-y-1">
-					<CardTitle className="text-2xl font-bold text-center">
+					<CardTitle className="text-2xl text-white font-extrabold text-center">
 						Login
 					</CardTitle>
-					<CardDescription className="text-center">
+					<CardDescription className="text-center text-neutral-300">
 						Enter your email to sign in to your account
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+						<Label className="text-white" htmlFor="email">
+							Email
+						</Label>
 						<Input
+							className="placeholder:text-neutral-700 border-neutral-700 text-white"
 							autoComplete="email"
 							onChange={handleInput}
 							name="email"
@@ -94,13 +97,17 @@ function LoginPage() {
 					</div>
 					<div>
 						<div className="space-y-2">
-							<Label htmlFor="password">Password</Label>
+							<Label className="text-white" htmlFor="password">
+								Password
+							</Label>
 							<Input
+								className="border-neutral-700 placeholder:text-neutral-700 text-white"
 								ref={passwordRef}
 								autoComplete="current-password"
 								onChange={handleInput}
 								name="password"
 								id="password"
+								placeholder="• •"
 								type="password"
 							/>
 						</div>
@@ -114,17 +121,15 @@ function LoginPage() {
 						onClick={() => {
 							signIn(formData);
 						}}
-						className="w-full"
+						className="w-full bg-white hover:bg-white/90 text-black font-semibold border border-neutral-700"
 					>
 						Sign In
 					</Button>
 				</CardContent>
 				<CardFooter className="flex flex-wrap justify-center gap-1">
-					<p className="text-sm text-muted-foreground">
-						Don't have an account?
-					</p>
-					<Link to="/register" className="text-sm font-medium hover:underline">
-						Register
+					<p className="text-sm text-neutral-300">Don't have an account?</p>
+					<Link to="/register" className="text-sm font-medium">
+						<span className="text-blue-500 hover:underline">Register</span>
 					</Link>
 				</CardFooter>
 			</Card>

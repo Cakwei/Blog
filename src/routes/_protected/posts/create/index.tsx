@@ -172,91 +172,95 @@ function NewPostForm() {
 	}, [isSaving]);
 */
 	return (
-		<div className="max-w-6xl bg-black mx-auto px-4 py-12 h-auto">
-			<Link
-				to="/posts"
-				className="text-sm text-white hover:text-blue-600 transition-colors mb-5 inline-block"
-			>
-				<span className="text-white hover:underline">← Back to your posts</span>
-			</Link>
-			<div className="flex justify-between mb-5">
-				<h1 className="text-3xl font-bold text-white">New post</h1>
-				{isSaving ? (
-					<Button disabled>Saving...</Button>
-				) : (
-					<Button
-						ref={createBtnRef}
-						className="bg-white text-black font-semibold hover:bg-white/90"
-						onClick={async () => {
-							if (!blogHeroImg) return;
-
-							if (createBtnRef.current) createBtnRef.current.disabled = true;
-							const blogHeroImgUrl = await uploadImgToS3(blogHeroImg);
-
-							const result: IResponse = await saveFileToDB({
-								data: {
-									jsonContent: editor?.getJSON(),
-									blogImg: blogHeroImgUrl,
-									tags: tags,
-								},
-							});
-
-							if (!result.success && createBtnRef.current) {
-								createBtnRef.current.disabled = false;
-							}
-
-							if (result.success) {
-								navigate({ to: "/posts" });
-							}
-						}}
-					>
-						Save my blog
-					</Button>
-				)}
-			</div>
-			<div className="flex flex-col items-center">
-				<ImageUploader onImageReadyForS3={setBlogHeroIMG} />
-				<Combobox
-					multiple
-					autoHighlight
-					onValueChange={(values) => {
-						setTags(values);
-					}}
-					items={CATEGORIES}
+		<div className="bg-black">
+			<div className="max-w-6xl bg-black mx-auto px-4 py-12 h-auto">
+				<Link
+					to="/posts"
+					className="text-sm text-white hover:text-blue-600 transition-colors mb-5 inline-block"
 				>
-					<ComboboxChips
-						ref={anchor}
-						className="w-full bg-black max-w-sm border-neutral-700"
+					<span className="text-white hover:underline">
+						← Back to your posts
+					</span>
+				</Link>
+				<div className="flex justify-between mb-5">
+					<h1 className="text-3xl font-bold text-white">New post</h1>
+					{isSaving ? (
+						<Button disabled>Saving...</Button>
+					) : (
+						<Button
+							ref={createBtnRef}
+							className="bg-white text-black font-semibold hover:bg-white/90"
+							onClick={async () => {
+								if (!blogHeroImg) return;
+
+								if (createBtnRef.current) createBtnRef.current.disabled = true;
+								const blogHeroImgUrl = await uploadImgToS3(blogHeroImg);
+
+								const result: IResponse = await saveFileToDB({
+									data: {
+										jsonContent: editor?.getJSON(),
+										blogImg: blogHeroImgUrl,
+										tags: tags,
+									},
+								});
+
+								if (!result.success && createBtnRef.current) {
+									createBtnRef.current.disabled = false;
+								}
+
+								if (result.success) {
+									navigate({ to: "/posts" });
+								}
+							}}
+						>
+							Save my blog
+						</Button>
+					)}
+				</div>
+				<div className="flex flex-col items-center">
+					<ImageUploader onImageReadyForS3={setBlogHeroIMG} />
+					<Combobox
+						multiple
+						autoHighlight
+						onValueChange={(values) => {
+							setTags(values);
+						}}
+						items={CATEGORIES}
 					>
-						<ComboboxValue>
-							{(values) => (
-								<>
-									{values.map((value: string) => (
-										<ComboboxChip key={value}>{value}</ComboboxChip>
-									))}
-									<ComboboxChipsInput
-										className="text-white"
-										placeholder={`${Array.isArray(tags) && tags.length > 0 ? "" : "Select tag(s)"}`}
-									/>
-								</>
-							)}
-						</ComboboxValue>
-					</ComboboxChips>
-					<ComboboxContent anchor={anchor}>
-						<ComboboxEmpty>No items found.</ComboboxEmpty>
-						<ComboboxList>
-							{(item) => (
-								<ComboboxItem key={item} value={item}>
-									{item}
-								</ComboboxItem>
-							)}
-						</ComboboxList>
-					</ComboboxContent>
-				</Combobox>
-				<hr className="border-t border-gray-300 mb-5" />
-			</div>
-			<div className="w-full">
-				<SimpleEditor setData={setData} />
+						<ComboboxChips
+							ref={anchor}
+							className="w-full bg-black max-w-sm border-neutral-700"
+						>
+							<ComboboxValue>
+								{(values) => (
+									<>
+										{values.map((value: string) => (
+											<ComboboxChip key={value}>{value}</ComboboxChip>
+										))}
+										<ComboboxChipsInput
+											className="text-white"
+											placeholder={`${Array.isArray(tags) && tags.length > 0 ? "" : "Select tag(s)"}`}
+										/>
+									</>
+								)}
+							</ComboboxValue>
+						</ComboboxChips>
+						<ComboboxContent anchor={anchor}>
+							<ComboboxEmpty>No items found.</ComboboxEmpty>
+							<ComboboxList>
+								{(item) => (
+									<ComboboxItem key={item} value={item}>
+										{item}
+									</ComboboxItem>
+								)}
+							</ComboboxList>
+						</ComboboxContent>
+					</Combobox>
+					<hr className="border-t border-gray-300 mb-5" />
+				</div>
+				<div className="w-full">
+					<SimpleEditor setData={setData} />
+				</div>
 			</div>
 		</div>
 	);
