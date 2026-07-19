@@ -20,7 +20,7 @@
   --inset-glint: rgba(255, 255, 255, 0.82);
   --kicker: rgba(47, 106, 74, 0.9);
   --bg-base: #e7f3ec;
-  height:auto;
+  height: auto;
   --header-bg: rgba(251, 255, 248, 0.84);
   --chip-bg: rgba(255, 255, 255, 0.8);
   --chip-line: rgba(47, 106, 74, 0.18);
@@ -163,20 +163,19 @@ body,
 #app {
   /* Fix: Force layouts to handle overflow dynamically on dynamic long copy edits */
   min-height: 100%;
-  height: auto; 
+  height: auto;
   background-color: black;
-  
 }
 
 body {
   margin: 0;
   color: var(--sea-ink);
   font-family: var(--font-sans);
-  
+  background-color: #ffffff;
   /* Fix: Use background-color with theme variables here instead of Tailwind layers */
- /* background-color: var(--bg-base);
+  /* background-color: var(--bg-base);
  */
-  overflow-x: hidden;
+ min-height: 100vh;
 }
 
 a {
@@ -234,7 +233,11 @@ pre code {
 }
 
 .feature-card {
-  background: linear-gradient(165deg, color-mix(in oklab, var(--surface-strong) 93%, white 7%), var(--surface));
+  background: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--surface-strong) 93%, white 7%),
+    var(--surface)
+  );
   box-shadow:
     0 1px 0 var(--inset-glint) inset,
     0 18px 34px rgba(30, 90, 72, 0.1),
@@ -249,7 +252,10 @@ pre code {
 button,
 .island-shell,
 a {
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease,
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
     transform 180ms ease;
 }
 
