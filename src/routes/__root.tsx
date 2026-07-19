@@ -57,11 +57,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { session } = Route.useRouteContext();
 
   return (
-    <html lang="en" className='bg-red-500'>
+    <html lang="en" style={{ backgroundColor: 'black', margin: 0 }}>
       <head>
         <HeadContent />
       </head>
-      <body className='min-h-dvh bg-black m-0'>
+      <body>
         {/* HEADER */}
         <header className="border-b backdrop-blur sticky top-0 left-0 z-50 border-neutral-700 w-full px-5 bg-black">
           <div className="h-16 w-full flex items-center justify-between">
@@ -103,7 +103,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         </header>
         {children}
         {/* FOOTER */}
-        <footer className="border-t py-12 bg-black border-neutral-700">
+        <footer className="border-t py-12 bg-black border-neutral-700 h-auto">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-4 gap-8">
               <div className="col-span-2">

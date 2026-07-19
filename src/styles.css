@@ -162,20 +162,27 @@ html,
 body,
 #app {
   /* Fix: Force layouts to handle overflow dynamically on dynamic long copy edits */
-  min-height: 100%;
-  height: auto;
   background-color: black;
+}
+
+body::after {
+  background-color: black;
+  height: auto;
+}
+
+body::before {
+  background-color: black;
+  height: auto;
 }
 
 body {
   margin: 0;
   color: var(--sea-ink);
   font-family: var(--font-sans);
-  background-color: #ffffff;
+  background-color: black;
   /* Fix: Use background-color with theme variables here instead of Tailwind layers */
   /* background-color: var(--bg-base);
  */
- min-height: 100vh;
 }
 
 a {
@@ -314,16 +321,6 @@ a {
 .site-footer {
   border-top: 1px solid var(--line);
   background: color-mix(in oklab, var(--header-bg) 84%, transparent 16%);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    /* Fix: Removed 'background-color: var(--background);' which overrode your custom styles */
-    color: var(--foreground);
-  }
 }
 
 [data-resize-handle] {
