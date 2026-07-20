@@ -22,7 +22,7 @@ const postsQueryOptions = () =>
 
 export const Route = createFileRoute("/")({
 	beforeLoad: async ({ context }) => {
-		context.queryClient.ensureQueryData(postsQueryOptions());
+		await context.queryClient.fetchQuery(postsQueryOptions());
 	},
 	component: HomePage,
 });
@@ -64,7 +64,9 @@ function HomePage() {
 									<div className="flex items-center text-sm text-neutral-400">
 										<span>{new Date(featuredPost?.date).toDateString()}</span>
 										<span className="mx-2">•</span>
-										<span>{featuredPost?.category || "Category not set"}</span>
+										<span className="rounded-full border px-3.5 py-1 text-xs font-bold text-white captitalize">
+											{featuredPost?.category || "Category not set"}
+										</span>
 									</div>
 								</div>
 							</Link>

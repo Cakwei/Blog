@@ -8,9 +8,11 @@ import {
 	createContext,
 	type ReactNode,
 	useContext,
+	useEffect,
 	useRef,
 	useState,
 } from "react";
+import { toast } from "sonner";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
 import { Button } from "#/components/ui/button";
 import {
@@ -42,7 +44,7 @@ const saveFileToDB = createServerFn({ method: "POST" })
 	)
 	.handler(async ({ data }) => {
 		try {
-			if (!data.jsonContent || !data.blogImg || !data.tags) {
+			if (!data.jsonContent || !data.blogImg) {
 				return {
 					success: false,
 					message: "One or more inputs empty",
@@ -63,7 +65,7 @@ const saveFileToDB = createServerFn({ method: "POST" })
 					excerpt: "",
 					date: new Date().toISOString(),
 					userId: session?.user.id,
-					category: data.tags.toString(),
+					category: data.tags ? data.tags.toString() : "",
 					image: data.blogImg || "",
 					content: data.jsonContent,
 				},
@@ -126,7 +128,6 @@ async function uploadImgToS3(file: File) {
 		return `https://s3.cakwei.dev/${BUCKET_NAME}/${s3Key}`;
 	} catch (e) {
 		console.error(e);
-		return "gyatt";
 	}
 }
 
@@ -190,27 +191,45 @@ function NewPostForm() {
 						<Button
 							ref={createBtnRef}
 							className="bg-white text-black font-semibold hover:bg-white/90"
-							onClick={async () => {
-								if (!blogHeroImg) return;
+							onClick={() => {
+								toast.promise(
+									async () => {
+										if (!blogHeroImg) throw Error();
 
-								if (createBtnRef.current) createBtnRef.current.disabled = true;
-								const blogHeroImgUrl = await uploadImgToS3(blogHeroImg);
+										if (createBtnRef.current)
+											createBtnRef.current.disabled = true;
+										const blogHeroImgUrl = await uploadImgToS3(blogHeroImg);
 
-								const result: IResponse = await saveFileToDB({
-									data: {
-										jsonContent: editor?.getJSON(),
-										blogImg: blogHeroImgUrl,
-										tags: tags,
+										const result: IResponse = await saveFileToDB({
+											data: {
+												jsonContent: editor?.getJSON(),
+												blogImg: blogHeroImgUrl,
+												tags: tags,
+											},
+										});
+
+										if (!result.success && createBtnRef.current) {
+											createBtnRef.current.disabled = false;
+										}
+
+										if (result.success) {
+											// Clear the auto-saved draft securely upon successful creation
+											try {
+												localStorage.removeItem("tiptapDraftContent");
+											} catch (e) {
+												console.error("Failed to clear local storage", e);
+											}
+											navigate({ to: "/posts" });
+										}
 									},
-								});
-
-								if (!result.success && createBtnRef.current) {
-									createBtnRef.current.disabled = false;
-								}
-
-								if (result.success) {
-									navigate({ to: "/posts" });
-								}
+									{
+										position: "top-center",
+										loading: "Loading...",
+										success: () => `Blog successfully published`,
+										error:
+											"An erorr occurred publishing blog, please try again later",
+									},
+								);
 							}}
 						>
 							Save my blog
@@ -281,6 +300,39 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
 	const [editor, setEditor] = useState<Editor | null>(null);
 	// const [blogHeroImgUrl, setBlogHeroImgUrl] = useState<string | null>(null);
 
+	useEffect(() => {
+		// 1. Guard clause: Ensure editor exists and is fully initialized
+		if (!editor) return;
+
+		try {
+			const rawData = localStorage.getItem("tiptapDraftContent");
+
+			if (!rawData) return;
+
+			const parsedJSON = JSON.parse(rawData);
+
+			// 3. Structural Validation: Ensure it's an object (Tiptap JSON node structure)
+			// If it's a string, number, or array, it's either corrupt or a malicious payload.
+			if (typeof parsedJSON !== "object" || parsedJSON === null) {
+				console.warn("Invalid draft format encountered. Purging corrupt data.");
+				localStorage.removeItem("tiptapDraftContent");
+				return;
+			}
+
+			// 4. Content Check: Only inject if the editor is currently empty.
+			// This prevents the effect from wiping out real-time user changes if the component remounts.
+			if (editor.isEmpty) {
+				editor.commands.setContent(parsedJSON);
+			}
+		} catch (error) {
+			// Safe Fallback: Catch structural manipulation or malformed strings safely without a UI white-screen
+			console.error(
+				"Security/Parsing alert: Failed to safely parse local draft:",
+				error,
+			);
+			localStorage.removeItem("tiptapDraftContent");
+		}
+	}, [editor]);
 	return (
 		<EditorSavingContext.Provider
 			value={{

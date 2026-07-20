@@ -402,7 +402,11 @@ export function SimpleEditor({
 			// 4. Set a new timer to execute after 1000ms of inactivity
 			saveTimeoutRef.current = setTimeout(() => {
 				const json = editor.getJSON();
-
+				try {
+					localStorage.setItem("tiptapDraftContent", JSON.stringify(json));
+				} catch (e) {
+					console.error("Failed to save draft to localStorage", e);
+				}
 				// 5. Trigger your actual save / TanStack mutation here
 				setData(json);
 
