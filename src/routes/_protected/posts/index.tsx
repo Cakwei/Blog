@@ -1,14 +1,9 @@
-import {
-	queryOptions,
-	useQueryClient,
-	useSuspenseQuery,
-} from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Session } from "better-auth";
 import { Suspense } from "react";
 import { Button } from "#/components/ui/button";
-import { Loading } from "#/components/ui/loading";
 import { prisma } from "#/db";
 import type { Post } from "#/lib/types";
 import { getFreshServerSession } from "#/lib/utils";
@@ -22,20 +17,19 @@ const getOwnPosts = createServerFn().handler(async () => {
 			userId: session?.user.id,
 		},
 	});
-	console.log(JSON.stringify(posts));
 	return posts;
 });
 
 const postsQueryOptions = (userId: string) =>
 	queryOptions({
-		queryKey: ["posts", userId],
+		queryKey: ["myPosts", userId],
 		queryFn: () => getOwnPosts(),
 	});
 
 export const Route = createFileRoute("/_protected/posts/")({
 	beforeLoad: async ({ context }) => {
 		const userId = (context.session as Session).id;
-		await context.queryClient.fetchQuery(postsQueryOptions(userId));
+		context.queryClient.fetchQuery(postsQueryOptions(userId));
 	},
 	component: AdminPostsPage,
 });
@@ -59,19 +53,10 @@ function AdminPostsPage() {
 					>
 						New post
 					</Button>
-					{/*<Button
-						onClick={() => {
-							queryClient.clear();
-							//queryClient.removeQueries();
-						}}
-						className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
-					>
-						Reset Cache
-					</Button> */}
 				</div>
 
-				{/* Suspense handles the loading state cleanly while useSuspenseQuery fetches data */}
-				<Suspense fallback={<Loading />}>
+				{/* Skeleton UI mimicking real post rows during loading */}
+				<Suspense fallback={<PostListSkeleton count={5} />}>
 					<PostListContent />
 				</Suspense>
 			</div>
@@ -125,17 +110,13 @@ function PostRow({ post }: { post: Post }) {
 							post.category.split(",").map((cat) => (
 								<span
 									key={cat}
-									className={`rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white captitalize
-                        `}
+									className="rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white capitalize"
 								>
 									{capitalize(cat)}
 								</span>
 							))
 						) : (
-							<span
-								className={`rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white captitalize
-                            `}
-							>
+							<span className="rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white capitalize">
 								No tags
 							</span>
 						)}
@@ -165,6 +146,49 @@ function PostRow({ post }: { post: Post }) {
 					<span className="text-white hover:bg-none hover:underline">Edit</span>
 				</Link>
 			</div>
+		</div>
+	);
+}
+
+function PostRowSkeleton() {
+	return (
+		<div className="flex items-center gap-4 px-5 py-4 animate-pulse">
+			{/* Image Placeholder */}
+			<div className="w-16 h-16 rounded-lg bg-neutral-800 flex-shrink-0" />
+
+			{/* Content Placeholder */}
+			<div className="flex-1 min-w-0 space-y-2">
+				{/* Badges Placeholder */}
+				<div className="flex items-center gap-2">
+					<div className="h-4 w-16 bg-neutral-800 rounded-full" />
+					<div className="h-4 w-14 bg-neutral-800 rounded-full" />
+				</div>
+				{/* Title Placeholder */}
+				<div className="h-5 w-3/5 bg-neutral-800 rounded" />
+				{/* Date Placeholder */}
+				<div className="h-4 w-24 bg-neutral-800 rounded" />
+			</div>
+
+			{/* Action Buttons Placeholder */}
+			<div className="flex items-center gap-4 flex-shrink-0">
+				<div className="h-4 w-8 bg-neutral-800 rounded" />
+				<div className="h-4 w-8 bg-neutral-800 rounded" />
+			</div>
+		</div>
+	);
+}
+
+function PostListSkeleton({ count = 4 }: { count?: number }) {
+	return (
+		<div className="rounded-2xl overflow-hidden divide-y divide-neutral-700">
+			{Array.from({ length: count }).map((_, index) => (
+				<PostRowSkeleton
+					key={
+						// biome-ignore lint/suspicious/noArrayIndexKey: no
+						index
+					}
+				/>
+			))}
 		</div>
 	);
 }
