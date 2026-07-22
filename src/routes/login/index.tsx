@@ -70,7 +70,7 @@ function LoginPage() {
 	}, [formData]);
 */
 	return (
-		<div className="flex bg-black border border-neutral-700 items-center justify-center min-h-[calc(100vh-64px)]">
+		<div className="flex bg-black  items-center justify-center min-h-[calc(100vh-64px)]">
 			<Card className="w-full max-w-md bg-neutral-900 border border-neutral-700">
 				<CardHeader className="space-y-1">
 					<CardTitle className="text-2xl text-white font-extrabold text-center">

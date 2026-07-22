@@ -10,6 +10,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
+import { SearchDialog } from "#/components/ui/searchBar";
 import { Skeleton } from "#/components/ui/skeleton";
 import { authClient } from "#/lib/auth-client";
 
@@ -40,6 +41,7 @@ export default function BetterAuthHeader() {
 				>
 					Create Blog
 				</Button>
+				<SearchDialog />
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						{session.user.image ? (

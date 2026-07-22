@@ -17,7 +17,7 @@ const getRandomPosts = createServerFn().handler(async () => {
 
 const postsQueryOptions = (userId: string) =>
 	queryOptions({
-		queryKey: ["homePosts", userId],
+		queryKey: ["posts", userId],
 		queryFn: () => getRandomPosts(),
 		refetchInterval: 1000 * 60,
 	});
