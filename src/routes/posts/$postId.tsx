@@ -13,7 +13,7 @@ import Typography from "@tiptap/extension-typography";
 import { Selection } from "@tiptap/extensions";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
-import { sanitize } from "isomorphic-dompurify";
+import DOMPurify from "dompurify";
 import { prisma } from "#/db";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -67,7 +67,7 @@ function PostPage() {
 		Selection,
 	]);
 
-	const sanitizedContent = sanitize(content);
+	const sanitizedContent = DOMPurify.sanitize(content);
 	return (
 		<div className="bg-black">
 			<article className="container max-w-3xl mx-auto py-20 px-4 bg-black">
