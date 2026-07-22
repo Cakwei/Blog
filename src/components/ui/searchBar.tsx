@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitize } from 'isomorphic-dompurify';
 import debounce from 'lodash.debounce';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -54,7 +54,7 @@ export function SearchDialog() {
         return;
       }
       setError(null);
-      setValidatedQuery(DOMPurify.sanitize(value));
+      setValidatedQuery(sanitize(value));
     }, DEBOUNCE_DELAY),
     [],
   );
