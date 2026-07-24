@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Session } from "better-auth";
 import { Suspense } from "react";
+import { Label } from "#/components/ui/label";
 import { Skeleton } from "#/components/ui/skeleton";
 import { prisma } from "#/db";
 
@@ -10,8 +11,35 @@ const getRandomPosts = createServerFn().handler(async () => {
 	// This runs only on the server
 	const posts = await prisma.post.findMany({
 		take: 10,
+		select: {
+			id: true,
+			category: true,
+			content: true,
+			date: true,
+			excerpt: true,
+			image: true,
+			title: true,
+			userId: true,
+			user: {
+				select: {
+					displayUsername: true,
+				},
+			},
+		},
 	});
-
+	/*
+	const users = await prisma.user.findMany({
+	select: {
+		id: true,
+		name: true,
+		posts: {
+		select: {
+			title: true, // Only fetches the title column from posts
+		},
+		},
+	},
+		}); */
+	console.log(posts);
 	return posts;
 });
 
@@ -94,7 +122,13 @@ function HomeContent() {
 								{featuredPost.excerpt}
 							</p>
 							<div className="flex items-center text-sm text-neutral-400">
-								<span>{new Date(featuredPost.date).toDateString()}</span>
+								<div className="flex items-center gap-1.5">
+									<span>{new Date(featuredPost.date).toDateString()}</span>
+									<p className="text-neutral-400">|</p>
+									<p className="rounded-full py-1 text-sm text-neutral-400">
+										{` Authored by ${featuredPost.user.displayUsername}`}
+									</p>
+								</div>
 								<span className="mx-2">•</span>
 								<span className="rounded-full border border-neutral-700 px-3.5 py-1 text-xs font-bold text-white capitalize">
 									{featuredPost.category || "Category not set"}
@@ -151,9 +185,15 @@ function HomeContent() {
 							<p className="text-neutral-300 line-clamp-2 mb-4">
 								{post.excerpt}
 							</p>
-							<p className="text-sm text-neutral-400">
-								{new Date(post.date).toDateString()}
-							</p>
+							<div className="flex items-center gap-1.5">
+								<p className="text-sm text-neutral-400">
+									{new Date(post.date).toDateString()}
+								</p>
+								<p className="text-neutral-400">|</p>
+								<p className="rounded-full py-1 text-sm text-neutral-400">
+									{` Authored by ${featuredPost.user.displayUsername}`}
+								</p>
+							</div>
 						</Link>
 					</article>
 				))}

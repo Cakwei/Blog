@@ -31,6 +31,7 @@ const searchDatabaseFn = createServerFn()
 				title: { contains: input },
 			},
 			take: 5,
+			orderBy: { date: "desc" },
 		});
 		return data;
 	});

@@ -77,7 +77,7 @@ function PostPage() {
 							<Badge
 								key={cat}
 								variant="secondary"
-								className="rounded-full bg-black border border-white px-3.5 py-1 text-xs font-bold text-white captitalize"
+								className="rounded-full bg-black border border-neutral-700 px-3.5 py-1 text-xs font-bold text-white captitalize"
 							>
 								{cat || "No tag"}
 							</Badge>
