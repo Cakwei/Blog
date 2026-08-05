@@ -22,7 +22,7 @@ import { prisma } from "#/db";
 import { authClient } from "#/lib/auth-client";
 import { getSessionFn } from "#/lib/utils";
 
-// 1. Server Functions with secure session context validation
+//  Server Functions with secure session context validation
 const getUserProfile = createServerFn().handler(async () => {
 	const session = await getSessionFn();
 	if (!session?.user?.id) throw new Error("Unauthorized");

@@ -1,9 +1,8 @@
-// app/routes/posts.$postId.tsx
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { JSONContent } from "@tiptap/core";
-import { generateHTML } from "@tiptap/core"; // Switched to core to run safely on client browser
+import { generateHTML } from "@tiptap/core";
 import { Highlight } from "@tiptap/extension-highlight";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { Image } from "@tiptap/extension-image";
@@ -20,6 +19,7 @@ import { prisma } from "#/db";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import "#/index.css";
+import { logger } from "#/lib/utils";
 
 export const getPostById = createServerFn({ method: "GET" })
 	.validator((postId: string) => postId)
@@ -99,7 +99,7 @@ function PostContent({ postId }: { postId: string }) {
 			const rawHtml = generateHTML(jsonContent, tptExtensions);
 			setRenderedHTML(DOMPurify.sanitize(rawHtml));
 		} catch (e) {
-			console.error("Failed to parse or render post content", e);
+			logger("error", "Failed to parse or render post content", e);
 			setRenderedHTML(
 				"<p class='text-red-400'>Failed to load post content.</p>",
 			);

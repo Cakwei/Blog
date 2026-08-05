@@ -138,7 +138,8 @@ function HomeContent() {
 					Latest Articles
 				</h2>
 				<Link
-					to="/"
+					search={{ category: "ALL", search: "" }}
+					to="/articles"
 					className="text-(--link) hover:underline text-sm font-semibold"
 				>
 					View all

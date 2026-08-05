@@ -13,6 +13,7 @@ import {
 	type NodeWithPos,
 } from "@tiptap/react";
 import { type ClassValue, clsx } from "clsx";
+import { logger } from "./utils";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -146,7 +147,7 @@ export function focusNextNode(editor: Editor) {
 
 	const paragraphType = state.schema.nodes.paragraph;
 	if (!paragraphType) {
-		console.warn("No paragraph node type found in schema.");
+		logger("warn", "No paragraph node type found in schema.");
 		return false;
 	}
 
@@ -191,7 +192,8 @@ export function isExtensionAvailable(
 	);
 
 	if (!found) {
-		console.warn(
+		logger(
+			"warn",
 			`None of the extensions [${names.join(", ")}] were found in the editor schema. Ensure they are included in the editor configuration.`,
 		);
 	}
@@ -209,12 +211,12 @@ export function findNodeAtPosition(editor: Editor, position: number) {
 	try {
 		const node = editor.state.doc.nodeAt(position);
 		if (!node) {
-			console.warn(`No node found at position ${position}`);
+			logger("warn", `No node found at position ${position}`);
 			return null;
 		}
 		return node;
 	} catch (error) {
-		console.error(`Error getting node at position ${position}:`, error);
+		logger("error", `Error getting node at position ${position}:`, error);
 		return null;
 	}
 }
@@ -375,8 +377,6 @@ export const handleImageUpload = async (
 		);
 	}
 
-	// For demo/testing: Simulate upload progress. In production, replace the following code
-	// with your own upload implementation.
 	for (let progress = 0; progress <= 100; progress += 10) {
 		if (abortSignal?.aborted) {
 			throw new Error("Upload cancelled");

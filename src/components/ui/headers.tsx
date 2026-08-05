@@ -1,10 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import {
-	useLocation,
-	useNavigate,
-	useRouteContext,
-	useRouterState,
-} from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "#/components/ui/button";
 import {
 	DropdownMenu,
@@ -18,6 +13,7 @@ import {
 import { SearchDialog } from "#/components/ui/searchBar";
 import { Skeleton } from "#/components/ui/skeleton";
 import { authClient } from "#/lib/auth-client";
+import { logger } from "#/lib/utils";
 
 export default function BetterAuthHeader() {
 	const { data: session, isPending } = authClient.useSession();
@@ -27,17 +23,17 @@ export default function BetterAuthHeader() {
 		select: (location) => location.pathname,
 	});
 	if (isPending) {
-		console.log(isPending, session);
 		return (
 			<div className="flex items-center gap-5">
 				<Skeleton className="inline-flex w-20 h-10 shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" />
-				<div className="h-8 w-8 bg-neutral-100 dark:bg-neutral-800 animate-pulse" />
+				<Skeleton className="h-8 w-8 bg-(--bg) rounded-full animate-pulse" />
 			</div>
 		);
 	}
 
 	if (session?.user) {
-		console.log("headers.tsx @", session);
+		logger("debug", "headers.tsx @", session);
+
 		return (
 			<div className="flex items-center gap-5">
 				<SearchDialog />{" "}

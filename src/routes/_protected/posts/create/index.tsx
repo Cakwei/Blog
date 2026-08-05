@@ -7,12 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Editor } from "@tiptap/core";
-import {
-	createContext,
-	type ReactNode,
-	useContext,
-	useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { toast } from "sonner";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
 import { Button } from "#/components/ui/button";
@@ -33,7 +28,7 @@ import { Label } from "#/components/ui/label";
 import { prisma } from "#/db";
 import { CATEGORIES } from "#/lib/const";
 import type { IEditorSavingContext, IResponse } from "#/lib/types";
-import { getSessionFn } from "#/lib/utils";
+import { getSessionFn, logger } from "#/lib/utils";
 
 export const Route = createFileRoute("/_protected/posts/create/")({
 	component: NewPostPage,
@@ -78,7 +73,7 @@ const uploadImgToS3ServerFn = createServerFn({ method: "POST" })
 				message: "Successfully uploaded image",
 			};
 		} catch (error: any) {
-			console.error("S3 Server Upload Error:", error);
+			logger("error", "S3 Server Upload Error:", error);
 			return {
 				success: false,
 				url: "",
@@ -130,7 +125,7 @@ const saveFileToDB = createServerFn({ method: "POST" })
 				data: {},
 			};
 		} catch (error) {
-			console.error("Database save error:", error);
+			logger("error", "Database save error:", error);
 			return {
 				success: false,
 				message: "An error occurred while saving to database",
@@ -183,7 +178,7 @@ function NewPostForm() {
 			tags: [] as Array<string>,
 		},
 		onSubmit: async ({ value }) => {
-			console.log("sukuna", JSON.stringify(data), editor, "||||||", data);
+			logger("debug", "sukuna", JSON.stringify(data), editor, "||||||", data);
 
 			if (!blogHeroImg) {
 				toast.error("Please upload a hero background image.");
@@ -232,13 +227,13 @@ function NewPostForm() {
 				try {
 					localStorage.removeItem("tiptapDraftContent");
 				} catch (e) {
-					console.error("Failed to clear local storage draft", e);
+					logger("error", "Failed to clear local storage draft", e);
 				}
 
 				toast.success("Blog successfully published!", { id: "save-blog" });
 				navigate({ to: "/posts" });
 			} catch (error: any) {
-				console.error(error);
+				logger("error", error);
 				toast.error(
 					error?.message || "An error occurred publishing your blog.",
 					{ id: "save-blog" },

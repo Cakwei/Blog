@@ -6,6 +6,7 @@ import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { authClient } from "#/lib/auth-client";
+import { logger } from "#/lib/utils";
 
 export const Route = createFileRoute("/login/")({
 	component: LoginPage,
@@ -21,7 +22,7 @@ function LoginPage() {
 		},
 		onSubmit: async ({ value }) => {
 			try {
-				console.log(value.email, value.password);
+				logger("debug", value.email, value.password);
 				await authClient.signIn.email(
 					{
 						email: value.email,
@@ -42,7 +43,7 @@ function LoginPage() {
 							navigate({ to: "/" });
 						},
 						onError: ({ error }) => {
-							console.error(error);
+							logger("error", "", error);
 							toast.error(
 								<div className="flex flex-col gap-1">
 									<span className="text-(--text) font-semibold text-xs">
@@ -58,7 +59,7 @@ function LoginPage() {
 					},
 				);
 			} catch (error) {
-				console.error("Login failed:", error);
+				logger("error", "Login failed:", error);
 				toast.error("An unexpected error occurred", {
 					description: "Please check your network connection and try again.",
 				});

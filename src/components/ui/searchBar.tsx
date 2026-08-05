@@ -5,6 +5,7 @@ import debounce from "lodash.debounce";
 import { Loader2, Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { prisma } from "#/db";
+import { logger } from "#/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -99,7 +100,7 @@ export function SearchDialog() {
 				const results = await searchDatabaseFn({ data: sanitized });
 				setSearchResults(results);
 			} catch (err) {
-				console.error("Failed to fetch search results:", err);
+				logger("error", "Failed to fetch search results:", err);
 				setError("An error occurred while fetching results.");
 			} finally {
 				setIsLoading(false);

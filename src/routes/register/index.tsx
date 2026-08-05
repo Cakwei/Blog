@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, AtSign, Lock, Mail, User } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "#/lib/auth-client";
+import { logger } from "#/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,7 +46,7 @@ function RegisterPage() {
 							window.location.href = "/login";
 						},
 						onError: ({ error }) => {
-							console.error(error);
+							logger("error", "", error);
 							toast.error(
 								<div className="flex flex-col gap-1">
 									<span className="text-(--link) font-semibold text-xs">
@@ -61,7 +62,7 @@ function RegisterPage() {
 					},
 				);
 			} catch (error) {
-				console.error("Sign up failed:", error);
+				logger("error", "Sign up failed:", error);
 				toast.error(
 					<div className="flex flex-col gap-1">
 						<span className="text-(--link) font-semibold">

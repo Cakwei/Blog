@@ -62,7 +62,6 @@ function AdminPostsPage() {
 	);
 }
 
-// Extracted the query logic into a separate component so Suspense can catch the loading promise
 function PostListContent() {
 	const { session }: { session: Session } = Route.useRouteContext();
 	const userId = session.userId;

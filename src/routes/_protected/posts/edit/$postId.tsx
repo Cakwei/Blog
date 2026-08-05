@@ -1,4 +1,3 @@
-// #/routes/posts/edit/$postId.tsx
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
@@ -24,7 +23,7 @@ import { Label } from "#/components/ui/label";
 import { prisma } from "#/db";
 import { CATEGORIES } from "#/lib/const";
 import type { IEditorSavingContext, IResponse } from "#/lib/types";
-import { getSessionFn } from "#/lib/utils";
+import { getSessionFn, logger } from "#/lib/utils";
 
 // 1. Fetch existing post data securely with ownership check
 const getPostForEdit = createServerFn({ method: "GET" })
@@ -104,7 +103,7 @@ const uploadImgToS3ServerFn = createServerFn({ method: "POST" })
 				message: "Successfully uploaded image",
 			};
 		} catch (error: any) {
-			console.error("S3 Server Upload Error:", error);
+			logger("error", "S3 Server Upload Error:", error);
 			return {
 				success: false,
 				url: "",
@@ -165,7 +164,7 @@ const updatePostInDB = createServerFn({ method: "POST" })
 				data: {},
 			};
 		} catch (error) {
-			console.error("Database update error:", error);
+			logger("error", "Database update error:", error);
 			return {
 				success: false,
 				message: "An error occurred while updating the database",
@@ -295,7 +294,7 @@ function EditPostForm({ postId }: { postId: string }) {
 								try {
 									localStorage.removeItem(`tiptapDraftContent-${postId}`);
 								} catch (e) {
-									console.error("Failed to clear local storage draft", e);
+									logger("error", "Failed to clear local storage draft", e);
 								}
 								queryClient.invalidateQueries({ queryKey: ["editPost"] });
 								navigate({ to: "/posts" });
@@ -416,7 +415,7 @@ function EditPostForm({ postId }: { postId: string }) {
 				<div className="w-full rounded-xl overflow-hidden border border-(--border) bg-(--bg)/40">
 					<SimpleEditor
 						setData={(data) => {
-							console.log("yuta:3", data);
+							logger("debug", "yuta:3", data);
 							setEditorData(data);
 							try {
 								localStorage.setItem(
@@ -424,7 +423,7 @@ function EditPostForm({ postId }: { postId: string }) {
 									JSON.stringify(data),
 								);
 							} catch (e) {
-								console.error("Failed to save local draft", e);
+								logger("error", "Failed to save local draft", e);
 							}
 						}}
 					/>
