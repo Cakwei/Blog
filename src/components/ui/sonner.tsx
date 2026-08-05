@@ -17,15 +17,26 @@ const Toaster = ({ ...props }: ToasterProps) => {
 			className="toaster group"
 			icons={{
 				success: <CircleCheckIcon className="size-4 text-emerald-500" />,
-				info: <InfoIcon className="size-4 text-red-500 " />,
-				warning: <TriangleAlertIcon className="size-4" />,
-				error: <OctagonXIcon className="size-4" />,
-				loading: <Loader2Icon className="size-4 animate-spin" />,
+				info: <InfoIcon className="size-4 text-(--link)" />,
+				warning: <TriangleAlertIcon className="size-4 text-amber-500" />,
+				error: <OctagonXIcon className="size-4 text-(--error)" />,
+				loading: <Loader2Icon className="size-4 animate-spin text-(--link)" />,
+			}}
+			toastOptions={{
+				classNames: {
+					toast:
+						"group toast bg-(--bg-secondary) text-(--text) border-(--border) shadow-xl backdrop-blur-xl",
+					success: "border-(--link)/50 text-(--text)",
+					// Explicitly targeting Sonner's internal data attributes for error titles and descriptions
+					error: "border-(--error)/50 bg-(--bg-secondary)",
+					title: "text-red-400",
+					description: "text-(--text-secondary)",
+				},
 			}}
 			style={
 				{
-					"--normal-bg": "var(--popover)",
-					"--normal-text": "var(--popover-foreground)",
+					"--normal-bg": "var(--bg-secondary)",
+					"--normal-text": "var(--text)",
 					"--normal-border": "var(--border)",
 					"--border-radius": "var(--radius)",
 				} as React.CSSProperties

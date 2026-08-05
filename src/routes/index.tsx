@@ -3,12 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Session } from "better-auth";
 import { Suspense } from "react";
-import { Label } from "#/components/ui/label";
 import { Skeleton } from "#/components/ui/skeleton";
 import { prisma } from "#/db";
 
 const getRandomPosts = createServerFn().handler(async () => {
-	// This runs only on the server
 	const posts = await prisma.post.findMany({
 		take: 10,
 		select: {
@@ -27,19 +25,6 @@ const getRandomPosts = createServerFn().handler(async () => {
 			},
 		},
 	});
-	/*
-	const users = await prisma.user.findMany({
-	select: {
-		id: true,
-		name: true,
-		posts: {
-		select: {
-			title: true, // Only fetches the title column from posts
-		},
-		},
-	},
-		}); */
-	console.log(posts);
 	return posts;
 });
 
@@ -60,8 +45,9 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
 	return (
-		<div className="bg-black">
-			<div className="max-w-6xl mx-auto px-4 py-12 bg-black">
+		/* Midnight Canvas Background */
+		<div className=" min-h-screen text-(--text)">
+			<div className="max-w-6xl mx-auto px-4 py-12">
 				<Suspense fallback={<HomeSkeleton />}>
 					<HomeContent />
 				</Suspense>
@@ -81,11 +67,11 @@ function HomeContent() {
 
 	if (posts.length === 0) {
 		return (
-			<div className="text-center py-20 border border-dashed min-h-[65dvh] border-neutral-500 flex justify-center flex-col items-center rounded-2xl">
-				<h3 className="text-lg font-bold text-white mb-2">
+			<div className="text-center py-20 border border-dashed min-h-[65dvh] border-(--border) bg-(--bg-secondary) flex justify-center flex-col items-center rounded-2xl">
+				<h3 className="text-lg font-bold text-(--text) mb-2">
 					No posts available
 				</h3>
-				<p className="text-neutral-300 text-sm">
+				<p className="text-(--text-secondary) text-sm">
 					Check back later for fresh content.
 				</p>
 			</div>
@@ -102,7 +88,8 @@ function HomeContent() {
 						params={{ postId: featuredPost.id.toString() }}
 						className="group grid md:grid-cols-2 gap-8 items-center"
 					>
-						<div className="overflow-hidden rounded-2xl bg-neutral-900">
+						{/* Featured Image Container */}
+						<div className="overflow-hidden rounded-2xl bg-(--bg-secondary) border border-(--border)">
 							{featuredPost.image && (
 								<img
 									src={featuredPost.image}
@@ -112,39 +99,49 @@ function HomeContent() {
 							)}
 						</div>
 						<div>
-							<span className="text-white font-extrabold uppercase tracking-wider text-sm">
+							{/* Accent Kicker */}
+							<span className="text-(--link) font-extrabold uppercase tracking-wider text-sm">
 								Featured Post
 							</span>
-							<h1 className="text-4xl font-bold mt-2 mb-4 group-hover:underline underline-offset-8 text-white transition-colors">
+
+							{/* Featured Title */}
+							<h1 className="text-4xl font-bold mt-2 mb-4 text-(--text) group-hover:text-(--link) transition-colors">
 								{featuredPost.title}
 							</h1>
-							<p className="text-neutral-300 text-lg mb-4">
+
+							{/* Featured Excerpt */}
+							<p className="text-(--text-secondary) text-lg mb-4 line-clamp-3">
 								{featuredPost.excerpt}
 							</p>
-							<div className="flex items-center text-sm text-neutral-400">
+
+							{/* Meta & Category Badge */}
+							<div className="flex items-center text-sm text-(--text-secondary)">
 								<div className="flex items-center gap-1.5">
 									<span>{new Date(featuredPost.date).toDateString()}</span>
-									<p className="text-neutral-400">|</p>
-									<p className="rounded-full py-1 text-sm text-neutral-400">
-										{` Authored by ${featuredPost.user.displayUsername}`}
-									</p>
+									<span>|</span>
+									<span>{`Authored by ${featuredPost.user.displayUsername}`}</span>
 								</div>
 								<span className="mx-2">•</span>
-								<span className="rounded-full border border-neutral-700 px-3.5 py-1 text-xs font-bold text-white capitalize">
-									{featuredPost.category || "Category not set"}
+								<span className="rounded-full border border-(--border) bg-(--bg-secondary) px-3.5 py-1 text-xs font-semibold text-(--link) capitalize">
+									{featuredPost.category || "General"}
 								</span>
 							</div>
 						</div>
 					</Link>
-					<hr className="my-10 border-neutral-700" />
+					<hr className="my-10 text-(--border)" />
 				</section>
 			)}
 
 			{/* Grid Section Header */}
 			<div className="flex justify-between items-end mb-8">
-				<h2 className="text-2xl text-white font-extrabold">Latest Articles</h2>
-				<Link to="/" className="text-white hover:underline">
-					<span className="text-white hover:underline">View all</span>
+				<h2 className="text-2xl font-extrabold text-(--text)">
+					Latest Articles
+				</h2>
+				<Link
+					to="/"
+					className="text-(--link) hover:underline text-sm font-semibold"
+				>
+					View all
 				</Link>
 			</div>
 
@@ -153,7 +150,7 @@ function HomeContent() {
 				{remainingPosts.map((post) => (
 					<article key={post.id} className="group">
 						<Link to="/posts/$postId" params={{ postId: post.id.toString() }}>
-							<div className="overflow-hidden rounded-xl mb-4 bg-neutral-900">
+							<div className="overflow-hidden rounded-xl mb-4 bg-(--bg-secondary) border border-(--border)">
 								{post.image && (
 									<img
 										src={post.image}
@@ -162,37 +159,35 @@ function HomeContent() {
 									/>
 								)}
 							</div>
-							<div className="flex gap-2.5 overflow-x-auto scrollbar-none truncate mb-2">
+
+							<div className="flex gap-2 overflow-x-auto scrollbar-none truncate mb-2">
 								{post.category ? (
 									post.category.split(",").map((cat) => (
 										<span
 											key={cat}
-											className="rounded-full border border-neutral-700 px-3.5 py-1 text-xs font-bold text-white capitalize"
+											className="rounded-full border border-(--border) bg-(--bg-secondary) px-3 py-0.5 text-xs font-semibold text-(--link) capitalize"
 										>
 											{cat.trim()}
 										</span>
 									))
 								) : (
-									<span className="rounded-full border border-neutral-700 px-3.5 py-1 text-xs font-bold text-white capitalize">
-										No category
+									<span className="rounded-full border border-(--border) bg-(--bg-secondary) px-3 py-0.5 text-xs font-semibold text-(--text-secondary) capitalize">
+										General
 									</span>
 								)}
 							</div>
 
-							<h3 className="text-xl font-bold mt-2 mb-2 group-hover:underline underline-offset-4 text-white transition-colors">
+							<h3 className="text-xl font-bold mt-2 mb-2 text-(--text) group-hover:text-(--link) transition-colors">
 								{post.title}
 							</h3>
-							<p className="text-neutral-300 line-clamp-2 mb-4">
+							<p className="text-(--text-secondary) line-clamp-2 mb-4 text-sm">
 								{post.excerpt}
 							</p>
-							<div className="flex items-center gap-1.5">
-								<p className="text-sm text-neutral-400">
-									{new Date(post.date).toDateString()}
-								</p>
-								<p className="text-neutral-400">|</p>
-								<p className="rounded-full py-1 text-sm text-neutral-400">
-									{` Authored by ${featuredPost.user.displayUsername}`}
-								</p>
+
+							<div className="flex items-center gap-1.5 text-xs text-(--text-secondary)">
+								<span>{new Date(post.date).toDateString()}</span>
+								<span>|</span>
+								<span>{`By ${post.user?.displayUsername || "Anonymous"}`}</span>
 							</div>
 						</Link>
 					</article>
@@ -210,24 +205,21 @@ function FeaturedPostSkeleton() {
 	return (
 		<section className="animate-pulse">
 			<div className="grid md:grid-cols-2 gap-8 items-center">
-				{/* Hero Image Skeleton */}
-				<Skeleton className="w-full aspect-video rounded-2xl bg-neutral-800" />
-
-				{/* Hero Details Skeleton */}
+				<Skeleton className="w-full aspect-video rounded-2xl bg-(--bg-secondary)" />
 				<div className="space-y-4">
-					<Skeleton className="h-4 w-28 bg-neutral-800" />
-					<Skeleton className="h-10 w-4/5 bg-neutral-800" />
+					<Skeleton className="h-4 w-28 bg-(--bg-secondary)" />
+					<Skeleton className="h-10 w-4/5 bg-(--bg-secondary)" />
 					<div className="space-y-2">
-						<Skeleton className="h-5 w-full bg-neutral-800" />
-						<Skeleton className="h-5 w-3/4 bg-neutral-800" />
+						<Skeleton className="h-5 w-full bg-(--bg-secondary)" />
+						<Skeleton className="h-5 w-3/4 bg-(--bg-secondary)" />
 					</div>
 					<div className="flex items-center gap-3 pt-2">
-						<Skeleton className="h-4 w-24 bg-neutral-800" />
-						<Skeleton className="h-6 w-20 rounded-full bg-neutral-800" />
+						<Skeleton className="h-4 w-24 bg-(--bg-secondary)" />
+						<Skeleton className="h-6 w-20 rounded-full bg-(--bg-secondary)" />
 					</div>
 				</div>
 			</div>
-			<hr className="my-10 border-neutral-700" />
+			<hr className="my-10 border-(--border)" />
 		</section>
 	);
 }
@@ -235,23 +227,14 @@ function FeaturedPostSkeleton() {
 function ArticleCardSkeleton() {
 	return (
 		<div className="space-y-3 animate-pulse">
-			{/* Card Image Skeleton */}
-			<Skeleton className="w-full aspect-[16/10] rounded-xl bg-neutral-800" />
-
-			{/* Category Tag Skeleton */}
-			<Skeleton className="h-6 w-20 rounded-full bg-neutral-800" />
-
-			{/* Title Skeleton */}
-			<Skeleton className="h-6 w-5/6 bg-neutral-800" />
-
-			{/* Excerpt Skeleton */}
+			<Skeleton className="w-full aspect-[16/10] rounded-xl bg-(--bg-secondary)" />
+			<Skeleton className="h-6 w-20 rounded-full bg-(--bg-secondary)" />
+			<Skeleton className="h-6 w-5/6 bg-(--bg-secondary)" />
 			<div className="space-y-2">
-				<Skeleton className="h-4 w-full bg-neutral-800" />
-				<Skeleton className="h-4 w-2/3 bg-neutral-800" />
+				<Skeleton className="h-4 w-full bg-(--bg-secondary)" />
+				<Skeleton className="h-4 w-2/3 bg-(--bg-secondary)" />
 			</div>
-
-			{/* Date Skeleton */}
-			<Skeleton className="h-4 w-24 bg-neutral-800" />
+			<Skeleton className="h-4 w-24 bg-(--bg-secondary)" />
 		</div>
 	);
 }
@@ -259,16 +242,11 @@ function ArticleCardSkeleton() {
 function HomeSkeleton({ gridCount = 6 }: { gridCount?: number }) {
 	return (
 		<div>
-			{/* Hero Skeleton */}
 			<FeaturedPostSkeleton />
-
-			{/* Header Section Skeleton */}
 			<div className="flex justify-between items-end mb-8">
-				<Skeleton className="h-8 w-44 bg-neutral-800" />
-				<Skeleton className="h-4 w-16 bg-neutral-800" />
+				<Skeleton className="h-8 w-44 bg-(--bg-secondary)" />
+				<Skeleton className="h-4 w-16 bg-(--bg-secondary)" />
 			</div>
-
-			{/* Grid Section Skeleton */}
 			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 				{Array.from({ length: gridCount }).map((_, i) => (
 					// biome-ignore lint/suspicious/noArrayIndexKey: No-fix atm

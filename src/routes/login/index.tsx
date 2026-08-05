@@ -1,138 +1,227 @@
-// app/routes/login.tsx
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { type ChangeEvent, useRef, useState } from "react";
+import { useForm } from "@tanstack/react-form";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, Lock, Mail } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "#/components/ui/button";
+import { Input } from "#/components/ui/input";
+import { Label } from "#/components/ui/label";
 import { authClient } from "#/lib/auth-client";
-import type { AuthFormData } from "#/lib/types";
-import { getFreshServerSession } from "#/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/login/")({
 	component: LoginPage,
-	beforeLoad: async () => {
-		const session = await getFreshServerSession();
-
-		if (session) {
-			// confirm("inside");
-			throw redirect({ to: "/" });
-		}
-	},
 });
 
 function LoginPage() {
-	const [isLoginError, setIsLoginError] = useState<boolean>(false);
+	const navigate = useNavigate();
 
-	const [formData, setFormData] = useState<AuthFormData>({
-		email: "",
-		password: "",
+	const form = useForm({
+		defaultValues: {
+			email: "",
+			password: "",
+		},
+		onSubmit: async ({ value }) => {
+			try {
+				console.log(value.email, value.password);
+				await authClient.signIn.email(
+					{
+						email: value.email,
+						password: value.password,
+					},
+					{
+						onSuccess: () => {
+							toast.success(
+								<div className="flex flex-col gap-1">
+									<span className="text-(--link) font-semibold text-xs">
+										Welcome back!
+									</span>
+									<span className="text-white text-sm">
+										Successfully signed in to your account.
+									</span>
+								</div>,
+							);
+							navigate({ to: "/" });
+						},
+						onError: ({ error }) => {
+							console.error(error);
+							toast.error(
+								<div className="flex flex-col gap-1">
+									<span className="text-(--text) font-semibold text-xs">
+										Sign in failed
+									</span>
+									<span className="text-(--text-secondary) text-xs">
+										{error.message ||
+											"Invalid email or password. Please try again."}
+									</span>
+								</div>,
+							);
+						},
+					},
+				);
+			} catch (error) {
+				console.error("Login failed:", error);
+				toast.error("An unexpected error occurred", {
+					description: "Please check your network connection and try again.",
+				});
+			}
+		},
 	});
-	const passwordRef = useRef<HTMLInputElement | null>(null);
 
-	const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = event.target;
-		setFormData((prevData) => ({
-			...prevData, // Copy previous state
-			[name]: value,
-		}));
-	};
-
-	const signIn = async (formData: { email: string; password: string }) => {
-		await authClient.signIn.email({
-			email: formData.email,
-			password: formData.password,
-			callbackURL: "/",
-			fetchOptions: {
-				onError: (ctx) => {
-					switch (ctx.error.code) {
-						case "INVALID_EMAIL_OR_PASSWORD":
-							setIsLoginError(true);
-
-							if (passwordRef.current) {
-								passwordRef.current.value = "";
-							}
-					}
-				},
-			},
-		});
-	};
-	/*
-	useEffect(() => {
-		console.log(formData);
-	}, [formData]);
-*/
 	return (
-		<div className="flex bg-black  items-center justify-center min-h-[calc(100vh-64px)]">
-			<Card className="w-full max-w-md bg-neutral-900 border border-neutral-700">
-				<CardHeader className="space-y-1">
-					<CardTitle className="text-2xl text-white font-extrabold text-center">
-						Login
-					</CardTitle>
-					<CardDescription className="text-center text-neutral-300">
-						Enter your email to sign in to your account
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="space-y-2">
-						<Label className="text-white" htmlFor="email">
-							Email
-						</Label>
-						<Input
-							className="placeholder:text-neutral-700 border-neutral-700 text-white"
-							autoComplete="email"
-							onChange={handleInput}
-							name="email"
-							id="email"
-							type="email"
-							placeholder="m@example.com"
-						/>
-					</div>
-					<div>
-						<div className="space-y-2">
-							<Label className="text-white" htmlFor="password">
-								Password
-							</Label>
-							<Input
-								className="border-neutral-700 placeholder:text-neutral-700 text-white"
-								ref={passwordRef}
-								autoComplete="current-password"
-								onChange={handleInput}
-								name="password"
-								id="password"
-								placeholder="• •"
-								type="password"
-							/>
+		<div className="min-h-[calc(100vh-10rem)] flex items-center justify-center px-4 py-12 bg-(--bg) relative overflow-hidden">
+			{/* Subtle background ambient lighting / glow effect */}
+			<div className="absolute w-[500px] h-[500px] bg-(--link)/10 rounded-full blur-3xl pointer-events-none -top-32 -left-32" />
+			<div className="absolute w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none -bottom-32 -right-32" />
+
+			<div className="w-full max-w-md relative z-10">
+				{/* Clean Floating Card */}
+				<div className="bg-(--bg-secondary)/80 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border border-(--border)/60 shadow-2xl shadow-black/40 space-y-8">
+					{/* Centered Header */}
+					<div className="space-y-3 text-center flex flex-col items-center">
+						<div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-(--link)/10 border border-(--link)/20 text-(--link)">
+							<Lock className="w-5 h-5" />
 						</div>
-						{isLoginError ? (
-							<span className="text-red-500 text-xs">
-								Invalid username or password
-							</span>
-						) : null}
+						<div className="space-y-1">
+							<h1 className="text-2xl font-bold tracking-tight text-(--text)">
+								Welcome back
+							</h1>
+							<p className="text-sm text-(--text-secondary)">
+								Please enter your details to sign in.
+							</p>
+						</div>
 					</div>
-					<Button
-						onClick={() => {
-							signIn(formData);
+
+					{/* TanStack Form */}
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							form.handleSubmit();
 						}}
-						className="w-full bg-white hover:bg-white/90 text-black font-semibold border border-neutral-700"
+						className="space-y-3"
 					>
-						Sign In
-					</Button>
-				</CardContent>
-				<CardFooter className="flex flex-wrap justify-center gap-1">
-					<p className="text-sm text-neutral-300">Don't have an account?</p>
-					<Link to="/register" className="text-sm font-medium">
-						<span className="text-blue-500 hover:underline">Register</span>
-					</Link>
-				</CardFooter>
-			</Card>
+						{/* Email Field */}
+						<form.Field
+							name="email"
+							validators={{
+								onChange: ({ value }) =>
+									!value ? "Email is required" : undefined,
+							}}
+						>
+							{(field) => (
+								<div className="space-y-2">
+									<Label
+										htmlFor={field.name}
+										className="text-xs font-semibold uppercase tracking-wider text-(--text-secondary)"
+									>
+										Email
+									</Label>
+									<div className="relative">
+										<Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-secondary)" />
+										<Input
+											id={field.name}
+											name={field.name}
+											type="email"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="name@example.com"
+											className="pl-10 bg-(--bg) border-(--border) text-(--text) placeholder:text-(--text-secondary)/60 focus-visible:ring-(--link) h-11 rounded-md text-sm"
+										/>
+									</div>
+									{field.state.meta.errors ? (
+										<p className="text-xs text-(--error) font-medium">
+											{field.state.meta.errors.join(", ")}
+										</p>
+									) : null}
+								</div>
+							)}
+						</form.Field>
+
+						{/* Password Field */}
+						<form.Field
+							name="password"
+							validators={{
+								onChange: ({ value }) =>
+									!value ? "Password is required" : undefined,
+							}}
+						>
+							{(field) => (
+								<div className="space-y-2">
+									<div className="flex items-center justify-between">
+										<Label
+											htmlFor={field.name}
+											className="text-xs font-semibold uppercase tracking-wider text-(--text-secondary)"
+										>
+											Password
+										</Label>
+									</div>
+									<div className="relative">
+										<Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-secondary)" />
+										<Input
+											id={field.name}
+											name={field.name}
+											type="password"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="••••••••"
+											className="pl-10 bg-(--bg) text-sm border-(--border) text-(--text) placeholder:text-(--text-secondary)/60 focus-visible:ring-(--link) h-11 rounded-md"
+										/>
+									</div>
+									{field.state.meta.errors ? (
+										<p className="text-xs text-(--error) font-medium">
+											{field.state.meta.errors.join(", ")}
+										</p>
+									) : null}
+									<Link
+										to="/forgot-password"
+										className="text-xs font-medium text-(--link) hover:underline"
+									>
+										<span className="text-(--link) hover:underline">
+											Forgot password?
+										</span>
+									</Link>
+								</div>
+							)}
+						</form.Field>
+
+						{/* Submit Button */}
+						<form.Subscribe
+							selector={(state) => [state.canSubmit, state.isSubmitting]}
+						>
+							{([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={!canSubmit}
+									className="w-full bg-(--link) hover:bg-(--link) font-semibold text-white hover:opacity-90 transition-all duration-200 h-11 rounded-md flex items-center justify-center gap-2 group shadow-lg shadow-(--link)/25"
+								>
+									{isSubmitting ? (
+										"Signing in..."
+									) : (
+										<>
+											Sign in
+											<ArrowRight className="w-4 h-4 transition-transform" />
+										</>
+									)}
+								</Button>
+							)}
+						</form.Subscribe>
+					</form>
+
+					{/* Footer Register Link */}
+					<div className="text-center text-sm text-(--text-secondary) pt-4 border-t border-(--border)/60">
+						Don't have an account?{" "}
+						<Link
+							to="/register"
+							className="text-(--link) font-semibold hover:underline"
+						>
+							<span className="text-(--link) hover:text-(--link) hover:underline">
+								Create account
+							</span>
+						</Link>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }

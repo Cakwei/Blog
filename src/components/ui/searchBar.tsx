@@ -22,13 +22,20 @@ const MAX_SEARCH_LENGTH = 50;
 const DEBOUNCE_DELAY = 300;
 
 const searchDatabaseFn = createServerFn()
-	.validator((input: string) => input)
+	.validator((input: unknown) => {
+		if (typeof input !== "string")
+			throw new Error("Invalid search input format");
+		return input.trim();
+	})
 	.handler(async ({ data: input }) => {
-		if (!input.trim()) return [];
+		if (!input || input.length === 0) return [];
+
+		// Strict boundary check on server as well
+		const safeQuery = input.slice(0, MAX_SEARCH_LENGTH);
 
 		const data = await prisma.post.findMany({
 			where: {
-				title: { contains: input },
+				title: { contains: safeQuery },
 			},
 			take: 5,
 			orderBy: { date: "desc" },
@@ -42,7 +49,7 @@ export function SearchDialog() {
 	const [inputValue, setInputValue] = useState("");
 
 	// States for search results and async feedback
-	const [searchResults, setSearchResults] = useState<any>([]);
+	const [searchResults, setSearchResults] = useState<any[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -85,8 +92,6 @@ export function SearchDialog() {
 			}
 
 			setError(null);
-
-			// Set loading state ONLY when the debounce delay finishes and the request starts
 			setIsLoading(true);
 
 			try {
@@ -121,7 +126,6 @@ export function SearchDialog() {
 
 		setError(null);
 
-		// Reset search results if input is cleared immediately
 		if (!value.trim()) {
 			setIsLoading(false);
 			setSearchResults([]);
@@ -140,13 +144,12 @@ export function SearchDialog() {
 	return (
 		<>
 			<Button
-				variant="ghost"
 				onClick={() => setOpen(true)}
-				className="h-9 px-2 gap-4 rounded-md font-normal hover:bg-neutral-900 bg-neutral-800 border-neutral-700 text-white hover:text-white hover:opacity-85"
+				className="h-9 px-2 gap-4 rounded-md font-normal hover:bg-(--bg)/80 bg-(--bg) border border-(--border) text-(--text) hover:text-(--text) transition-colors"
 				aria-label={`Open search (${modifierKey}+K)`}
 			>
-				<Search className="h-4 w-4" />
-				<kbd className="pointer-events-none hidden h-5 select-none items-center gap-0.5 rounded border bg-neutral-800 border-neutral-700 text-white px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+				<Search className="h-4 w-4 text-(--text-secondary)" />
+				<kbd className="pointer-events-none hidden h-5 select-none items-center gap-0.5 rounded border bg-(--bg) border-(--border) text-(--text-secondary) px-1.5 font-mono text-[10px] font-medium sm:flex">
 					<span>{`${modifierKey} + K`}</span>
 				</kbd>
 			</Button>
@@ -154,50 +157,55 @@ export function SearchDialog() {
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent
 					showCloseButton={false}
-					className="p-0 overflow-hidden rounded-md border-neutral-700 border"
+					className="p-0 overflow-hidden rounded-xl border-(--border) border bg-(--bg-secondary) shadow-2xl"
 				>
 					<Command
-						className="shadow-md bg-black rounded-none p-0.5 py-1"
-						shouldFilter={false} // Managed via server-side query
+						className="shadow-none bg-transparent rounded-none p-1"
+						shouldFilter={false}
 					>
-						<div className="flex items-center border-b px-3 w-full">
+						<div className="flex items-center border-b border-(--border) px-3 w-full bg-(--bg) rounded-md">
+							<Search className="h-4 w-4 text-(--text-secondary) mr-2 flex-shrink-0" />
 							<CommandInput
 								value={inputValue}
 								onValueChange={handleInputChange}
 								placeholder="Search posts or actions..."
 								maxLength={MAX_SEARCH_LENGTH + 5}
-								className="flex-1 text-white"
+								className="flex-1 text-(--text) placeholder:text-(--text-secondary) bg-transparent border-none outline-none py-3"
 							/>
 						</div>
 
-						<CommandList className="px-2">
+						<CommandList className="p-2">
 							{error ? (
-								<div className="p-4 text-sm text-destructive font-medium">
+								<div className="p-4 text-sm text-(--error) font-medium">
 									{error}
 								</div>
 							) : (
 								<>
 									{isLoading && (
-										<div className="w-full flex justify-center items-center gap-2 py-4">
-											<Loader2 className="h-4 w-4 animate-spin text-neutral-400" />
-											<Label className="text-neutral-300">
+										<div className="w-full flex justify-center items-center gap-2 py-6">
+											<Loader2 className="h-4 w-4 animate-spin text-(--link)" />
+											<Label className="text-(--text-secondary) text-sm font-normal">
 												Fetching results...
 											</Label>
 										</div>
 									)}
 									{!isLoading && inputValue && searchResults.length === 0 && (
-										<CommandEmpty className="py-4 text-center text-sm text-neutral-400">
+										<CommandEmpty className="py-6 text-center text-sm text-(--text-secondary)">
 											No results found for "{inputValue}"
 										</CommandEmpty>
 									)}
 
 									{/* Dynamic DB Results */}
 									{searchResults.length > 0 && (
-										<CommandGroup heading="Posts" className="text-white">
+										<CommandGroup
+											heading="Posts"
+											className="text-(--text-secondary) text-xs font-semibold px-2"
+										>
 											{searchResults.map((post: any) => (
 												<CommandItem
 													key={post.id}
 													onSelect={() => handleNavigation(`/posts/${post.id}`)}
+													className="text-(--text) aria-selected:bg-(--bg) aria-selected:text-(--link) rounded-md px-3 py-2.5 my-0.5 cursor-pointer transition-colors"
 												>
 													{post.title}
 												</CommandItem>
@@ -206,12 +214,21 @@ export function SearchDialog() {
 									)}
 
 									{/* Static Quick Navigation Links */}
-									<CommandGroup heading="Suggestions" className="text-white">
-										<Separator className="bg-neutral-700 mb-2" />
-										<CommandItem onSelect={() => handleNavigation("/profile")}>
+									<CommandGroup
+										heading="Suggestions"
+										className="text-(--text-secondary) text-xs font-semibold px-2 mt-2"
+									>
+										<Separator className="bg-(--border) my-2" />
+										<CommandItem
+											onSelect={() => handleNavigation("/profile")}
+											className="text-(--text) hover:bg-(--bg) aria-selected:bg-(--bg) aria-selected:text-(--link) rounded-lg px-3 py-2.5 my-0.5 cursor-pointer transition-colors"
+										>
 											View Profile
 										</CommandItem>
-										<CommandItem onSelect={() => handleNavigation("/settings")}>
+										<CommandItem
+											onSelect={() => handleNavigation("/settings")}
+											className="text-(--text) hover:bg-(--bg) aria-selected:bg-(--bg) aria-selected:text-(--link) rounded-lg px-3 py-2.5 my-0.5 cursor-pointer transition-colors"
+										>
 											Settings
 										</CommandItem>
 									</CommandGroup>

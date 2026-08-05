@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export const getFreshServerSession = createServerFn({ method: "GET" }).handler(
+export const getSessionFn = createServerFn({ method: "GET" }).handler(
 	async () => {
 		// 1. Grab incoming user headers via TanStack Server utility
 		const headers = getRequestHeaders();

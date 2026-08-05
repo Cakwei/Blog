@@ -6,12 +6,12 @@ import { Suspense } from "react";
 import { Button } from "#/components/ui/button";
 import { prisma } from "#/db";
 import type { Post } from "#/lib/types";
-import { getFreshServerSession } from "#/lib/utils";
+import { getSessionFn } from "#/lib/utils";
 import "#/index.css";
 
 const getOwnPosts = createServerFn().handler(async () => {
 	// This runs only on the server
-	const session = await getFreshServerSession();
+	const session = await getSessionFn();
 	const posts = await prisma.post.findMany({
 		where: {
 			userId: session?.user.id,
@@ -38,28 +38,26 @@ function AdminPostsPage() {
 	const navigate = useNavigate();
 
 	return (
-		<div className="bg-black">
-			<div className="max-w-6xl bg-black mx-auto px-4 py-12">
-				<div className="flex justify-between items-end mb-10">
-					<div>
-						<h1 className="text-3xl text-white font-extrabold">Your posts</h1>
-						<p className="text-neutral-300 mt-1">
-							Create, edit, and publish your articles.
-						</p>
-					</div>
-					<Button
-						onClick={() => navigate({ to: "/posts/create" })}
-						className="px-5 bg-white text-black border hover:bg-white/90 border-neutral-700 font-semibold transition-colors whitespace-nowrap"
-					>
-						New post
-					</Button>
+		<div className="max-w-6xl bg-(--bg) mx-auto px-4 py-12">
+			<div className="flex justify-between items-end mb-10">
+				<div>
+					<h1 className="text-3xl text-(--text) font-extrabold">Your posts</h1>
+					<p className="text-(--text-secondary) mt-1">
+						Create, edit, and publish your articles.
+					</p>
 				</div>
-
-				{/* Skeleton UI mimicking real post rows during loading */}
-				<Suspense fallback={<PostListSkeleton count={5} />}>
-					<PostListContent />
-				</Suspense>
+				<Button
+					onClick={() => navigate({ to: "/posts/create" })}
+					className="px-5 bg-(--link) hover:bg-(--link)/80 text-(--text) font-semibold transition-colors whitespace-nowrap shadow-sm border border-(--border)"
+				>
+					New post
+				</Button>
 			</div>
+
+			{/* Skeleton UI mimicking real post rows during loading */}
+			<Suspense fallback={<PostListSkeleton count={5} />}>
+				<PostListContent />
+			</Suspense>
 		</div>
 	);
 }
@@ -75,7 +73,7 @@ function PostListContent() {
 	}
 
 	return (
-		<div className="rounded-2xl overflow-hidden divide-y divide-neutral-700">
+		<div className="rounded-2xl overflow-hidden divide-y divide-(--border) bg-(--bg-secondary) border border-(--border) shadow-xl">
 			{posts.map((post) => (
 				<PostRow key={post.id} post={post} />
 			))}
@@ -87,8 +85,8 @@ function PostRow({ post }: { post: Post }) {
 	const isDraft = post.status === "draft";
 
 	return (
-		<div className="flex items-center gap-4 px-5 py-4 hover:bg-neutral-900 transition-colors group">
-			<div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+		<div className="flex items-center gap-4 px-5 py-4 hover:bg-(--bg) transition-colors group">
+			<div className="w-16 h-16 rounded-lg overflow-hidden bg-(--bg) border border-(--border) flex-shrink-0">
 				{post.image && (
 					<img src={post.image} alt="" className="w-full h-full object-cover" />
 				)}
@@ -97,35 +95,35 @@ function PostRow({ post }: { post: Post }) {
 			<div className="flex-1 min-w-0">
 				<div className="flex items-center gap-2 mb-1">
 					<span
-						className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+						className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
 							isDraft
-								? "bg-amber-50 text-amber-700"
-								: "bg-green-50 text-green-700"
+								? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+								: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
 						}`}
 					>
 						{isDraft ? "Draft" : "Published"}
 					</span>
-					<span className="text-xs font-bold text-white flex gap-1.5">
+					<span className="text-xs font-bold text-(--text) flex gap-1.5">
 						{post.category ? (
 							post.category.split(",").map((cat) => (
 								<span
 									key={cat}
-									className="rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white capitalize"
+									className="rounded-full border border-(--border) px-2.5 py-0.5 text-xs font-semibold bg-(--bg) text-(--link) capitalize"
 								>
 									{capitalize(cat)}
 								</span>
 							))
 						) : (
-							<span className="rounded-full border border-neutral-700 px-2.5 py-0.5 text-xs font-semibold bg-blue-600 text-white capitalize">
+							<span className="rounded-full border border-(--border) px-2.5 py-0.5 text-xs font-semibold bg-(--bg) text-(--text-secondary) capitalize">
 								No tags
 							</span>
 						)}
 					</span>
 				</div>
-				<h3 className="font-bold text-white truncate hover:text-white/90 transition-colors">
+				<h3 className="font-bold text-(--text) truncate group-hover:text-(--link) transition-colors">
 					{post.title}
 				</h3>
-				<p className="text-sm text-neutral-400">
+				<p className="text-sm text-(--text-secondary)">
 					{new Date(post.date).toLocaleDateString("en-MY")}
 				</p>
 			</div>
@@ -134,16 +132,16 @@ function PostRow({ post }: { post: Post }) {
 				<Link
 					to="/posts/$postId"
 					params={{ postId: post.id.toString() }}
-					className="px-3 py-2 text-sm font-semibold rounded-lg transition-colors"
+					className="px-3 py-2 text-sm font-semibold rounded-lg transition-colors border border-transparent"
 				>
-					<span className="text-white hover:bg-none hover:underline">View</span>
+					<span className="text-(--link) hover:underline ">View</span>
 				</Link>
 				<Link
 					to="/posts/edit/$postId"
 					params={{ postId: post.id.toString() }}
-					className="px-3 py-2 text-sm font-semibold text-white rounded-lg transition-colors"
+					className="px-3 py-2 text-sm font-semibold rounded-lg transition-colors"
 				>
-					<span className="text-white hover:bg-none hover:underline">Edit</span>
+					<span className="text-(--text-secondary) hover:underline ">Edit</span>
 				</Link>
 			</div>
 		</div>
@@ -154,25 +152,25 @@ function PostRowSkeleton() {
 	return (
 		<div className="flex items-center gap-4 px-5 py-4 animate-pulse">
 			{/* Image Placeholder */}
-			<div className="w-16 h-16 rounded-lg bg-neutral-800 flex-shrink-0" />
+			<div className="w-16 h-16 rounded-lg bg-(--bg) border border-(--border) flex-shrink-0" />
 
 			{/* Content Placeholder */}
 			<div className="flex-1 min-w-0 space-y-2">
 				{/* Badges Placeholder */}
 				<div className="flex items-center gap-2">
-					<div className="h-4 w-16 bg-neutral-800 rounded-full" />
-					<div className="h-4 w-14 bg-neutral-800 rounded-full" />
+					<div className="h-4 w-16 bg-(--bg) border border-(--border) rounded-full" />
+					<div className="h-4 w-14 bg-(--bg) border border-(--border) rounded-full" />
 				</div>
 				{/* Title Placeholder */}
-				<div className="h-5 w-3/5 bg-neutral-800 rounded" />
+				<div className="h-5 w-3/5 bg-(--bg) border border-(--border) rounded" />
 				{/* Date Placeholder */}
-				<div className="h-4 w-24 bg-neutral-800 rounded" />
+				<div className="h-4 w-24 bg-(--bg) border border-(--border) rounded" />
 			</div>
 
 			{/* Action Buttons Placeholder */}
 			<div className="flex items-center gap-4 flex-shrink-0">
-				<div className="h-4 w-8 bg-neutral-800 rounded" />
-				<div className="h-4 w-8 bg-neutral-800 rounded" />
+				<div className="h-4 w-8 bg-(--bg) rounded" />
+				<div className="h-4 w-8 bg-(--bg) rounded" />
 			</div>
 		</div>
 	);
@@ -180,7 +178,7 @@ function PostRowSkeleton() {
 
 function PostListSkeleton({ count = 4 }: { count?: number }) {
 	return (
-		<div className="rounded-2xl overflow-hidden divide-y divide-neutral-700">
+		<div className="rounded-2xl overflow-hidden divide-y divide-(--border) bg-(--bg-secondary) border border-(--border)">
 			{Array.from({ length: count }).map((_, index) => (
 				<PostRowSkeleton
 					key={
@@ -195,9 +193,9 @@ function PostListSkeleton({ count = 4 }: { count?: number }) {
 
 function EmptyState() {
 	return (
-		<div className="text-center py-20 border border-dashed min-h-[65dvh] border-neutral-500 flex justify-center flex-col items-center rounded-2xl">
-			<h3 className="text-lg font-bold text-white mb-2">No posts yet</h3>
-			<p className="text-neutral-300 mb-6 text-sm">
+		<div className="text-center py-20 border border-dashed min-h-[65dvh] border-(--border) bg-(--bg-secondary)/50 flex justify-center flex-col items-center rounded-2xl shadow-inner">
+			<h3 className="text-lg font-bold text-(--text) mb-2">No posts yet</h3>
+			<p className="text-(--text-secondary) mb-6 text-sm">
 				Write your first post to see it here.
 			</p>
 		</div>

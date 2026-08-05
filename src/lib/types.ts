@@ -33,12 +33,13 @@ export type PostInput = Omit<Post, "id" | "date"> & {
 	date?: string;
 };
 
-export interface EditorSavingContenxt {
+export interface IEditorSavingContext {
 	isSaving: boolean;
 	setIsSaving: (saving: boolean) => void;
 	//downloadFile: (editor: Editor) => Promise<void>;
 	editor: Editor | null;
 	setEditor: Dispatch<SetStateAction<Editor | null>>;
+	initialContent: any;
 	// blogHeroImgUrl: string | null;
 	// setBlogHeroImgUrl: Dispatch<SetStateAction<string | null>>;
 }

@@ -7,6 +7,15 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* For my reference */
+  --bg: #090d16;             /* Deep Midnight Blue */
+  --bg-secondary: #131b2e;   /* Indigo-tinted Card Surface */
+  --text: #f1f5f9;   /* High-contrast Slate Text */
+  --text-secondary: #94a3b8; /* Muted Blue-gray Subtext */
+  --link: #818cf8;           /* Vibrant Indigo Link */
+  --border: #1e293b;         /* Subtle Slate Border */
+  --error: #f87171;          /* Soft Coral Red */
+  /* ================ */
   --sea-ink: #173a40;
   --sea-ink-soft: #416166;
   --lagoon: #4fb8b2;
@@ -44,7 +53,7 @@
   --accent-foreground: oklch(0.21 0.006 285.885);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
+  /*--border: oklch(0.92 0.004 286.32);*/
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.871 0.006 286.286);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -64,6 +73,7 @@
 }
 
 .dark {
+  
   --sea-ink: #d7ece8;
   --sea-ink-soft: #afcdc8;
   --lagoon: #60d7cf;
@@ -162,14 +172,13 @@ html,
 body,
 #app {
   /* Fix: Force layouts to handle overflow dynamically on dynamic long copy edits */
-  background-color: black;
-}
+  }
 
 body {
   margin: 0;
   color: var(--sea-ink);
+
   font-family: var(--font-sans);
-  background-color: black;
   /* Fix: Use background-color with theme variables here instead of Tailwind layers */
   /* background-color: var(--bg-base);
  */

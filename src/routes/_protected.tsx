@@ -1,9 +1,9 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { getFreshServerSession } from "#/lib/utils";
+import { getSessionFn } from "#/lib/utils";
 
 export const Route = createFileRoute("/_protected")({
 	beforeLoad: async ({ location }) => {
-		const session = await getFreshServerSession();
+		const session = await getSessionFn();
 		const currentUrl = location.href;
 
 		if (!session) {

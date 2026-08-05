@@ -1,330 +1,462 @@
-// #/routes/posts/create.tsx
-
-import { Upload } from '@aws-sdk/lib-storage';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { createServerFn } from '@tanstack/react-start';
-import type { Editor } from '@tiptap/core';
-import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { SimpleEditor } from '#/components/tiptap-templates/simple/simple-editor';
-import { Button } from '#/components/ui/button';
+import { useForm } from "@tanstack/react-form";
 import {
-  Combobox,
-  ComboboxChip,
-  ComboboxChips,
-  ComboboxChipsInput,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxValue,
-  useComboboxAnchor,
-} from '#/components/ui/combobox';
-import ImageUploader from '#/components/ui/fileUpload';
-import { prisma } from '#/db';
-import { CATEGORIES } from '#/lib/const';
-import { s3Client } from '#/lib/s3';
-import type { EditorSavingContenxt, IResponse } from '#/lib/types';
-import { getFreshServerSession } from '#/lib/utils';
+	ClientOnly,
+	createFileRoute,
+	Link,
+	useNavigate,
+} from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import type { Editor } from "@tiptap/core";
+import {
+	createContext,
+	type ReactNode,
+	useContext,
+	useState,
+} from "react";
+import { toast } from "sonner";
+import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
+import { Button } from "#/components/ui/button";
+import {
+	Combobox,
+	ComboboxChip,
+	ComboboxChips,
+	ComboboxChipsInput,
+	ComboboxContent,
+	ComboboxEmpty,
+	ComboboxItem,
+	ComboboxList,
+	ComboboxValue,
+	useComboboxAnchor,
+} from "#/components/ui/combobox";
+import ImageUploader from "#/components/ui/fileUpload";
+import { Label } from "#/components/ui/label";
+import { prisma } from "#/db";
+import { CATEGORIES } from "#/lib/const";
+import type { IEditorSavingContext, IResponse } from "#/lib/types";
+import { getSessionFn } from "#/lib/utils";
 
-export const Route = createFileRoute('/_protected/posts/create/')({
-  component: NewPostPage,
+export const Route = createFileRoute("/_protected/posts/create/")({
+	component: NewPostPage,
 });
 
-const saveFileToDB = createServerFn({ method: 'POST' })
-  .validator((data: { jsonContent: any; blogImg: any; tags: Array<string> }) => data)
-  .handler(async ({ data }) => {
-    try {
-      if (!data.jsonContent || !data.blogImg) {
-        return {
-          success: false,
-          message: 'One or more inputs empty',
-          data: {},
-        };
-      }
+// Server Function handling S3 Image Upload securely on the backend (Node environment)
+const uploadImgToS3ServerFn = createServerFn({ method: "POST" })
+	.validator(
+		(data: { fileName: string; fileType: string; base64Data: string }) => data,
+	)
+	.handler(async ({ data }) => {
+		try {
+			const { Upload } = await import("@aws-sdk/lib-storage");
+			const { s3Client } = await import("#/lib/s3");
 
-      // Fetch user session
-      const session = await getFreshServerSession();
+			const uuid = crypto.randomUUID();
+			const cleanFileName = data.fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+			const s3Key = `${uuid}-${cleanFileName}`;
 
-      if (!session) return { success: false, message: 'Session not found', data: {} };
+			// Convert base64 string to Buffer for server-side S3 upload processing
+			const base64Content = data.base64Data.includes(",")
+				? data.base64Data.split(",")[1]
+				: data.base64Data;
+			const buffer = Buffer.from(base64Content, "base64");
 
-      // Upload to DB
-      await prisma.post.create({
-        data: {
-          title: 'bom',
-          excerpt: '',
-          date: new Date().toISOString(),
-          userId: session?.user.id,
-          category: data.tags ? data.tags.toString() : '',
-          image: data.blogImg || '',
-          content: data.jsonContent,
-        },
-      });
-      return {
-        success: true,
-        message: 'Successfully uploaded blog to DB',
-        data: {},
-      };
-    } catch (e) {
-      console.error(e);
-      return { success: false, message: 'An error has occurred', data: {} };
-    }
-  });
+			const uploader = new Upload({
+				client: s3Client,
+				params: {
+					Bucket: "blog",
+					Key: s3Key,
+					Body: buffer,
+					ContentType: data.fileType,
+				},
+				queueSize: 4,
+				partSize: 5 * 1024 * 1024,
+			});
+
+			await uploader.done();
+			return {
+				success: true,
+				url: `https://s3.cakwei.dev/blog/${s3Key}`,
+				message: "Successfully uploaded image",
+			};
+		} catch (error: any) {
+			console.error("S3 Server Upload Error:", error);
+			return {
+				success: false,
+				url: "",
+				message: error?.message || "Failed to upload image to S3",
+			};
+		}
+	});
+
+// Server Function handling database insertion safely on the backend
+const saveFileToDB = createServerFn({ method: "POST" })
+	.validator(
+		(data: {
+			title: string;
+			jsonContent: any;
+			blogImg: string;
+			tags: Array<string>;
+		}) => data,
+	)
+	.handler(async ({ data }) => {
+		try {
+			if (!data.title || !data.jsonContent || !data.blogImg) {
+				return {
+					success: false,
+					message: "Required fields are missing",
+					data: {},
+				};
+			}
+
+			const session = await getSessionFn();
+			if (!session) {
+				return { success: false, message: "Unauthorized session", data: {} };
+			}
+
+			await prisma.post.create({
+				data: {
+					title: data.title,
+					excerpt: "",
+					date: new Date().toISOString(),
+					userId: session.user.id,
+					category: data.tags ? data.tags.join(",") : "",
+					image: data.blogImg,
+					content: data.jsonContent,
+				},
+			});
+
+			return {
+				success: true,
+				message: "Successfully uploaded blog to DB",
+				data: {},
+			};
+		} catch (error) {
+			console.error("Database save error:", error);
+			return {
+				success: false,
+				message: "An error occurred while saving to database",
+				data: {},
+			};
+		}
+	});
 
 function NewPostPage() {
-  return (
-    <EditorProvider>
-      <NewPostForm />
-    </EditorProvider>
-  );
+	return (
+		<EditorProvider>
+			<div className="bg-(--bg) min-h-screen w-full px-4 py-8 md:px-8 lg:px-12 text-white isolate">
+				<NewPostForm />
+			</div>
+		</EditorProvider>
+	);
 }
 
-async function uploadImgToS3(file: File) {
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  const BUCKET_NAME = 'blog';
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-  if (!file?.name) return;
+function validateFile(file: File): void {
+	if (!file.type.startsWith("image/")) {
+		throw new Error("Only image files are allowed for the hero background.");
+	}
+	if (file.size > MAX_FILE_SIZE) {
+		throw new Error("File size exceeds the maximum allowed limit of 5MB.");
+	}
+}
 
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error(`File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`);
-  }
-
-  // 2. Generate Unique S3 Key using crypto.randomUUID()
-  const uuid = crypto.randomUUID();
-  const cleanFileName = file.name.replace(/\s+/g, '-');
-  const s3Key = `${uuid}-${cleanFileName}`;
-
-  try {
-    // 3. Initialize the Managed Upload Instance
-    const uploader = new Upload({
-      client: s3Client,
-      params: {
-        Bucket: BUCKET_NAME,
-        Key: s3Key,
-        Body: file,
-        ContentType: file.type,
-      },
-      // Configuration optimized for both small and large assets
-      queueSize: 4,
-      partSize: 5 * 1024 * 1024, // 5MB parts
-    });
-
-    // 6. Execute and Wait for Resolution
-    await uploader.done();
-
-    // 7. Return URL to Tiptap image node src attribute
-    return `https://s3.cakwei.dev/${BUCKET_NAME}/${s3Key}`;
-  } catch (e) {
-    console.error(e);
-  }
+// Helper to convert File to base64 string for server transfer
+async function fileToBase64(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = () => resolve(reader.result as string);
+		reader.onerror = (error) => reject(error);
+	});
 }
 
 function NewPostForm() {
-  const navigate = useNavigate();
-  const createBtnRef = useRef<HTMLButtonElement | null>(null);
-  const anchor = useComboboxAnchor();
-  const [data, setData] = useState();
-  const [tags, setTags] = useState<any>(null);
-  const [blogHeroImg, setBlogHeroImg] = useState<File | null>(null);
-  const { isSaving, editor } = useEditorSavingState();
+	const navigate = useNavigate();
+	const anchor = useComboboxAnchor();
+	const [data, setData] = useState<any>();
+	const [blogHeroImg, setBlogHeroImg] = useState<File | null>(null);
+	const { isSaving, editor } = useEditorSavingState();
 
-  /*
-	async function downloadFile() {
-		if (!editor) return;
+	const form = useForm({
+		defaultValues: {
+			title: "",
+			tags: [] as Array<string>,
+		},
+		onSubmit: async ({ value }) => {
+			console.log("sukuna", JSON.stringify(data), editor, "||||||", data);
 
-		const jsonContent = editor.getJSON();
-		const jsonString = JSON.stringify(jsonContent, null, 2);
+			if (!blogHeroImg) {
+				toast.error("Please upload a hero background image.");
+				return;
+			}
 
-		// 3. Create a Blob with the JSON data
-		const blob = new Blob([jsonString], { type: "application/json" });
+			if (!data) {
+				toast.error("Blog content cannot be empty.");
+				return;
+			}
 
-		// 4. Create a temporary download link
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement("a");
+			try {
+				toast.loading("Publishing blog...", { id: "save-blog" });
 
-		link.href = url;
-		link.download = "tiptap-content.json";
+				validateFile(blogHeroImg);
+				const base64Data = await fileToBase64(blogHeroImg);
 
-		// 5. Trigger the download and clean up
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
-*/
-  async function setBlogHeroIMG(file: File) {
-    if (file) setBlogHeroImg(file);
-  }
-  /*
-	useEffect(() => {
-		console.log("Layout reading state:", isSaving);
-	}, [isSaving]);
-*/
-  return (
-    <div className="bg-black">
-      <div className="max-w-6xl bg-black mx-auto px-4 py-12 h-auto">
-        <Link
-          to="/posts"
-          className="text-sm text-white hover:text-blue-600 transition-colors mb-5 inline-block"
-        >
-          <span className="text-white hover:underline">← Back to your posts</span>
-        </Link>
-        <div className="flex justify-between mb-5">
-          <h1 className="text-3xl font-bold text-white">New post</h1>
-          {isSaving ? (
-            <Button disabled>Saving...</Button>
-          ) : (
-            <Button
-              ref={createBtnRef}
-              className="bg-white text-black font-semibold hover:bg-white/90"
-              onClick={() => {
-                toast.promise(
-                  async () => {
-                    if (!blogHeroImg) throw Error();
+				// Call server function to perform S3 upload securely on the backend
+				const uploadResult = await uploadImgToS3ServerFn({
+					data: {
+						fileName: blogHeroImg.name,
+						fileType: blogHeroImg.type,
+						base64Data,
+					},
+				});
 
-                    if (createBtnRef.current) createBtnRef.current.disabled = true;
-                    const blogHeroImgUrl = await uploadImgToS3(blogHeroImg);
+				if (!uploadResult.success || !uploadResult.url) {
+					throw new Error(uploadResult.message || "Image upload failed.");
+				}
 
-                    const result: IResponse = await saveFileToDB({
-                      data: {
-                        jsonContent: editor?.getJSON(),
-                        blogImg: blogHeroImgUrl,
-                        tags: tags,
-                      },
-                    });
+				const rawContent = data; // editor.getJSON();
 
-                    if (!result.success && createBtnRef.current) {
-                      createBtnRef.current.disabled = false;
-                    }
+				const result: IResponse = await saveFileToDB({
+					data: {
+						title: value.title,
+						jsonContent: rawContent,
+						blogImg: uploadResult.url,
+						tags: value.tags,
+					},
+				});
 
-                    if (result.success) {
-                      // Clear the auto-saved draft securely upon successful creation
-                      try {
-                        localStorage.removeItem('tiptapDraftContent');
-                      } catch (e) {
-                        console.error('Failed to clear local storage', e);
-                      }
-                      navigate({ to: '/posts' });
-                    }
-                  },
-                  {
-                    position: 'top-center',
-                    loading: 'Loading...',
-                    success: () => `Blog successfully published`,
-                    error: 'An erorr occurred publishing blog, please try again later',
-                  },
-                );
-              }}
-            >
-              Save my blog
-            </Button>
-          )}
-        </div>
-        <div className="flex flex-col items-center">
-          <ImageUploader onImageReadyForS3={setBlogHeroIMG} />
-          <Combobox
-            multiple
-            autoHighlight
-            onValueChange={(values) => {
-              setTags(values);
-            }}
-            items={CATEGORIES}
-          >
-            <ComboboxChips ref={anchor} className="w-full bg-black max-w-sm border-neutral-700">
-              <ComboboxValue>
-                {(values) => (
-                  <>
-                    {values.map((value: string) => (
-                      <ComboboxChip key={value}>{value}</ComboboxChip>
-                    ))}
-                    <ComboboxChipsInput
-                      className="text-white"
-                      placeholder={`${Array.isArray(tags) && tags.length > 0 ? '' : 'Select tag(s)'}`}
-                    />
-                  </>
-                )}
-              </ComboboxValue>
-            </ComboboxChips>
-            <ComboboxContent anchor={anchor}>
-              <ComboboxEmpty>No items found.</ComboboxEmpty>
-              <ComboboxList>
-                {(item) => (
-                  <ComboboxItem key={item} value={item}>
-                    {item}
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
-          <hr className="border-t border-gray-300 mb-5" />
-        </div>
-        <div className="w-full">
-          <SimpleEditor setData={setData} />
-        </div>
-      </div>
-    </div>
-  );
+				if (!result.success) {
+					throw new Error(result.message || "Failed to save post.");
+				}
+
+				try {
+					localStorage.removeItem("tiptapDraftContent");
+				} catch (e) {
+					console.error("Failed to clear local storage draft", e);
+				}
+
+				toast.success("Blog successfully published!", { id: "save-blog" });
+				navigate({ to: "/posts" });
+			} catch (error: any) {
+				console.error(error);
+				toast.error(
+					error?.message || "An error occurred publishing your blog.",
+					{ id: "save-blog" },
+				);
+			}
+		},
+	});
+
+	return (
+		<div className="max-w-4xl mx-auto space-y-6">
+			<Link
+				to="/posts"
+				className="group text-sm font-medium text-neutral-400 hover:text-white transition-colors inline-flex items-center gap-1.5"
+			>
+				<div className="text-(--text) flex group-hover:underline w-full">
+					<span className="text-(--text)">{"← Back to your posts"}</span>
+				</div>
+			</Link>
+
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					form.handleSubmit();
+				}}
+			>
+				{/* Header Section with Modern Action Bar */}
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-neutral-800/80 mb-8">
+					<div>
+						<h1 className="text-3xl font-extrabold tracking-tight text-white">
+							Create New Post
+						</h1>
+						<p className="text-sm text-neutral-400 mt-1">
+							Draft and format your article with rich media sections.
+						</p>
+					</div>
+					<Button
+						type="submit"
+						disabled={isSaving}
+						className="bg-(--link) hover:bg-(--link)/80 text-(--text) font-semibold transition-all shadow-sm rounded-md px-5 py-2.5 h-auto cursor-pointer"
+					>
+						{isSaving ? "Saving..." : "Publish post"}
+					</Button>
+				</div>
+
+				{/* Form Controls Container */}
+				<div className="space-y-6 bg-neutral-900/40 border border-neutral-800/80 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+					{/* Title Field */}
+					<form.Field
+						name="title"
+						validators={{
+							onChange: ({ value }) =>
+								!value || value.length < 3
+									? "Title must be at least 3 characters long"
+									: undefined,
+						}}
+					>
+						{(field) => (
+							<div className="flex flex-col gap-2">
+								<Label className="text-sm font-semibold tracking-wide text-neutral-200">
+									Post Title
+								</Label>
+								<input
+									type="text"
+									value={field.state.value}
+									onChange={(e) => field.handleChange(e.target.value)}
+									onBlur={field.handleBlur}
+									placeholder="What is your blog post about?"
+									className="w-full bg-black/60 border border-neutral-800 focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 rounded-md px-4 py-3 text-white placeholder:text-neutral-600 transition-all outline-none text-base"
+								/>
+								{field.state.meta.isTouched &&
+								field.state.meta.errors.length > 0 ? (
+									<em className="text-red-400 text-xs mt-0.5">
+										{field.state.meta.errors.join(", ")}
+									</em>
+								) : null}
+							</div>
+						)}
+					</form.Field>
+
+					{/* Hero Image Section */}
+					<div className="flex flex-col gap-2">
+						<Label className="text-sm font-semibold tracking-wide text-neutral-200">
+							Hero Cover Image
+						</Label>
+						<div className="w-full">
+							<ImageUploader onImageReadyForS3={setBlogHeroImg} />
+						</div>
+					</div>
+
+					{/* Tags Field */}
+					<form.Field
+						name="tags"
+						validators={{
+							onChange: ({ value }) =>
+								value && value.length > 5
+									? "Cannot select more than 5 tags"
+									: undefined,
+						}}
+					>
+						{(field) => (
+							<div className="flex flex-col gap-2">
+								<Label className="text-sm font-semibold tracking-wide text-neutral-200">
+									Categories & Tags
+								</Label>
+								<Combobox
+									multiple
+									autoHighlight
+									onValueChange={(values) =>
+										field.handleChange(values as Array<string>)
+									}
+									items={CATEGORIES}
+								>
+									<ComboboxChips
+										ref={anchor}
+										className="w-full bg-black/60 border border-neutral-800 focus-within:border-neutral-500 rounded-md px-3 py-2 min-h-[46px] transition-all"
+									>
+										<ComboboxValue>
+											{(values) => (
+												<div className="flex flex-wrap gap-1.5 items-center">
+													{(values as Array<string>).map((value: string) => (
+														<ComboboxChip
+															key={value}
+															className="bg-neutral-800 text-white border-neutral-700 rounded-lg text-xs"
+														>
+															{value}
+														</ComboboxChip>
+													))}
+													<ComboboxChipsInput
+														className="text-white bg-transparent placeholder:text-neutral-600 outline-none text-sm ml-1 py-1"
+														placeholder={
+															field.state.value.length > 0
+																? ""
+																: "Select up to 5 tags..."
+														}
+													/>
+												</div>
+											)}
+										</ComboboxValue>
+									</ComboboxChips>
+									<ComboboxContent
+										anchor={anchor}
+										className="bg-neutral-900 border border-neutral-800 text-white rounded-xl shadow-2xl overflow-hidden z-50"
+									>
+										<ComboboxEmpty className="py-3 text-center text-sm text-neutral-500">
+											No tags found.
+										</ComboboxEmpty>
+										<ComboboxList className="p-1">
+											{(item) => (
+												<ComboboxItem
+													key={item}
+													value={item}
+													className="hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors"
+												>
+													{item}
+												</ComboboxItem>
+											)}
+										</ComboboxList>
+									</ComboboxContent>
+								</Combobox>
+							</div>
+						)}
+					</form.Field>
+				</div>
+			</form>
+
+			{/* Editor Workspace Panel */}
+			<div className="w-full mt-6 bg-neutral-900/40 border border-neutral-800/80 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+				<Label className="text-sm font-semibold tracking-wide text-neutral-200 mb-3 block">
+					Post Content
+				</Label>
+				<div className="w-full rounded-xl overflow-hidden border border-neutral-800/80 bg-black/40">
+					<ClientOnly
+						fallback={
+							<div className="w-full h-64 flex items-center justify-center text-neutral-500 text-sm">
+								Loading editor environment...
+							</div>
+						}
+					>
+						<SimpleEditor setData={setData} />
+					</ClientOnly>
+				</div>
+			</div>
+		</div>
+	);
 }
 
-export const EditorSavingContext = createContext<EditorSavingContenxt>({
-  isSaving: false,
-  setIsSaving: () => {},
-  ///	downloadFile: async () => {},
-  editor: null,
-  setEditor: () => {},
-  // blogHeroImgUrl: "",
-  // setBlogHeroImgUrl: () => {},
+export const EditorSavingContext = createContext<IEditorSavingContext>({
+	isSaving: false,
+	setIsSaving: () => {},
+	editor: null,
+	setEditor: () => {},
+	initialContent: null,
 });
 
-export const EditorProvider = ({ children }: { children: ReactNode }) => {
-  const [isSaving, setIsSaving] = useState(false);
-  const [editor, setEditor] = useState<Editor | null>(null);
-  // const [blogHeroImgUrl, setBlogHeroImgUrl] = useState<string | null>(null);
+export const EditorProvider = ({
+	children,
+	initialContent,
+}: {
+	children: ReactNode;
+	initialContent?: IEditorSavingContext["initialContent"];
+}) => {
+	const [isSaving, setIsSaving] = useState(false);
+	const [editor, setEditor] = useState<Editor | null>(null);
 
-  useEffect(() => {
-    // 1. Guard clause: Ensure editor exists and is fully initialized
-    if (!editor) return;
-
-    try {
-      const rawData = localStorage.getItem('tiptapDraftContent');
-
-      if (!rawData) return;
-
-      const parsedJSON = JSON.parse(rawData);
-
-      // 3. Structural Validation: Ensure it's an object (Tiptap JSON node structure)
-      // If it's a string, number, or array, it's either corrupt or a malicious payload.
-      if (typeof parsedJSON !== 'object' || parsedJSON === null) {
-        console.warn('Invalid draft format encountered. Purging corrupt data.');
-        localStorage.removeItem('tiptapDraftContent');
-        return;
-      }
-
-      // 4. Content Check: Only inject if the editor is currently empty.
-      // This prevents the effect from wiping out real-time user changes if the component remounts.
-      if (editor.isEmpty) {
-        editor.commands.setContent(parsedJSON);
-      }
-    } catch (error) {
-      // Safe Fallback: Catch structural manipulation or malformed strings safely without a UI white-screen
-      console.error('Security/Parsing alert: Failed to safely parse local draft:', error);
-      localStorage.removeItem('tiptapDraftContent');
-    }
-  }, [editor]);
-  return (
-    <EditorSavingContext.Provider
-      value={{
-        isSaving,
-        setIsSaving,
-        editor,
-        setEditor,
-        // blogHeroImgUrl,
-        // setBlogHeroImgUrl,
-      }}
-    >
-      {children}
-    </EditorSavingContext.Provider>
-  );
+	return (
+		<EditorSavingContext.Provider
+			value={{
+				isSaving,
+				setIsSaving,
+				editor,
+				setEditor,
+				initialContent: initialContent || null,
+			}}
+		>
+			{children}
+		</EditorSavingContext.Provider>
+	);
 };
 
 export const useEditorSavingState = () => useContext(EditorSavingContext);

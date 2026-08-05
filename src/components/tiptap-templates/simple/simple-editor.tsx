@@ -1,4 +1,4 @@
-import { Upload } from "@aws-sdk/lib-storage";
+import { createServerFn } from "@tanstack/react-start";
 import { Highlight } from "@tiptap/extension-highlight";
 import { Image } from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
@@ -8,7 +8,6 @@ import { TextAlign } from "@tiptap/extension-text-align";
 import { Typography } from "@tiptap/extension-typography";
 import { Selection } from "@tiptap/extensions";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
-// --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
 import {
 	type Dispatch,
@@ -18,9 +17,7 @@ import {
 	useState,
 } from "react";
 import { HorizontalRule } from "#/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
-// --- Tiptap Node ---
 import { ImageUploadNode } from "#/components/tiptap-node/image-upload-node/image-upload-node-extension";
-// --- UI Primitives ---
 import { Button } from "#/components/tiptap-ui-primitive/button";
 import { Spacer } from "#/components/tiptap-ui-primitive/spacer";
 import {
@@ -28,6 +25,7 @@ import {
 	ToolbarGroup,
 	ToolbarSeparator,
 } from "#/components/tiptap-ui-primitive/toolbar";
+import { useEditorSavingState } from "#/routes/_protected/posts/edit/$postId";
 import "#/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "#/components/tiptap-node/code-block-node/code-block-node.scss";
 import "#/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
@@ -35,20 +33,10 @@ import "#/components/tiptap-node/list-node/list-node.scss";
 import "#/components/tiptap-node/image-node/image-node.scss";
 import "#/components/tiptap-node/heading-node/heading-node.scss";
 import "#/components/tiptap-node/paragraph-node/paragraph-node.scss";
-
-// --- Icons ---
 import { ArrowLeftIcon } from "#/components/tiptap-icons/arrow-left-icon";
-import { HighlighterIcon } from "#/components/tiptap-icons/highlighter-icon";
 import { LinkIcon } from "#/components/tiptap-icons/link-icon";
-// --- Components ---
 import { BlockquoteButton } from "#/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "#/components/tiptap-ui/code-block-button";
-import {
-	ColorHighlightPopover,
-	ColorHighlightPopoverButton,
-	ColorHighlightPopoverContent,
-} from "#/components/tiptap-ui/color-highlight-popover";
-// --- Tiptap UI ---
 import { HeadingDropdownMenu } from "#/components/tiptap-ui/heading-dropdown-menu";
 import { ImageUploadButton } from "#/components/tiptap-ui/image-upload-button";
 import {
@@ -61,91 +49,65 @@ import { MarkButton } from "#/components/tiptap-ui/mark-button";
 import { TextAlignButton } from "#/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "#/components/tiptap-ui/undo-redo-button";
 import { useCursorVisibility } from "#/hooks/use-cursor-visibility";
-// --- Hooks ---
 import { useIsBreakpoint } from "#/hooks/use-is-breakpoint";
 import { useWindowSize } from "#/hooks/use-window-size";
-
-// --- Lib ---
 import { MAX_FILE_SIZE } from "#/lib/tiptap-utils";
-
-// --- Styles ---
 import "#/components/tiptap-templates/simple/simple-editor.scss";
-
 import "#/index.css";
-import { s3Client } from "#/lib/s3";
-import { useEditorSavingState } from "#/routes/_protected/posts/create";
 
-/**
- * Handles image upload with progress tracking and abort capability.
- * Automatically switches between dynamic local previews (Development)
- * and real network server uploads (Production).
- * * @param file The file to upload
- * @param onProgress Optional callback for tracking upload progress
- * @param abortSignal Optional AbortSignal for cancelling the upload
- * @returns Promise resolving to the URL of the uploaded image
- */
-// OLD handleImageUpload
-/*export const handleImageUpload = async (
-	file: File,
-	onProgress?: (event: { progress: number }) => void,
-	abortSignal?: AbortSignal,
-): Promise<string> => {
-	// 1. Structural File Validation
-	if (!file) {
-		throw new Error("No file provided");
-	}
-
-	if (file.size > MAX_FILE_SIZE) {
-		throw new Error(
-			`File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`,
-		);
-	}
-
-	// 2. Base64 Conversion with Progress Tracking & Cancel Support
-	return new Promise((resolve, reject) => {
-		// Handle immediate termination if already cancelled
-		if (abortSignal?.aborted) {
-			return reject(new Error("Upload cancelled"));
-		}
-
-		const reader = new FileReader();
-
-		// Track processing progress for the Tiptap loader UI
-		reader.onprogress = (event) => {
-			if (event.lengthComputable) {
-				const progress = Math.round((event.loaded / event.total) * 100);
-				onProgress?.({ progress });
-			}
-		};
-
-		// Fire success callback when base64 generation completes
-		reader.onload = (event) => {
-			if (abortSignal?.aborted) {
-				return reject(new Error("Upload cancelled"));
-			}
-			if (event.target?.result) {
-				resolve(event.target.result as string);
-			} else {
-				reject(new Error("Failed to convert image to Base64"));
-			}
-		};
-
-		// Intercept internal local reading errors
-		reader.onerror = () => {
-			reject(new Error("Error reading local image file"));
-		};
-
-		// Listen to Tiptap's UI abort signal to stop reading the file
-		abortSignal?.addEventListener("abort", () => {
-			reader.abort();
-			reject(new Error("Upload cancelled"));
-		});
-
-		// Trigger the binary string reader engine
-		reader.readAsDataURL(file);
-	});
+const getDraftStorageKey = () => {
+	const match = window.location.pathname.match(
+		/\/posts\/(?:edit\/([^/]+)|create)/,
+	);
+	const postId = match?.[1];
+	return postId ? `tiptapDraftContent-${postId}` : "tiptapDraftContent";
 };
-*/
+
+export const uploadEditorImageServerFn = createServerFn({ method: "POST" })
+	.validator(
+		(data: { fileName: string; fileType: string; base64Data: string }) => data,
+	)
+	.handler(async ({ data }) => {
+		try {
+			const { Upload } = await import("@aws-sdk/lib-storage");
+			const { s3Client } = await import("#/lib/s3");
+
+			const uuid = crypto.randomUUID();
+			const cleanFileName = data.fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+			const s3Key = `editor/${uuid}-${cleanFileName}`;
+
+			const base64Content = data.base64Data.includes(",")
+				? data.base64Data.split(",")[1]
+				: data.base64Data;
+			const buffer = Buffer.from(base64Content, "base64");
+
+			const uploader = new Upload({
+				client: s3Client,
+				params: {
+					Bucket: "blog",
+					Key: s3Key,
+					Body: buffer,
+					ContentType: data.fileType,
+				},
+				queueSize: 4,
+				partSize: 5 * 1024 * 1024,
+			});
+
+			await uploader.done();
+
+			return {
+				success: true,
+				url: `https://s3.cakwei.dev/blog/${s3Key}`,
+			};
+		} catch (error: any) {
+			console.error("Editor Image S3 Upload Error:", error);
+			return {
+				success: false,
+				url: "",
+				message: error?.message || "Failed to upload image.",
+			};
+		}
+	});
 
 export const handleImageUpload = async (
 	file: File,
@@ -153,9 +115,7 @@ export const handleImageUpload = async (
 	abortSignal?: AbortSignal,
 ): Promise<string> => {
 	const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-	const BUCKET_NAME = "blog";
 
-	// 1. Structural File Validation
 	if (!file) throw new Error("No file provided");
 	if (file.size > MAX_FILE_SIZE) {
 		throw new Error(
@@ -163,65 +123,58 @@ export const handleImageUpload = async (
 		);
 	}
 
-	// 2. Generate Unique S3 Key using crypto.randomUUID()
-	const uuid = crypto.randomUUID();
-	const cleanFileName = file.name.replace(/\s+/g, "-");
-	const s3Key = `${uuid}-${cleanFileName}`;
+	const base64Data = await new Promise<string>((resolve, reject) => {
+		const reader = new FileReader();
 
-	try {
-		// 3. Initialize the Managed Upload Instance
-		const uploader = new Upload({
-			client: s3Client,
-			params: {
-				Bucket: BUCKET_NAME,
-				Key: s3Key,
-				Body: file,
-				ContentType: file.type,
-			},
-			// Configuration optimized for both small and large assets
-			queueSize: 4,
-			partSize: 5 * 1024 * 1024, // 5MB parts
-		});
-
-		// 4. Attach the Lib-Storage Progress Listener
-		uploader.on("httpUploadProgress", (progress) => {
-			if (progress.loaded && progress.total) {
-				const percentage = Math.round((progress.loaded / progress.total) * 100);
-				onProgress?.({ progress: percentage });
+		reader.onprogress = (event) => {
+			if (event.lengthComputable && onProgress) {
+				const progress = Math.round((event.loaded / event.total) * 50);
+				onProgress({ progress });
 			}
-		});
+		};
 
-		// 5. Handle Tiptap UI Deletion / Abort Events Mid-Stream
-		if (abortSignal) {
-			if (abortSignal.aborted) {
-				uploader.abort();
-				throw new Error("Upload cancelled");
-			}
+		reader.onload = () => {
+			if (onProgress) onProgress({ progress: 50 });
+			resolve(reader.result as string);
+		};
 
-			abortSignal.addEventListener("abort", () => {
-				uploader.abort();
-			});
+		reader.onerror = () => reject(new Error("Error reading local image file"));
+
+		if (abortSignal?.aborted) {
+			return reject(new Error("Upload cancelled"));
 		}
 
-		// 6. Execute and Wait for Resolution
-		await uploader.done();
+		abortSignal?.addEventListener("abort", () => {
+			reader.abort();
+			reject(new Error("Upload cancelled"));
+		});
 
-		// 7. Return URL to Tiptap image node src attribute
-		return `https://s3.cakwei.dev/${BUCKET_NAME}/${s3Key}`;
-	} catch (error: any) {
-		if (error.name === "AbortError" || abortSignal?.aborted) {
-			throw new Error("Upload cancelled");
-		}
-		throw new Error(`AWS S3 Upload Failed: ${error.message}`);
+		reader.readAsDataURL(file);
+	});
+
+	if (abortSignal?.aborted) throw new Error("Upload cancelled");
+	if (onProgress) onProgress({ progress: 75 });
+
+	const result = await uploadEditorImageServerFn({
+		data: {
+			fileName: file.name,
+			fileType: file.type,
+			base64Data,
+		},
+	});
+
+	if (!result.success || !result.url) {
+		throw new Error(result.message || "Failed to upload image to S3");
 	}
+
+	if (onProgress) onProgress({ progress: 100 });
+	return result.url;
 };
 
 const MainToolbarContent = ({
-	onHighlighterClick,
 	onLinkClick,
 	isMobile,
 }: {
-	onHighlighterClick: () => void;
 	onLinkClick: () => void;
 	isMobile: boolean;
 }) => {
@@ -254,10 +207,6 @@ const MainToolbarContent = ({
 				<MarkButton type="strike" />
 				<MarkButton type="code" />
 				<MarkButton type="underline" />
-				{!isMobile
-					? /* 	<ColorHighlightPopover />
-						 */ null
-					: /*<ColorHighlightPopoverButton onClick={onHighlighterClick} >*/ null}
 				{!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
 			</ToolbarGroup>
 
@@ -286,10 +235,6 @@ const MainToolbarContent = ({
 			<Spacer />
 
 			{isMobile && <ToolbarSeparator />}
-
-			{/*<ToolbarGroup>
-				<ThemeToggle />
-			</ToolbarGroup>*/}
 		</>
 	);
 };
@@ -298,45 +243,53 @@ const MobileToolbarContent = ({
 	type,
 	onBack,
 }: {
-	type: "highlighter" | "link";
+	type: "link";
 	onBack: () => void;
 }) => (
 	<>
 		<ToolbarGroup>
 			<Button variant="ghost" onClick={onBack}>
 				<ArrowLeftIcon className="tiptap-button-icon" />
-				{type === "highlighter" ? (
-					<HighlighterIcon className="tiptap-button-icon" />
-				) : (
-					<LinkIcon className="tiptap-button-icon" />
-				)}
+				<LinkIcon className="tiptap-button-icon" />
 			</Button>
 		</ToolbarGroup>
 
 		<ToolbarSeparator />
-
-		{type === "highlighter" ? (
-			<ColorHighlightPopoverContent />
-		) : (
-			<LinkContent />
-		)}
+		<LinkContent />
 	</>
 );
 
-export function SimpleEditor({
-	setData,
-}: {
+interface SimpleEditorProps {
 	setData: Dispatch<SetStateAction<any>>;
-}) {
-	const { setIsSaving } = useEditorSavingState();
+}
+
+export function SimpleEditor({ setData }: SimpleEditorProps) {
 	const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const isMobile = useIsBreakpoint();
 	const { height } = useWindowSize();
-	const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
-		"main",
-	);
+	const [mobileView, setMobileView] = useState<"main" | "link">("main");
 	const toolbarRef = useRef<HTMLDivElement>(null);
-	const { setEditor } = useEditorSavingState();
+
+	const { setEditor, setIsSaving, initialContent } = useEditorSavingState();
+
+	const getResolvedInitialContent = () => {
+		try {
+			const rawDraft = localStorage.getItem(getDraftStorageKey());
+			if (rawDraft) {
+				const parsedDraft = JSON.parse(rawDraft);
+				if (parsedDraft && typeof parsedDraft === "object") {
+					return parsedDraft;
+				}
+			}
+		} catch (e) {
+			console.error("Failed to parse local draft", e);
+		}
+
+		if (!initialContent) return "";
+		return typeof initialContent === "string"
+			? JSON.parse(initialContent)
+			: initialContent;
+	};
 
 	const editor = useEditor({
 		immediatelyRender: false,
@@ -358,7 +311,6 @@ export function SimpleEditor({
 				},
 			}),
 			HorizontalRule,
-
 			TextAlign.configure({ types: ["heading", "paragraph"] }),
 			TaskList,
 			TaskItem.configure({ nested: true }),
@@ -366,12 +318,11 @@ export function SimpleEditor({
 			Image.configure({
 				resize: {
 					enabled: true,
-					directions: ["top", "bottom", "left", "right"], // can be any direction or diagonal combination
+					directions: ["top", "bottom", "left", "right"],
 					minWidth: 50,
 					minHeight: 50,
 					alwaysPreserveAspectRatio: true,
 				},
-
 				allowBase64: true,
 			}),
 			Typography,
@@ -386,33 +337,26 @@ export function SimpleEditor({
 				onError: (error) => console.error("Upload failed:", error),
 			}),
 		],
-		// content,
-		onCreate: () => {
-			setEditor(editor);
-		},
+		content: getResolvedInitialContent(),
+		onMount: ({ editor }) => setEditor(editor),
+		onCreate: ({ editor }) => setEditor(editor),
 		onUpdate: ({ editor }) => {
-			// 2. Immediately clear any existing timer when user types
 			if (saveTimeoutRef.current) {
 				clearTimeout(saveTimeoutRef.current);
 			}
 
-			// 3. Immediately show "Saving..." feedback to the user
 			setIsSaving(true);
 
-			// 4. Set a new timer to execute after 1000ms of inactivity
 			saveTimeoutRef.current = setTimeout(() => {
 				const json = editor.getJSON();
 				try {
-					localStorage.setItem("tiptapDraftContent", JSON.stringify(json));
+					localStorage.setItem(getDraftStorageKey(), JSON.stringify(json));
 				} catch (e) {
 					console.error("Failed to save draft to localStorage", e);
 				}
-				// 5. Trigger your actual save / TanStack mutation here
 				setData(json);
-
-				// 6. Turn off the saving state once saved
 				setIsSaving(false);
-			}, 350); // 1 second debounce window
+			}, 350);
 		},
 	});
 
@@ -428,42 +372,39 @@ export function SimpleEditor({
 	}, [isMobile, mobileView]);
 
 	return (
-		<div className="bg-white rounded-md">
-			<EditorContext.Provider value={{ editor }}>
-				<Toolbar
-					ref={toolbarRef}
-					className="rounded-md"
-					style={{
-						...(isMobile
-							? {
-									bottom: `calc(100% - ${height - rect.y}px)`,
-									position: "relative",
-									width: "100%",
-									zIndex: 10,
-								}
-							: { position: "relative", width: "100%", zIndex: 10 }),
-					}}
-				>
-					{mobileView === "main" ? (
-						<MainToolbarContent
-							onHighlighterClick={() => setMobileView("highlighter")}
-							onLinkClick={() => setMobileView("link")}
-							isMobile={isMobile}
-						/>
-					) : (
-						<MobileToolbarContent
-							type={mobileView === "highlighter" ? "highlighter" : "link"}
-							onBack={() => setMobileView("main")}
-						/>
-					)}
-				</Toolbar>
+		<EditorContext.Provider value={{ editor }}>
+			<Toolbar
+				ref={toolbarRef}
+				className="rounded-md"
+				style={{
+					...(isMobile
+						? {
+								bottom: `calc(100% - ${height - rect.y}px)`,
+								position: "relative",
+								width: "100%",
+								zIndex: 10,
+							}
+						: { position: "relative", width: "100%", zIndex: 10 }),
+				}}
+			>
+				{mobileView === "main" ? (
+					<MainToolbarContent
+						onLinkClick={() => setMobileView("link")}
+						isMobile={isMobile}
+					/>
+				) : (
+					<MobileToolbarContent
+						type="link"
+						onBack={() => setMobileView("main")}
+					/>
+				)}
+			</Toolbar>
 
-				<EditorContent
-					editor={editor}
-					role="presentation"
-					className="simple-editor-content"
-				/>
-			</EditorContext.Provider>
-		</div>
+			<EditorContent
+				editor={editor}
+				role="presentation"
+				className="simple-editor-content"
+			/>
+		</EditorContext.Provider>
 	);
 }
