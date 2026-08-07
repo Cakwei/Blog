@@ -25,7 +25,7 @@ interface MyRouterContext {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	beforeLoad: async () => {
 		const session = await getSessionFn();
-		return session;
+		return { session: session };
 	},
 	head: () => ({
 		meta: [
@@ -60,11 +60,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body className="bg-(--bg)">
+			<body className="bg-(--bg) text-(--text) selection:bg-(--link)/20 selection:text-(--link) min-h-screen flex flex-col antialiased">
 				{/* HEADER */}
-				<header className="border-b border-(--border) backdrop-blur sticky top-0 left-0 z-50 w-full px-5 bg-(--bg-secondary)/80">
-					<div className="h-16 w-full max-w-6xl mx-auto flex items-center justify-between">
-						<div className="flex items-center gap-8">
+				<header className="border-b border-(--border)/60 backdrop-blur-xl sticky top-0 left-0 z-50 w-full px-4 sm:px-6 lg:px-8 bg-(--bg-secondary)/70 transition-all">
+					<div className="h-18 w-full max-w-7xl mx-auto flex items-center justify-between">
+						<div className="flex items-center gap-10">
 							<Link
 								to="/"
 								onClick={(e) => {
@@ -74,41 +74,45 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 									}
 									navigate({ to: "/" });
 								}}
-								className="text-xl font-bold tracking-tighter group"
+								className="text-lg font-black tracking-tight group flex items-center gap-2"
 							>
-								<span className="text-(--link) group-hover:text-(--link)/80">
-									Charlee's
-									<span className="text-white group-hover:text-white/80">
-										{" "}
-										Blog
-									</span>
+								<span className="text-(--text) group-hover:text-(--link) transition-colors">
+									Charlee's <span className="text-(--link)">Blog</span>
 								</span>
 							</Link>
-							<nav className="hidden md:flex gap-6 text-sm font-medium">
-								{/*<Link to="/" className="transition-colors hover:text-(--link)">
-                                    Articles
-                                </Link>
-                                <Link
-                                    to="/"
-                                    className="transition-colors hover:text-(--link) text-(--text-secondary)"
-                                >
-                                    About
-                                </Link>*/}
-							</nav>
+							{/*
+							<nav className="hidden md:flex items-center gap-1 text-xs font-semibold">
+								<Link
+									to="/"
+									className="px-3 py-2 rounded-xl text-(--text-secondary) hover:text-(--text) hover:bg-(--bg-secondary) transition-all"
+								>
+									Articles
+								</Link>
+								<Link
+									to="/articles"
+									className="px-3 py-2 rounded-xl text-(--text-secondary) hover:text-(--text) hover:bg-(--bg-secondary) transition-all"
+								>
+									Archive
+								</Link>
+							</nav>*/}
 						</div>
-						{/* Showed depending not logged in OR logged in */}
+
+						{/* Auth / Header Actions */}
 						{session ? (
 							<BetterAuthHeader />
 						) : (
-							<div className="flex items-center gap-4">
+							<div className="flex items-center gap-2.5">
 								<Link to="/login">
-									<Button className="bg-(--bg-secondary) font-semibold border text-(--text) hover:bg-(--bg) border-(--border) transition-colors">
+									<Button
+										variant="ghost"
+										className="font-semibold text-xs h-9 px-4 rounded-xl text-(--text-secondary) hover:text-(--text) hover:bg-(--bg-secondary) transition-all"
+									>
 										Log in
 									</Button>
 								</Link>
 
 								<Link to="/register">
-									<Button className="bg-(--link) hover:bg-(--link) font-semibold text-white hover:opacity-90 border border-transparent transition-opacity">
+									<Button className="bg-(--link) hover:bg-(--link)/90 font-semibold text-white text-xs h-9 px-4 rounded-xl shadow-lg shadow-(--link)/20 transition-all">
 										Sign up
 									</Button>
 								</Link>
@@ -116,51 +120,80 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						)}
 					</div>
 				</header>
-				{children}
+
+				{/* MAIN CONTENT WRAPPER */}
+				<div className="flex-1">{children}</div>
 
 				<Toaster />
 
 				{/* FOOTER */}
-				<footer className="border-t py-12 bg-(--bg-secondary) border-(--border) h-auto">
-					<div className="container max-w-6xl mx-auto px-4">
-						<div className="grid md:grid-cols-4 gap-8">
-							<div className="col-span-2">
-								<span className="text-xl text-(--link) font-bold tracking-tighter">
-									Charlee's<span className="text-white"> Blog</span>
-								</span>
-								<p className="text-sm text-(--text-secondary) max-w-xs mt-2">
-									Built with TanStack Start and BetterAuth
+				<footer className="border-t border-(--border)/60 py-16 bg-(--bg-secondary)/40 backdrop-blur-md">
+					<div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+						<div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-16">
+							<div className="md:col-span-6 space-y-3">
+								<div className="flex items-center gap-2">
+									<div className="w-6 h-6 rounded-lg bg-(--link)/10 border border-(--link)/30 flex items-center justify-center text-(--link) text-xs font-bold">
+										C
+									</div>
+									<span className="text-base font-black tracking-tight text-(--text)">
+										Charlee's<span className="text-(--link)"> Blog</span>
+									</span>
+								</div>
+								<p className="text-xs text-(--text-secondary) max-w-sm leading-relaxed">
+									A space where I share my personal experience & thoughts.
 								</p>
 							</div>
-							<div>
-								<h3 className="text-sm font-semibold mb-4 text-(--text)">
-									Resources
+
+							<div className="md:col-span-3 space-y-3">
+								<h3 className="text-xs font-extrabold uppercase tracking-widest text-(--text)">
+									Navigation
 								</h3>
-								<ul className="space-y-2 text-sm text-(--text-secondary)">
-									<li className="hover:text-(--text) transition-colors cursor-pointer">
-										Documentation
+								<ul className="space-y-2 text-xs text-(--text-secondary)">
+									<li>
+										<Link
+											to="/"
+											className="hover:text-(--link) transition-colors"
+										>
+											Home Feed
+										</Link>
 									</li>
-									<li className="hover:text-(--text) transition-colors cursor-pointer">
-										Components
+									<li>
+										<Link
+											to="/articles"
+											className="hover:text-(--link) transition-colors"
+										>
+											Explore Articles
+										</Link>
 									</li>
 								</ul>
 							</div>
-							<div>
-								<h3 className="text-sm font-semibold mb-4 text-(--text)">
-									Legal
+
+							<div className="md:col-span-3 space-y-3">
+								<h3 className="text-xs font-extrabold uppercase tracking-widest text-(--text)">
+									Connect
 								</h3>
-								<ul className="space-y-2 text-sm text-(--text-secondary)">
-									<li className="hover:text-(--text) transition-colors cursor-pointer">
-										Privacy
+								<ul className="space-y-2 text-xs text-(--text-secondary)">
+									<li className="hover:text-(--link) transition-colors cursor-pointer">
+										GitHub
 									</li>
-									<li className="hover:text-(--text) transition-colors cursor-pointer">
-										Terms
+									<li className="hover:text-(--link) transition-colors cursor-pointer">
+										Twitter / X
 									</li>
 								</ul>
 							</div>
 						</div>
-						<div className="mt-12 pt-8 border-t text-center border-(--border) text-sm text-(--text-secondary)">
-							© {new Date().getFullYear()} Charlee Tan. All rights reserved.
+
+						<div className="mt-14 pt-8 border-t border-(--border)/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
+							<p>© {new Date().getFullYear()} Charlee Tan. Made with ❤️</p>
+							<div className="flex items-center gap-6">
+								<span className="hover:text-(--text) transition-colors cursor-pointer">
+									Privacy Policy
+								</span>
+								<span>•</span>
+								<span className="hover:text-(--text) transition-colors cursor-pointer">
+									Terms of Service
+								</span>
+							</div>
 						</div>
 					</div>
 				</footer>

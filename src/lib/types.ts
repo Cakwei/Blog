@@ -15,6 +15,11 @@ export interface PostFormProps {
 	submitLabel: string;
 }
 
+export type IResponse = {
+	success: boolean;
+	data: any;
+	message: string;
+};
 export type PostStatus = "draft" | "published";
 
 export interface Post {
@@ -43,9 +48,3 @@ export interface IEditorSavingContext {
 	// blogHeroImgUrl: string | null;
 	// setBlogHeroImgUrl: Dispatch<SetStateAction<string | null>>;
 }
-
-export type IResponse = {
-	success: boolean;
-	message: string;
-	data: object;
-};

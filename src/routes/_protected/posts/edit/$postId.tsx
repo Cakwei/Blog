@@ -2,6 +2,13 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Editor } from "@tiptap/core";
+import {
+	ArrowLeft,
+	Edit3,
+	Image as ImageIcon,
+	Sparkles,
+	Upload,
+} from "lucide-react";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { toast } from "sonner";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
@@ -25,7 +32,6 @@ import { CATEGORIES } from "#/lib/const";
 import type { IEditorSavingContext, IResponse } from "#/lib/types";
 import { getSessionFn, logger } from "#/lib/utils";
 
-// 1. Fetch existing post data securely with ownership check
 const getPostForEdit = createServerFn({ method: "GET" })
 	.validator((postId: string) => postId)
 	.handler(async ({ data: postId }) => {
@@ -65,7 +71,6 @@ export const Route = createFileRoute("/_protected/posts/edit/$postId")({
 	component: EditPostRoutePage,
 });
 
-// Handling S3 image upload
 const uploadImgToS3ServerFn = createServerFn({ method: "POST" })
 	.validator(
 		(data: { fileName: string; fileType: string; base64Data: string }) => data,
@@ -112,7 +117,6 @@ const uploadImgToS3ServerFn = createServerFn({ method: "POST" })
 		}
 	});
 
-// handle database updates
 const updatePostInDB = createServerFn({ method: "POST" })
 	.validator(
 		(data: {
@@ -179,8 +183,13 @@ function EditPostRoutePage() {
 
 	return (
 		<EditorProvider initialContent={post.content}>
-			<div className="bg-(--bg) min-h-screen w-full px-4 py-8 md:px-8 lg:px-12 text-(--text) isolate">
-				<EditPostForm postId={postId} />
+			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden">
+				{/* Atmospheric Ambient Glow Background */}
+				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-(--link)/10 via-(--link)/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+
+				<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+					<EditPostForm postId={postId} />
+				</div>
 			</div>
 		</EditorProvider>
 	);
@@ -221,28 +230,31 @@ function EditPostForm({ postId }: { postId: string }) {
 	const { isSaving, editor } = useEditorSavingState();
 
 	return (
-		<div className="max-w-4xl mx-auto space-y-6">
+		<div className="space-y-8">
 			<Link
 				to="/posts"
-				className="group text-sm font-medium text-(--text-secondary) hover:text-(--text) transition-colors inline-flex items-center gap-1.5"
+				className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
 			>
-				<span className="hover:underline text-(--text)">
-					{"← Back to your posts"}
-				</span>
+				<ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />{" "}
+				Back to your posts
 			</Link>
 
-			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-(--border) mb-8">
-				<div>
-					<h1 className="text-3xl font-extrabold tracking-tight text-(--text)">
-						Edit Post
+			{/* Header Section with Modern Action Bar */}
+			<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-(--border)/60 pb-8">
+				<div className="space-y-2">
+					<div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-(--link)/10 border border-(--link)/20 text-(--link) text-[11px] font-bold uppercase tracking-widest">
+						<Sparkles className="w-3 h-3" /> Editor Studio
+					</div>
+					<h1 className="text-3xl sm:text-4xl font-black tracking-tight text-(--text)">
+						Edit Post.
 					</h1>
-					<p className="text-sm text-(--text-secondary) mt-1">
-						Update your article content and configurations.
+					<p className="text-(--text-secondary) text-xs sm:text-sm">
+						Update your article content, configuration tags, and media assets.
 					</p>
 				</div>
 				<Button
 					disabled={isSaving}
-					className="bg-(--link) hover:bg-(--link)/80 text-(--text) font-semibold transition-all shadow-sm rounded-md px-5 py-2.5 h-auto cursor-pointer"
+					className="h-11 px-6 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-2xl shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
 					onClick={() => {
 						toast.promise(
 							async () => {
@@ -309,14 +321,15 @@ function EditPostForm({ postId }: { postId: string }) {
 						);
 					}}
 				>
-					{isSaving ? "Saving..." : "Update post"}
+					{isSaving ? "Saving..." : "Update Post"}
 				</Button>
 			</div>
 
-			<div className="space-y-6 bg-(--bg-secondary) border border-(--border) rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+			{/* Form Controls Container */}
+			<div className="space-y-6 bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
 				{/* Title Input */}
-				<div className="flex flex-col gap-2">
-					<Label className="text-sm font-semibold tracking-wide text-(--text)">
+				<div className="flex flex-col gap-2.5">
+					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Post Title
 					</Label>
 					<input
@@ -324,22 +337,25 @@ function EditPostForm({ postId }: { postId: string }) {
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 						placeholder="What is your blog post about?"
-						className="w-full bg-(--bg) border border-(--border) focus:border-(--link) focus:ring-1 focus:ring-(--link) rounded-md px-4 py-3 text-(--text) placeholder:text-(--text-secondary) transition-all outline-none text-base"
+						className="w-full bg-(--bg) border border-(--border) focus:border-(--link) focus:ring-1 focus:ring-(--link)/50 rounded-2xl px-4 py-3 text-xs sm:text-sm text-(--text) placeholder:text-(--text-secondary) transition-all outline-none"
 					/>
 				</div>
 
 				{/* Hero Image Section */}
-				<div className="flex flex-col gap-2">
-					<Label className="text-sm font-semibold tracking-wide text-(--text)">
+				<div className="flex flex-col gap-2.5">
+					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Hero Cover Image
 					</Label>
 					{existingImgUrl && !blogHeroImg && (
-						<div className="mb-2 relative w-full h-48 rounded-xl overflow-hidden border border-(--border)">
+						<div className="relative w-full h-48 rounded-2xl overflow-hidden border border-(--border) shadow-inner group">
 							<img
 								src={existingImgUrl}
-								alt="Current hero"
-								className="w-full h-full object-cover"
+								alt="Current hero cover"
+								className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 							/>
+							<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
+								Current Active Hero Image
+							</div>
 						</div>
 					)}
 					<div className="w-full">
@@ -348,8 +364,8 @@ function EditPostForm({ postId }: { postId: string }) {
 				</div>
 
 				{/* Tags Combobox */}
-				<div className="flex flex-col gap-2">
-					<Label className="text-sm font-semibold tracking-wide text-(--text)">
+				<div className="flex flex-col gap-2.5">
+					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Categories & Tags
 					</Label>
 					<Combobox
@@ -361,7 +377,7 @@ function EditPostForm({ postId }: { postId: string }) {
 					>
 						<ComboboxChips
 							ref={anchor}
-							className="w-full bg-(--bg) border border-(--border) focus-within:border-(--link) rounded-md px-3 py-2 min-h-[46px] transition-all"
+							className="w-full bg-(--bg) border border-(--border) focus-within:border-(--link) rounded-2xl px-3.5 py-2.5 min-h-[50px] transition-all"
 						>
 							<ComboboxValue>
 								{(values) => (
@@ -369,13 +385,13 @@ function EditPostForm({ postId }: { postId: string }) {
 										{(values as Array<string>).map((val: string) => (
 											<ComboboxChip
 												key={val}
-												className="bg-(--bg-secondary) text-(--text) border-(--border) rounded-lg text-xs"
+												className="bg-(--link)/15 border border-(--link)/30 text-(--link) rounded-xl text-xs font-semibold px-2.5 py-1"
 											>
 												{val}
 											</ComboboxChip>
 										))}
 										<ComboboxChipsInput
-											className="text-(--text) bg-transparent placeholder:text-(--text-secondary) outline-none text-sm ml-1 py-1"
+											className="text-(--text) bg-transparent placeholder:text-(--text-secondary) outline-none text-xs sm:text-sm ml-1 py-1 flex-1"
 											placeholder={
 												tags.length > 0 ? "" : "Select up to 5 tags..."
 											}
@@ -386,17 +402,17 @@ function EditPostForm({ postId }: { postId: string }) {
 						</ComboboxChips>
 						<ComboboxContent
 							anchor={anchor}
-							className="bg-(--bg-secondary) border border-(--border) text-(--text) rounded-xl shadow-2xl overflow-hidden z-50"
+							className="bg-(--bg-secondary) border border-(--border) text-(--text) rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-2xl p-2"
 						>
-							<ComboboxEmpty className="py-3 text-center text-sm text-(--text-secondary)">
+							<ComboboxEmpty className="py-4 text-center text-xs text-(--text-secondary)">
 								No tags found.
 							</ComboboxEmpty>
-							<ComboboxList className="p-1">
+							<ComboboxList className="space-y-1">
 								{(item) => (
 									<ComboboxItem
 										key={item}
 										value={item}
-										className="hover:bg-(--bg) text-(--text-secondary) hover:text-(--text) rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors"
+										className="hover:bg-(--link)/15 text-(--text-secondary) hover:text-(--link) rounded-xl px-3 py-2 text-xs font-medium cursor-pointer transition-colors"
 									>
 										{item}
 									</ComboboxItem>
@@ -408,11 +424,11 @@ function EditPostForm({ postId }: { postId: string }) {
 			</div>
 
 			{/* Editor Workspace Panel */}
-			<div className="w-full mt-6 bg-(--bg-secondary) border border-(--border) rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-				<Label className="text-sm font-semibold tracking-wide text-(--text) mb-3 block">
+			<div className="w-full bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-3">
+				<Label className="text-xs font-bold uppercase tracking-wider text-(--text) block">
 					Post Content
 				</Label>
-				<div className="w-full rounded-xl overflow-hidden border border-(--border) bg-(--bg)/40">
+				<div className="w-full rounded-2xl overflow-hidden border border-(--border) bg-(--bg)">
 					<SimpleEditor
 						setData={(data) => {
 							logger("debug", "yuta:3", data);

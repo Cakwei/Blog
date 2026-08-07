@@ -1,53 +1,50 @@
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import type { Session } from "better-auth";
+import axios from "axios";
+import { ArrowUpRight, Clock, Flame, Sparkles } from "lucide-react";
 import { Suspense } from "react";
+import { Badge } from "#/components/ui/badge";
 import { Skeleton } from "#/components/ui/skeleton";
-import { prisma } from "#/db";
+import type { Post } from "#/generated/prisma/client";
+import { API_URL } from "#/lib/const";
+import type { IResponse } from "#/lib/types";
+import { getHeadersCookieFn } from "#/lib/utils";
 
-const getRandomPosts = createServerFn().handler(async () => {
-	const posts = await prisma.post.findMany({
-		take: 10,
-		select: {
-			id: true,
-			category: true,
-			content: true,
-			date: true,
-			excerpt: true,
-			image: true,
-			title: true,
-			userId: true,
-			user: {
-				select: {
-					displayUsername: true,
-				},
-			},
-		},
-	});
-	return posts;
-});
-
-const postsQueryOptions = (userId: string) =>
+const postsQueryOptions = ({
+	search = "",
+	page = 1,
+	limit = 20,
+}: {
+	search?: string;
+	page?: number;
+	limit?: number;
+}) =>
 	queryOptions({
-		queryKey: ["posts", userId],
-		queryFn: () => getRandomPosts(),
+		queryKey: ["posts"],
+		queryFn: async () => {
+			const cookie = await getHeadersCookieFn();
+			const response = await axios.get(`${API_URL}/api/posts`, {
+				params: { search: search, page: page, limit: limit },
+				headers: { cookie: cookie },
+			});
+			console.log("oopppp", response.data);
+			return response.data as IResponse;
+		},
 		refetchInterval: 1000 * 60,
 	});
 
 export const Route = createFileRoute("/")({
-	beforeLoad: async ({ context }) => {
-		const userId = context.session ? (context.session as Session).id : "";
-		context.queryClient.fetchQuery(postsQueryOptions(userId));
+	loader: async ({ context }) => {
+		context.queryClient.ensureQueryData(postsQueryOptions({}));
 	},
 	component: HomePage,
 });
 
 function HomePage() {
 	return (
-		/* Midnight Canvas Background */
-		<div className=" min-h-screen text-(--text)">
-			<div className="max-w-6xl mx-auto px-4 py-12">
+		<div className="min-h-screen text-(--text) bg-(--bg)">
+			<div className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
 				<Suspense fallback={<HomeSkeleton />}>
 					<HomeContent />
 				</Suspense>
@@ -57,21 +54,18 @@ function HomePage() {
 }
 
 function HomeContent() {
-	const context = Route.useRouteContext();
-	const userId = context.session ? (context.session as Session).id : "";
+	const { data: posts } = useSuspenseQuery(postsQueryOptions({}));
+	const postList = posts.data;
+	const featuredPost = postList[0];
+	const remainingPosts = postList.slice(1);
 
-	const { data: posts } = useSuspenseQuery(postsQueryOptions(userId));
-
-	const featuredPost = posts[0];
-	const remainingPosts = posts.slice(1);
-
-	if (posts.length === 0) {
+	if (postList.length === 0) {
 		return (
-			<div className="text-center py-20 border border-dashed min-h-[65dvh] border-(--border) bg-(--bg-secondary) flex justify-center flex-col items-center rounded-2xl">
-				<h3 className="text-lg font-bold text-(--text) mb-2">
+			<div className="text-center py-20 border border-(--border) bg-(--bg-secondary)/20 flex justify-center flex-col items-center rounded-xl">
+				<h3 className="text-base font-bold text-(--text) mb-1">
 					No posts available
 				</h3>
-				<p className="text-(--text-secondary) text-sm">
+				<p className="text-(--text-secondary) text-xs">
 					Check back later for fresh content.
 				</p>
 			</div>
@@ -79,122 +73,133 @@ function HomeContent() {
 	}
 
 	return (
-		<>
-			{/* Hero Section */}
+		<div className="space-y-12">
+			{/* Minimalist Editorial Header */}
+			<header className="border-b border-(--border) pb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+				<div>
+					<div className="flex items-center gap-2 text-xs font-semibold text-(--link) tracking-widest uppercase mb-2">
+						<Sparkles className="w-3.5 h-3.5" /> Journal & Thoughts
+					</div>
+					<h1 className="text-4xl sm:text-5xl font-black tracking-tight text-(--text)">
+						Curated Stories.
+					</h1>
+				</div>
+				<Link
+					search={{ category: "ALL", search: "" }}
+					to="/articles"
+					className="text-xs font-bold text-(--text-secondary) hover:text-(--link) transition-colors flex items-center gap-1 uppercase tracking-wider"
+				>
+					<span className="text-xs font-bold text-(--text-secondary) hover:text-(--link) transition-colors flex items-center gap-1 uppercase tracking-wider">
+						Explore Archive <ArrowUpRight className="w-3.5 h-3.5" />
+					</span>
+				</Link>
+			</header>
+			{/* Featured Post - Editorial Magazine Style */}
 			{featuredPost && (
 				<section>
 					<Link
 						to="/posts/$postId"
 						params={{ postId: featuredPost.id.toString() }}
-						className="group grid md:grid-cols-2 gap-8 items-center"
+						className="group grid lg:grid-cols-12 gap-6 items-center bg-(--bg-secondary)/30 p-6 sm:p-8 rounded-2xl border border-(--border) hover:border-(--link)/40 transition-all"
 					>
-						{/* Featured Image Container */}
-						<div className="overflow-hidden rounded-2xl bg-(--bg-secondary) border border-(--border)">
+						<div className="lg:col-span-7 overflow-hidden rounded-xl bg-(--bg) aspect-[16/10] border border-(--border)">
 							{featuredPost.image && (
 								<img
 									src={featuredPost.image}
 									alt={featuredPost.title}
-									className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
+									className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
 								/>
 							)}
 						</div>
-						<div>
-							{/* Accent Kicker */}
-							<span className="text-(--link) font-extrabold uppercase tracking-wider text-sm">
-								Featured Post
-							</span>
+						<div className="lg:col-span-5 space-y-4">
+							<div className="flex items-center gap-2">
+								<Badge className="bg-(--link)/10 text-(--link) border-0 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5">
+									<Flame className="w-3 h-3 mr-1 inline" /> Featured
+								</Badge>
+								<span className="text-xs text-(--text-secondary)">
+									{new Date(featuredPost.date).toLocaleDateString()}
+								</span>
+							</div>
 
-							{/* Featured Title */}
-							<h1 className="text-4xl font-bold mt-2 mb-4 text-(--text) group-hover:text-(--link) transition-colors">
+							<h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text) group-hover:text-(--link) transition-colors leading-tight">
 								{featuredPost.title}
-							</h1>
+							</h2>
 
-							{/* Featured Excerpt */}
-							<p className="text-(--text-secondary) text-lg mb-4 line-clamp-3">
+							<p className="text-(--text-secondary) text-sm line-clamp-3 leading-relaxed">
 								{featuredPost.excerpt}
 							</p>
 
-							{/* Meta & Category Badge */}
-							<div className="flex items-center text-sm text-(--text-secondary)">
-								<div className="flex items-center gap-1.5">
-									<span>{new Date(featuredPost.date).toDateString()}</span>
-									<span>|</span>
-									<span>{`Authored by ${featuredPost.user.displayUsername}`}</span>
-								</div>
-								<span className="mx-2">•</span>
-								<span className="rounded-full border border-(--border) bg-(--bg-secondary) px-3.5 py-1 text-xs font-semibold text-(--link) capitalize">
-									{featuredPost.category || "General"}
+							<div className="pt-2 text-xs font-medium text-(--text-secondary) flex items-center gap-2">
+								<span>
+									By{" "}
+									<strong className="text-(--text)">
+										{featuredPost.user.displayUsername}
+									</strong>
 								</span>
 							</div>
 						</div>
 					</Link>
-					<hr className="my-10 text-(--border)" />
 				</section>
 			)}
 
-			{/* Grid Section Header */}
-			<div className="flex justify-between items-end mb-8">
-				<h2 className="text-2xl font-extrabold text-(--text)">
-					Latest Articles
-				</h2>
-				<Link
-					search={{ category: "ALL", search: "" }}
-					to="/articles"
-					className="text-(--link) hover:underline text-sm font-semibold"
-				>
-					View all
-				</Link>
+			{/* Clean Feed List Layout */}
+			<div className="space-y-6 pt-4">
+				<h3 className="text-xs font-bold uppercase tracking-widest text-(--text-secondary) border-b border-(--border) pb-3">
+					Latest Releases
+				</h3>
+
+				<div className="divide-y divide-(--border)">
+					{remainingPosts.map((post: Post) => {
+						console.log(post, "blyat");
+						return (
+							<article
+								key={post.id}
+								className="group py-6 first:pt-0 last:pb-0"
+							>
+								<Link
+									to="/posts/$postId"
+									params={{ postId: post.id.toString() }}
+									className="grid sm:grid-cols-12 gap-4 sm:gap-6 items-start justify-between"
+								>
+									<div className="sm:col-span-8 space-y-2">
+										<div className="flex items-center gap-3 text-xs text-(--text-secondary)">
+											<span className="text-(--link) font-semibold uppercase tracking-wider">
+												{post.category
+													? post.category.split(",")[0].trim()
+													: "General"}
+											</span>
+											<span>•</span>
+											<span className="flex items-center gap-1">
+												<Clock className="w-3 h-3" />{" "}
+												{new Date(post.date).toLocaleDateString()}
+											</span>
+										</div>
+
+										<h4 className="text-lg sm:text-xl font-bold text-(--text) group-hover:text-(--link) transition-colors">
+											{post.title}
+										</h4>
+
+										<p className="text-(--text-secondary) text-xs sm:text-sm line-clamp-2">
+											{post.excerpt}
+										</p>
+									</div>
+
+									{post.image && (
+										<div className="sm:col-span-4 overflow-hidden rounded-lg bg-(--bg-secondary) aspect-[16/10] border border-(--border)">
+											<img
+												src={post.image}
+												alt={post.title}
+												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+											/>
+										</div>
+									)}
+								</Link>
+							</article>
+						);
+					})}
+				</div>
 			</div>
-
-			{/* Grid Section */}
-			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-				{remainingPosts.map((post) => (
-					<article key={post.id} className="group">
-						<Link to="/posts/$postId" params={{ postId: post.id.toString() }}>
-							<div className="overflow-hidden rounded-xl mb-4 bg-(--bg-secondary) border border-(--border)">
-								{post.image && (
-									<img
-										src={post.image}
-										alt={post.title}
-										className="w-full aspect-[16/10] object-cover group-hover:scale-105 transition-transform duration-300"
-									/>
-								)}
-							</div>
-
-							<div className="flex gap-2 overflow-x-auto scrollbar-none truncate mb-2">
-								{post.category ? (
-									post.category.split(",").map((cat) => (
-										<span
-											key={cat}
-											className="rounded-full border border-(--border) bg-(--bg-secondary) px-3 py-0.5 text-xs font-semibold text-(--link) capitalize"
-										>
-											{cat.trim()}
-										</span>
-									))
-								) : (
-									<span className="rounded-full border border-(--border) bg-(--bg-secondary) px-3 py-0.5 text-xs font-semibold text-(--text-secondary) capitalize">
-										General
-									</span>
-								)}
-							</div>
-
-							<h3 className="text-xl font-bold mt-2 mb-2 text-(--text) group-hover:text-(--link) transition-colors">
-								{post.title}
-							</h3>
-							<p className="text-(--text-secondary) line-clamp-2 mb-4 text-sm">
-								{post.excerpt}
-							</p>
-
-							<div className="flex items-center gap-1.5 text-xs text-(--text-secondary)">
-								<span>{new Date(post.date).toDateString()}</span>
-								<span>|</span>
-								<span>{`By ${post.user?.displayUsername || "Anonymous"}`}</span>
-							</div>
-						</Link>
-					</article>
-				))}
-			</div>
-		</>
+		</div>
 	);
 }
 
@@ -204,55 +209,56 @@ function HomeContent() {
 
 function FeaturedPostSkeleton() {
 	return (
-		<section className="animate-pulse">
-			<div className="grid md:grid-cols-2 gap-8 items-center">
-				<Skeleton className="w-full aspect-video rounded-2xl bg-(--bg-secondary)" />
-				<div className="space-y-4">
-					<Skeleton className="h-4 w-28 bg-(--bg-secondary)" />
-					<Skeleton className="h-10 w-4/5 bg-(--bg-secondary)" />
-					<div className="space-y-2">
-						<Skeleton className="h-5 w-full bg-(--bg-secondary)" />
-						<Skeleton className="h-5 w-3/4 bg-(--bg-secondary)" />
-					</div>
-					<div className="flex items-center gap-3 pt-2">
-						<Skeleton className="h-4 w-24 bg-(--bg-secondary)" />
-						<Skeleton className="h-6 w-20 rounded-full bg-(--bg-secondary)" />
-					</div>
+		<div className="grid lg:grid-cols-12 gap-6 items-center bg-(--bg-secondary)/30 p-6 sm:p-8 rounded-2xl border border-(--border) animate-pulse">
+			<Skeleton className="lg:col-span-7 aspect-[16/10] rounded-xl bg-(--bg-secondary)" />
+			<div className="lg:col-span-5 space-y-4">
+				<Skeleton className="h-4 w-28 bg-(--bg-secondary)" />
+				<Skeleton className="h-8 w-full bg-(--bg-secondary)" />
+				<Skeleton className="h-8 w-3/4 bg-(--bg-secondary)" />
+				<div className="space-y-2">
+					<Skeleton className="h-4 w-full bg-(--bg-secondary)" />
+					<Skeleton className="h-4 w-2/3 bg-(--bg-secondary)" />
 				</div>
+				<Skeleton className="h-4 w-32 bg-(--bg-secondary)" />
 			</div>
-			<hr className="my-10 border-(--border)" />
-		</section>
-	);
-}
-
-function ArticleCardSkeleton() {
-	return (
-		<div className="space-y-3 animate-pulse">
-			<Skeleton className="w-full aspect-[16/10] rounded-xl bg-(--bg-secondary)" />
-			<Skeleton className="h-6 w-20 rounded-full bg-(--bg-secondary)" />
-			<Skeleton className="h-6 w-5/6 bg-(--bg-secondary)" />
-			<div className="space-y-2">
-				<Skeleton className="h-4 w-full bg-(--bg-secondary)" />
-				<Skeleton className="h-4 w-2/3 bg-(--bg-secondary)" />
-			</div>
-			<Skeleton className="h-4 w-24 bg-(--bg-secondary)" />
 		</div>
 	);
 }
 
-function HomeSkeleton({ gridCount = 6 }: { gridCount?: number }) {
+function ArticleRowSkeleton() {
 	return (
-		<div>
-			<FeaturedPostSkeleton />
-			<div className="flex justify-between items-end mb-8">
-				<Skeleton className="h-8 w-44 bg-(--bg-secondary)" />
-				<Skeleton className="h-4 w-16 bg-(--bg-secondary)" />
+		<div className="py-6 grid sm:grid-cols-12 gap-4 sm:gap-6 items-center animate-pulse">
+			<div className="sm:col-span-8 space-y-2">
+				<Skeleton className="h-3 w-32 bg-(--bg-secondary)" />
+				<Skeleton className="h-6 w-full bg-(--bg-secondary)" />
+				<Skeleton className="h-4 w-4/5 bg-(--bg-secondary)" />
 			</div>
-			<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-				{Array.from({ length: gridCount }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: No-fix atm
-					<ArticleCardSkeleton key={i} />
-				))}
+			<Skeleton className="sm:col-span-4 aspect-[16/10] rounded-lg bg-(--bg-secondary)" />
+		</div>
+	);
+}
+
+function HomeSkeleton({ gridCount = 4 }: { gridCount?: number }) {
+	return (
+		<div className="space-y-12">
+			<header className="border-b border-(--border) pb-8 flex justify-between items-end">
+				<div className="space-y-2">
+					<Skeleton className="h-4 w-32 bg-(--bg-secondary)" />
+					<Skeleton className="h-10 w-64 bg-(--bg-secondary)" />
+				</div>
+				<Skeleton className="h-4 w-28 bg-(--bg-secondary)" />
+			</header>
+
+			<FeaturedPostSkeleton />
+
+			<div className="space-y-6 pt-4">
+				<Skeleton className="h-3 w-32 bg-(--bg-secondary)" />
+				<div className="divide-y divide-(--border)">
+					{Array.from({ length: gridCount }).map((_, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: No-fix atm
+						<ArticleRowSkeleton key={i} />
+					))}
+				</div>
 			</div>
 		</div>
 	);

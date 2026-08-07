@@ -39,6 +39,9 @@ function LoginPage() {
 										Successfully signed in to your account.
 									</span>
 								</div>,
+								{
+									position: "top-center",
+								},
 							);
 							navigate({ to: "/" });
 						},
