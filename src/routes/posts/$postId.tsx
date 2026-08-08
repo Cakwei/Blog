@@ -26,6 +26,10 @@ export const getPostById = createServerFn({ method: "GET" })
 	.handler(async ({ data: postId }) => {
 		const post = await prisma.post.findUnique({
 			where: { id: parseInt(postId, 10) },
+			include: {
+				categories: true, // Fixed: include the many-to-many relation
+				user: true, // Include author relation for display purposes
+			},
 		});
 
 		if (!post) throw new Error("Post not found");
@@ -110,14 +114,14 @@ function PostContent({ postId }: { postId: string }) {
 		<article className="container max-w-3xl mx-auto py-20 px-4">
 			<div className="space-y-4 text-center mb-8">
 				<div className="flex w-full gap-2.5 justify-center flex-wrap">
-					{post.category ? (
-						post.category.split(",").map((cat) => (
+					{post.categories && post.categories.length > 0 ? (
+						post.categories.map((cat) => (
 							<Badge
-								key={cat}
+								key={cat.id}
 								variant="secondary"
 								className="rounded-full bg-(--bg-secondary) border border-(--border) px-3.5 py-1 text-xs font-bold text-(--link) capitalize"
 							>
-								{cat}
+								{cat.name}
 							</Badge>
 						))
 					) : (
@@ -132,13 +136,22 @@ function PostContent({ postId }: { postId: string }) {
 				<h1 className="text-4xl md:text-5xl text-(--text) font-extrabold tracking-tight">
 					{post.title}
 				</h1>
-				<div className="text-(--text-secondary) text-sm">
-					Published on{" "}
-					{new Date(post.date).toLocaleDateString("en", {
-						day: "numeric",
-						month: "long",
-						year: "numeric",
-					})}
+				<div className="text-(--text-secondary) text-sm flex items-center justify-center gap-2">
+					<span>
+						By{" "}
+						<strong className="text-(--text)">
+							{post.user?.displayUsername || post.user?.name || "Author"}
+						</strong>
+					</span>
+					<span>•</span>
+					<span>
+						Published on{" "}
+						{new Date(post.date).toLocaleDateString("en", {
+							day: "numeric",
+							month: "long",
+							year: "numeric",
+						})}
+					</span>
 				</div>
 			</div>
 

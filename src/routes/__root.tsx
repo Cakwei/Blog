@@ -71,6 +71,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 									e.preventDefault();
 									if (isCurrentRoute) {
 										window.scrollTo({ top: 0, behavior: "smooth" });
+										return;
 									}
 									navigate({ to: "/" });
 								}}
@@ -122,7 +123,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				</header>
 
 				{/* MAIN CONTENT WRAPPER */}
-				<div className="flex-1">{children}</div>
+				{children}
 
 				<Toaster />
 

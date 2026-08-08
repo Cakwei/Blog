@@ -2,13 +2,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Editor } from "@tiptap/core";
-import {
-	ArrowLeft,
-	Edit3,
-	Image as ImageIcon,
-	Sparkles,
-	Upload,
-} from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { toast } from "sonner";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
@@ -33,16 +27,24 @@ import type { IEditorSavingContext, IResponse } from "#/lib/types";
 import { getSessionFn, logger } from "#/lib/utils";
 
 const getPostForEdit = createServerFn({ method: "GET" })
-	.validator((postId: string) => postId)
+	.validator((postId: string) => {
+		if (!postId || typeof postId !== "string")
+			throw new Error("Invalid post ID");
+		return postId;
+	})
 	.handler(async ({ data: postId }) => {
 		const session = await getSessionFn();
 		if (!session?.user?.id) throw new Error("Unauthorized session");
 
 		const parsedId = parseInt(postId, 10);
-		if (isNaN(parsedId)) throw new Error("Invalid post ID format");
+		if (isNaN(parsedId) || parsedId <= 0)
+			throw new Error("Invalid post ID format");
 
 		const post = await prisma.post.findUnique({
 			where: { id: parsedId },
+			include: {
+				categories: true, // Fixed: use relation plural name matching schema
+			},
 		});
 
 		if (!post) throw new Error("Post not found");
@@ -60,6 +62,7 @@ const editPostQueryOptions = (postId: string) =>
 	queryOptions({
 		queryKey: ["editPost", postId],
 		queryFn: () => getPostForEdit({ data: postId }),
+		staleTime: 1000 * 60 * 5,
 	});
 
 export const Route = createFileRoute("/_protected/posts/edit/$postId")({
@@ -73,10 +76,27 @@ export const Route = createFileRoute("/_protected/posts/edit/$postId")({
 
 const uploadImgToS3ServerFn = createServerFn({ method: "POST" })
 	.validator(
-		(data: { fileName: string; fileType: string; base64Data: string }) => data,
+		(data: { fileName: string; fileType: string; base64Data: string }) => {
+			if (!data.fileName || !data.fileType || !data.base64Data) {
+				throw new Error("Missing image upload payload data");
+			}
+			if (!data.fileType.startsWith("image/")) {
+				throw new Error("Invalid file type. Only images are permitted.");
+			}
+			return data;
+		},
 	)
 	.handler(async ({ data }) => {
 		try {
+			const session = await getSessionFn();
+			if (!session?.user?.id) {
+				return {
+					success: false,
+					url: "",
+					message: "Unauthorized upload session",
+				};
+			}
+
 			const { Upload } = await import("@aws-sdk/lib-storage");
 			const { s3Client } = await import("#/lib/s3");
 
@@ -87,7 +107,16 @@ const uploadImgToS3ServerFn = createServerFn({ method: "POST" })
 			const base64Content = data.base64Data.includes(",")
 				? data.base64Data.split(",")[1]
 				: data.base64Data;
+
+			if (!base64Content) {
+				throw new Error("Corrupted base64 payload data");
+			}
+
 			const buffer = Buffer.from(base64Content, "base64");
+
+			if (buffer.length > 5 * 1024 * 1024) {
+				throw new Error("File payload exceeds strict 5MB server limit.");
+			}
 
 			const uploader = new Upload({
 				client: s3Client,
@@ -126,18 +155,15 @@ const updatePostInDB = createServerFn({ method: "POST" })
 			jsonContent: any;
 			blogImg: string;
 			tags: Array<string>;
-		}) => data,
+		}) => {
+			if (!data.postId || !data.jsonContent || !data.blogImg || !data.title) {
+				throw new Error("Required fields are missing for database update");
+			}
+			return data;
+		},
 	)
 	.handler(async ({ data }) => {
 		try {
-			if (!data.postId || !data.jsonContent || !data.blogImg || !data.title) {
-				return {
-					success: false,
-					message: "Required fields are missing",
-					data: {},
-				};
-			}
-
 			const session = await getSessionFn();
 			if (!session?.user?.id) {
 				return { success: false, message: "Unauthorized session", data: {} };
@@ -148,17 +174,45 @@ const updatePostInDB = createServerFn({ method: "POST" })
 			});
 
 			if (!existingPost || existingPost.userId !== session.user.id) {
-				return { success: false, message: "Unauthorized action", data: {} };
+				return {
+					success: false,
+					message: "Unauthorized or resource not found",
+					data: {},
+				};
 			}
+
+			// Process tag upserts only if tags array has elements
+			const categoryRecords =
+				data.tags && data.tags.length > 0
+					? await Promise.all(
+							data.tags.map(async (catName: string) => {
+								const categorySlug = catName
+									.toLowerCase()
+									.replace(/[^a-z0-9]+/g, "-")
+									.replace(/(^-|-$)/g, "");
+
+								return prisma.category.upsert({
+									where: { slug: categorySlug },
+									update: {},
+									create: {
+										name: catName,
+										slug: categorySlug,
+									},
+								});
+							}),
+						)
+					: [];
 
 			await prisma.post.update({
 				where: { id: data.postId },
 				data: {
-					title: data.title,
-					excerpt: data.excerpt || "",
-					category: data.tags ? data.tags.join(",") : "",
+					title: data.title.trim(),
+					excerpt: data.excerpt ? data.excerpt.trim() : "",
 					image: data.blogImg,
 					content: data.jsonContent,
+					categories: {
+						set: categoryRecords.map((cat) => ({ id: cat.id })), // Clears categories if tags is empty array
+					},
 				},
 			});
 
@@ -184,7 +238,6 @@ function EditPostRoutePage() {
 	return (
 		<EditorProvider initialContent={post.content}>
 			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden">
-				{/* Atmospheric Ambient Glow Background */}
 				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-(--link)/10 via-(--link)/5 to-transparent blur-[120px] pointer-events-none -z-10" />
 
 				<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -222,7 +275,7 @@ function EditPostForm({ postId }: { postId: string }) {
 	const { queryClient } = Route.useRouteContext();
 	const [title, setTitle] = useState(post.title || "");
 	const [tags, setTags] = useState<Array<string>>(
-		post.category ? post.category.split(",") : [],
+		post.categories ? post.categories.map((c) => c.name) : [],
 	);
 	const [blogHeroImg, setBlogHeroImg] = useState<File | null>(null);
 	const [existingImgUrl] = useState<string>(post.image || "");
@@ -239,7 +292,6 @@ function EditPostForm({ postId }: { postId: string }) {
 				Back to your posts
 			</Link>
 
-			{/* Header Section with Modern Action Bar */}
 			<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-(--border)/60 pb-8">
 				<div className="space-y-2">
 					<div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-(--link)/10 border border-(--link)/20 text-(--link) text-[11px] font-bold uppercase tracking-widest">
@@ -308,7 +360,9 @@ function EditPostForm({ postId }: { postId: string }) {
 								} catch (e) {
 									logger("error", "Failed to clear local storage draft", e);
 								}
-								queryClient.invalidateQueries({ queryKey: ["editPost"] });
+								queryClient.invalidateQueries({
+									queryKey: ["editPost", postId],
+								});
 								navigate({ to: "/posts" });
 							},
 							{
@@ -325,9 +379,7 @@ function EditPostForm({ postId }: { postId: string }) {
 				</Button>
 			</div>
 
-			{/* Form Controls Container */}
 			<div className="space-y-6 bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
-				{/* Title Input */}
 				<div className="flex flex-col gap-2.5">
 					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Post Title
@@ -341,7 +393,6 @@ function EditPostForm({ postId }: { postId: string }) {
 					/>
 				</div>
 
-				{/* Hero Image Section */}
 				<div className="flex flex-col gap-2.5">
 					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Hero Cover Image
@@ -363,7 +414,6 @@ function EditPostForm({ postId }: { postId: string }) {
 					</div>
 				</div>
 
-				{/* Tags Combobox */}
 				<div className="flex flex-col gap-2.5">
 					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Categories & Tags
@@ -392,9 +442,7 @@ function EditPostForm({ postId }: { postId: string }) {
 										))}
 										<ComboboxChipsInput
 											className="text-(--text) bg-transparent placeholder:text-(--text-secondary) outline-none text-xs sm:text-sm ml-1 py-1 flex-1"
-											placeholder={
-												tags.length > 0 ? "" : "Select up to 5 tags..."
-											}
+											placeholder={tags.length > 0 ? "" : "Select tags..."}
 										/>
 									</div>
 								)}
@@ -423,7 +471,6 @@ function EditPostForm({ postId }: { postId: string }) {
 				</div>
 			</div>
 
-			{/* Editor Workspace Panel */}
 			<div className="w-full bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-3">
 				<Label className="text-xs font-bold uppercase tracking-wider text-(--text) block">
 					Post Content
@@ -431,7 +478,6 @@ function EditPostForm({ postId }: { postId: string }) {
 				<div className="w-full rounded-2xl overflow-hidden border border-(--border) bg-(--bg)">
 					<SimpleEditor
 						setData={(data) => {
-							logger("debug", "yuta:3", data);
 							setEditorData(data);
 							try {
 								localStorage.setItem(
@@ -449,13 +495,14 @@ function EditPostForm({ postId }: { postId: string }) {
 	);
 }
 
-const EditorSavingContext = createContext<IEditorSavingContext>({
+export const EditorSavingContext = createContext<IEditorSavingContext>({
 	isSaving: false,
 	setIsSaving: () => {},
 	editor: null,
 	setEditor: () => {},
 	initialContent: null,
 });
+
 export const EditorProvider = ({
 	children,
 	initialContent,

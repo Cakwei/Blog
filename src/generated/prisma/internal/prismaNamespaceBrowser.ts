@@ -51,11 +51,11 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Todo: 'Todo',
   User: 'User',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
+  Category: 'Category',
   Post: 'Post'
 } as const
 
@@ -73,15 +73,6 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
-
-
-export const TodoScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  createdAt: 'createdAt'
-} as const
-
-export type TodoScalarFieldEnum = (typeof TodoScalarFieldEnum)[keyof typeof TodoScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
@@ -144,15 +135,27 @@ export const VerificationScalarFieldEnum = {
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
 
 
+export const CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug'
+} as const
+
+export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
 export const PostScalarFieldEnum = {
   id: 'id',
+  slug: 'slug',
   title: 'title',
   excerpt: 'excerpt',
   date: 'date',
-  category: 'category',
   image: 'image',
-  userId: 'userId',
-  content: 'content'
+  content: 'content',
+  published: 'published',
+  isFeatured: 'isFeatured',
+  views: 'views',
+  userId: 'userId'
 } as const
 
 export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
@@ -171,13 +174,6 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
-export const TodoOrderByRelevanceFieldEnum = {
-  title: 'title'
-} as const
-
-export type TodoOrderByRelevanceFieldEnum = (typeof TodoOrderByRelevanceFieldEnum)[keyof typeof TodoOrderByRelevanceFieldEnum]
 
 
 export const NullsOrder = {
@@ -235,6 +231,14 @@ export const VerificationOrderByRelevanceFieldEnum = {
 export type VerificationOrderByRelevanceFieldEnum = (typeof VerificationOrderByRelevanceFieldEnum)[keyof typeof VerificationOrderByRelevanceFieldEnum]
 
 
+export const CategoryOrderByRelevanceFieldEnum = {
+  name: 'name',
+  slug: 'slug'
+} as const
+
+export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
+
+
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -253,9 +257,9 @@ export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
 export const PostOrderByRelevanceFieldEnum = {
+  slug: 'slug',
   title: 'title',
   excerpt: 'excerpt',
-  category: 'category',
   image: 'image',
   userId: 'userId'
 } as const
