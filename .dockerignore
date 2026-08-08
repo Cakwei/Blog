@@ -1,0 +1,12 @@
+node_modules
+.output
+.vinxi
+.nitro
+dist
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+.env
+**.env
+.env*.local

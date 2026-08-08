@@ -28,7 +28,7 @@ import ImageUploader from "#/components/ui/fileUpload";
 import { Label } from "#/components/ui/label";
 import { CATEGORIES } from "#/lib/const";
 import type { IEditorSavingContext, IResponse } from "#/lib/types";
-import { logger } from "#/lib/utils";
+import { getHeadersCookieFn, logger } from "#/lib/utils";
 
 export const Route = createFileRoute("/_protected/posts/create/")({
 	component: NewPostPage,
@@ -97,16 +97,23 @@ function NewPostForm() {
 
 				validateFile(blogHeroImg);
 				const base64Data = await fileToBase64(blogHeroImg);
-
+				const cookie = await getHeadersCookieFn();
 				// Send streamlined request to the single API endpoint handling S3 upload & DB storage sequentially
-				const response = await axios.post<IResponse>("/api/posts", {
-					title: value.title,
-					jsonContent: data,
-					tags: value.tags,
-					fileName: blogHeroImg.name,
-					fileType: blogHeroImg.type,
-					base64Data,
-				});
+				const response = await axios.post<IResponse>(
+					"/api/posts",
+					{
+						title: value.title,
+						jsonContent: data,
+						tags: value.tags,
+						fileName: blogHeroImg.name,
+						fileType: blogHeroImg.type,
+						base64Data,
+					},
+					{
+						withCredentials: true,
+						headers: { cookie: cookie },
+					},
+				);
 
 				const result = response.data;
 
