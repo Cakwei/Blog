@@ -83,17 +83,24 @@ function NewPostForm() {
 		},
 		onSubmit: async ({ value }) => {
 			if (!blogHeroImg) {
-				toast.error("Please upload a hero background image.");
+				toast.error("Please upload a hero background image.", {
+					position: "top-center",
+				});
 				return;
 			}
 
 			if (!data) {
-				toast.error("Blog content cannot be empty.");
+				toast.error("Blog content cannot be empty.", {
+					position: "top-center",
+				});
 				return;
 			}
 
 			try {
-				toast.loading("Publishing blog...", { id: "save-blog" });
+				toast.loading("Publishing blog...", {
+					id: "save-blog",
+					position: "top-center",
+				});
 
 				validateFile(blogHeroImg);
 				const base64Data = await fileToBase64(blogHeroImg);
@@ -127,7 +134,10 @@ function NewPostForm() {
 					logger("error", "Failed to clear local storage draft", e);
 				}
 
-				toast.success("Blog successfully published!", { id: "save-blog" });
+				toast.success("Blog successfully published!", {
+					id: "save-blog",
+					position: "top-center",
+				});
 				navigate({ to: "/posts" });
 			} catch (error: any) {
 				logger("error", error);
@@ -135,7 +145,7 @@ function NewPostForm() {
 					error?.response?.data?.message ||
 						error?.message ||
 						"An error occurred publishing your blog.",
-					{ id: "save-blog" },
+					{ id: "save-blog", position: "top-center" },
 				);
 			}
 		},
@@ -145,10 +155,14 @@ function NewPostForm() {
 		<div className="space-y-8">
 			<Link
 				to="/posts"
-				className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
+				className="hover inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
 			>
-				<ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />{" "}
-				Back to your posts
+				<div className="group-hover:border-b gap-1 border-(--link) flex items-center">
+					<ArrowLeft className="w-3.5 h-3.5 text-(--text-secondary)" />
+					<span className="hover-(--link) text-(--text-secondary)">
+						Back to your posts
+					</span>
+				</div>
 			</Link>
 
 			<form

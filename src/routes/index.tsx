@@ -28,6 +28,7 @@ interface IPost extends Post {
 
 // Functions
 async function getPosts() {
+	console.log(import.meta.env.SSR, 'btd')
 	const response = await axios.get(
 		`${API_URL}/api/posts`,
 		import.meta.env.SSR

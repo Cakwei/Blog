@@ -190,17 +190,17 @@ function PostRow({ post }: { post: any }) {
 				<Link
 					to="/posts/$postId"
 					params={{ postId: post.id.toString() }}
-					className="inline-flex items-center gap-1 px-3.5 py-2 text-xs font-semibold rounded-xl bg-(--bg) border border-(--border) text-(--text) hover:text-(--link) hover:border-(--link)/40 transition-all shadow-xs"
+					className="group/2 inline-flex items-center gap-1 px-3.5 py-2 text-xs font-semibold rounded-xl bg-(--bg) border border-(--border) text-(--text) hover:text-(--link) hover:border-(--link)/40 transition-all shadow-xs"
 				>
-					<span>View</span>
-					<ArrowUpRight className="w-3 h-3" />
+					<span className="text-(--link) group-hover/2:text-(--text)">View</span>
+					<ArrowUpRight className="w-3 h-3 group-hover/2:text-(--text) text-(--link)" />
 				</Link>
 				<Link
 					to="/posts/edit/$postId"
 					params={{ postId: post.id.toString() }}
-					className="inline-flex items-center px-3.5 py-2 text-xs font-semibold rounded-xl bg-(--link)/10 text-(--link) border border-(--link)/20 hover:bg-(--link) hover:text-white transition-all shadow-xs"
+					className="group/2 inline-flex items-center px-3.5 py-2 text-xs font-semibold rounded-xl bg-(--link)/10 text-(--link) border border-(--link)/20 hover:bg-(--link) hover:text-white transition-all shadow-xs"
 				>
-					<span>Edit</span>
+					<span className="text-(--link) group-hover/2:text-(--text)">Edit</span>
 				</Link>
 			</div>
 		</div>

@@ -15,7 +15,8 @@ import BetterAuthHeader from "#/components/ui/headers";
 import { Toaster } from "#/components/ui/sonner";
 import { getSessionFn } from "#/lib/utils";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
-import appCss from "../styles.css?url";
+//import appCss from "../styles.css?url";
+import "../styles.css";
 
 export interface MyRouterContext {
 	queryClient: QueryClient;
@@ -40,12 +41,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				title: "Charlee's Blog",
 			},
 		],
-		links: [
+		/*	links: [
 			{
 				rel: "stylesheet",
 				href: appCss,
 			},
-		],
+		],*/
 	}),
 	shellComponent: RootDocument,
 });
@@ -152,10 +153,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								<ul className="space-y-2 text-xs text-(--text-secondary)">
 									<li>
 										<Link
-											to="/"
+											to="/posts"
 											className="hover:text-(--link) transition-colors"
 										>
-											Home Feed
+											<span className="hover:text-(--link) text-(--text-secondary)">
+												My Posts
+											</span>
 										</Link>
 									</li>
 									<li>
@@ -163,7 +166,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 											to="/articles"
 											className="hover:text-(--link) transition-colors"
 										>
-											Explore Articles
+											<span className="hover:text-(--link) text-(--text-secondary)">
+												Explore Articles
+											</span>
 										</Link>
 									</li>
 								</ul>

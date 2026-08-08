@@ -42,10 +42,10 @@ export default function BetterAuthHeader() {
 					<Button
 						onClick={() => navigate({ to: "/posts" })}
 						variant="ghost"
-						className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-(--bg-secondary)/60 hover:bg-(--bg-secondary) border border-(--border) hover:border-(--link)/40 text-(--text) font-medium text-xs h-9 px-3.5 transition-all"
+						className="hidden group sm:inline-flex items-center gap-2 rounded-xl bg-(--bg-secondary)/60 hover:bg-(--bg-secondary) border border-(--border) hover:border-(--link)/40 text-(--text) font-medium text-xs h-9 px-3.5 transition-all"
 					>
 						<PenSquare className="w-3.5 h-3.5 text-(--link)" />
-						<span>Write</span>
+						<span className="group-hover:text-(--text) text-(--text-secondary)">Write</span>
 					</Button>
 				)}
 
