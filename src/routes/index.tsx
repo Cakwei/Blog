@@ -17,30 +17,38 @@ import { Skeleton } from "#/components/ui/skeleton";
 import type { Category, Post, User } from "#/generated/prisma/client";
 import { API_URL } from "#/lib/const";
 import type { IResponse } from "#/lib/types";
-import { logger } from "#/lib/utils";
+import { getHeadersCookieFn, logger } from "#/lib/utils";
 
+// Interfaces / Types
 interface IPost extends Post {
 	categories: Category[];
 	user: User;
 }
+// ==================
 
+// Functions
+async function getPosts() {
+	const response = await axios.get(
+		`${API_URL}/api/posts`,
+		import.meta.env.SSR
+			? { headers: { cookie: await getHeadersCookieFn() } }
+			: {
+					withCredentials: true,
+				},
+	);
+	logger("debug", "oopppp", response.data);
+
+	return response.data as IResponse;
+}
+// ==================
+
+// Query Options
 const postsQueryOptions = queryOptions({
 	queryKey: ["posts"],
-	queryFn: async () => {
-		const response = await axios.get(
-			`${API_URL}/api/posts`,
-			typeof window !== "undefined"
-				? {}
-				: {
-						withCredentials: true,
-					},
-		);
-		logger("debug", "oopppp", response.data);
-
-		return response.data as IResponse;
-	},
+	queryFn: async () => await getPosts(),
 	refetchInterval: 1000 * 1,
 });
+// ==================
 
 export const Route = createFileRoute("/")({
 	loader: async ({ context }) => {

@@ -17,5 +17,5 @@ export const MESSAGE = {
 
 export const API_URL =
 	process.env.NODE_ENV === "production"
-		? process.env.BETTER_AUTH_URL
+		? import.meta.env.VITE_API_URL
 		: "http://localhost:3000";

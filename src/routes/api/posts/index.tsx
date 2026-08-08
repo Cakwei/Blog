@@ -11,10 +11,9 @@ export const Route = createFileRoute("/api/posts/")({
 		handlers: ({ createHandlers }) =>
 			createHandlers({
 				GET: {
-					middleware: [authMiddleware],
-					handler: async ({ request, context }) => {
+					//	middleware: [authMiddleware],
+					handler: async ({ request }) => {
 						try {
-							console.log("blyat", context.session);
 							const url = new URL(request.url);
 							const search = url.searchParams.get("search") || "";
 							const limit = safeParseInt(url.searchParams.get("limit")) || 10;
