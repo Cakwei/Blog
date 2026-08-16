@@ -42,7 +42,10 @@ function RegisterPage() {
 										Successfully registered your account. Please sign in.
 									</span>
 								</div>,
-							);
+						{
+									position: "top-center",
+								},
+								);
 							window.location.href = "/login";
 						},
 						onError: ({ error }) => {
@@ -56,7 +59,9 @@ function RegisterPage() {
 										{error.message ||
 											"Account with this username or email already exists."}
 									</span>
-								</div>,
+								</div>,{
+									position: "top-center",
+								},
 							);
 						},
 					},
@@ -71,7 +76,9 @@ function RegisterPage() {
 						<span className="text-white text-sm">
 							Please check your network connection and try again.
 						</span>
-					</div>,
+					</div>,{
+									position: "top-center",
+								},
 				);
 			}
 		},

@@ -114,7 +114,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								</Link>
 
 								<Link to="/register">
-									<Button className="bg-(--link) hover:bg-(--link)/90 font-semibold text-white text-xs h-9 px-4 rounded-xl shadow-lg shadow-(--link)/20 transition-all">
+									<Button className="bg-(--link) hover:bg-(--link)/90 text-white text-xs h-9 px-4 rounded-md shadow-lg shadow-(--link)/20 transition-all">
 										Sign up
 									</Button>
 								</Link>
@@ -126,7 +126,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				{/* MAIN CONTENT WRAPPER */}
 				{children}
 
-				<Toaster />
+				<Toaster closeButton={true} duration={1600} />
 
 				{/* FOOTER */}
 				<footer className="border-t border-(--border)/60 py-16 bg-(--bg-secondary)/40 backdrop-blur-md">
@@ -134,9 +134,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						<div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-16">
 							<div className="md:col-span-6 space-y-3">
 								<div className="flex items-center gap-2">
-									<div className="w-6 h-6 rounded-lg bg-(--link)/10 border border-(--link)/30 flex items-center justify-center text-(--link) text-xs font-bold">
-										C
-									</div>
 									<span className="text-base font-black tracking-tight text-(--text)">
 										Charlee's<span className="text-(--link)"> Blog</span>
 									</span>

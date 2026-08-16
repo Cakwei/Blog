@@ -1,17 +1,27 @@
 // routes/hello.ts
 
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { prisma } from "#/db";
 import { MESSAGE } from "#/lib/const";
 import { authMiddleware } from "#/lib/middleware";
 import { logger, parseBody, safeParseInt } from "#/lib/utils";
+
+const createPostSchema = z.object({
+	title: z.string().min(1, "Title is required"),
+	jsonContent: z.any(),
+	tags: z.array(z.string()).optional(),
+	fileName: z.string().min(1, "File name is required"),
+	fileType: z.string().min(1, "File type is required"),
+	base64Data: z.string().min(1, "Base64 image data is required"),
+});
 
 export const Route = createFileRoute("/api/posts/")({
 	server: {
 		handlers: ({ createHandlers }) =>
 			createHandlers({
 				GET: {
-					//	middleware: [authMiddleware],
+					//  middleware: [authMiddleware],
 					handler: async ({ request }) => {
 						try {
 							const url = new URL(request.url);
@@ -70,7 +80,24 @@ export const Route = createFileRoute("/api/posts/")({
 					handler: async ({ request, context }) => {
 						try {
 							const body = await parseBody(request);
-							console.log(body);
+
+							// Validate and parse body using Zod
+							const result = createPostSchema.safeParse(body);
+
+							if (!result.success) {
+								const errorMessage = result.error.issues
+									.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+									.join(", ");
+
+								return Response.json(
+									{
+										success: false,
+										message: errorMessage || "Validation failed",
+									},
+									{ status: 400 },
+								);
+							}
+
 							const {
 								title,
 								jsonContent,
@@ -78,24 +105,7 @@ export const Route = createFileRoute("/api/posts/")({
 								fileName,
 								fileType,
 								base64Data,
-							} = body;
-
-							// Validate required fields
-							if (
-								!title ||
-								!jsonContent ||
-								!base64Data ||
-								!fileName ||
-								!fileType
-							) {
-								return Response.json(
-									{
-										success: false,
-										message: "Required fields or image data are missing",
-									},
-									{ status: 400 },
-								);
-							}
+							} = result.data;
 
 							const session = context.session;
 

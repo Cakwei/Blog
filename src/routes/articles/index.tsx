@@ -1,7 +1,6 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { logger } from "better-auth";
 import debounce from "lodash.debounce";
 import {
 	ArrowLeft,
@@ -24,12 +23,7 @@ import {
 	useTransition,
 } from "react";
 import { Button } from "#/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from "#/components/ui/card";
+import { Card, CardFooter, CardHeader } from "#/components/ui/card";
 import { Input } from "#/components/ui/input";
 import { Skeleton } from "#/components/ui/skeleton";
 import { prisma } from "#/db";
@@ -68,7 +62,6 @@ const getFilteredPosts = createServerFn({ method: "GET" })
 						: {},
 					categoryFilter
 						? {
-								// Fixed: Use 'categories' (many-to-many relation) with 'some'
 								categories: {
 									some: {
 										name: { contains: categoryFilter },
@@ -88,7 +81,6 @@ const getFilteredPosts = createServerFn({ method: "GET" })
 				title: true,
 				userId: true,
 				categories: {
-					// Fixed: Match schema plural relation name
 					select: {
 						id: true,
 						name: true,
@@ -135,10 +127,7 @@ export const Route = createFileRoute("/articles/")({
 	pendingComponent: ArticlesPageSkeleton,
 });
 
-/* -------------------------------------------------------------------------- */
-/*                               Provider Context                             */
-/* -------------------------------------------------------------------------- */
-
+/* Provider Context */
 type ArticlesContextType = {
 	searchParams: ArticlesSearch;
 	searchTerm: string;
@@ -206,7 +195,8 @@ function AllArticlesPage() {
 				isPending,
 			}}
 		>
-			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden">
+			{/* Removed overflow-hidden from root to prevent clipping absolute elements */}
+			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative">
 				{/* Modern Atmospheric Gradient Background */}
 				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-(--link)/10 via-(--link)/5 to-transparent blur-[120px] pointer-events-none -z-10" />
 
@@ -218,8 +208,10 @@ function AllArticlesPage() {
 								to="/"
 								className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
 							>
-								<ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />{" "}
-								Back to Home
+								<ArrowLeft className="w-3.5 h-3.5 text-(--text-secondary) transition-colors group-hover:text-(--link)" />{" "}
+								<span className="text-(--text-secondary) transition-colors group-hover:text-(--link)">
+									Back to Home
+								</span>
 							</Link>
 
 							<div className="space-y-2">
@@ -259,7 +251,7 @@ function FilterControlsBar() {
 	const { searchTerm, setSearchTerm } = useArticlesContext();
 
 	return (
-		<div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-(--bg-secondary)/60 p-3 sm:p-4 rounded-3xl border border-(--border) backdrop-blur-2xl shadow-xl">
+		<div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-(--bg-secondary)/60 p-3 sm:p-4 rounded-md border border-(--border) backdrop-blur-2xl shadow-xl relative z-30">
 			{/* Search Input */}
 			<div className="relative w-full md:w-[420px]">
 				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--link)" />
@@ -268,7 +260,7 @@ function FilterControlsBar() {
 					placeholder="Search by title, topic, or keyword..."
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
-					className="w-full bg-(--bg) border-(--border) rounded-2xl pl-11 pr-4 py-3 text-xs sm:text-sm text-(--text) placeholder:text-(--text-secondary) focus-visible:ring-(--link)/50 shadow-inner"
+					className="w-full bg-(--bg) border-(--border) rounded-md pl-11 pr-4 py-3 text-xs sm:text-sm text-(--text) placeholder:text-(--text-secondary) focus-visible:ring-(--link)/50 shadow-inner"
 				/>
 			</div>
 
@@ -305,27 +297,27 @@ function CategoryDropdown() {
 	}, [categoryQuery]);
 
 	return (
-		<div className="relative w-full md:w-72" ref={dropdownRef}>
+		<div className="relative w-full md:w-72 isolate" ref={dropdownRef}>
 			<Button
 				type="button"
 				variant="outline"
 				onClick={() => setCategoryOpen(!categoryOpen)}
-				className="w-full justify-between items-center bg-(--bg) border-(--border) hover:bg-(--bg-secondary) rounded-2xl px-4 py-3 text-xs sm:text-sm text-(--text) capitalize font-semibold shadow-sm"
+				className="w-full justify-between items-center bg-(--bg) border-(--border) hover:bg-(--bg-secondary) rounded-md px-4 py-3 text-xs sm:text-sm text-(--text) capitalize font-semibold shadow-sm"
 			>
-				<span className="truncate">
+				<span className="truncate text-(--text-secondary)">
 					{selectedCategory === "all" ? "All Categories" : selectedCategory}
 				</span>
 				<ChevronDown className="w-4 h-4 text-(--link) shrink-0 ml-2" />
 			</Button>
 
 			{categoryOpen && (
-				<div className="absolute right-0 z-20 mt-2 w-full bg-(--bg-secondary) border border-(--border) rounded-3xl shadow-2xl overflow-hidden p-3 backdrop-blur-2xl">
+				<div className="absolute right-0 z-50 mt-2 w-full bg-(--bg-secondary) border border-(--border) rounded-md shadow-2xl overflow-hidden p-3 backdrop-blur-2xl">
 					<input
 						type="text"
 						placeholder="Filter categories..."
 						value={categoryQuery}
 						onChange={(e) => setCategoryQuery(e.target.value)}
-						className="w-full bg-(--bg) border border-(--border) rounded-xl px-3.5 py-2.5 text-xs text-(--text) placeholder:text-(--text-secondary) focus:outline-none focus:border-(--link) mb-2.5"
+						className="w-full bg-(--bg) border border-(--border) rounded-md px-3.5 py-2.5 text-xs text-(--text) placeholder:text-(--text-secondary) focus:outline-none focus:border-(--link) mb-2.5"
 					/>
 					<div className="max-h-52 overflow-y-auto space-y-1">
 						<Button
@@ -335,9 +327,9 @@ function CategoryDropdown() {
 								setSelectedCategory("all");
 								setCategoryOpen(false);
 							}}
-							className={`w-full justify-start px-3.5 py-2.5 text-xs rounded-xl transition-all font-semibold ${
+							className={`w-full justify-start px-3.5 py-2.5 text-xs rounded-md transition-all font-semibold ${
 								selectedCategory === "all"
-									? "bg-(--link) text-white hover:bg-(--link) shadow-md shadow-(--link)/20"
+									? "bg-(--link) text-white hover:bg-(--link) shadow-md shadow-(--link)/20 hover:text-(--text)/80"
 									: "text-(--text-secondary) hover:bg-(--border)/60 hover:text-(--text)"
 							}`}
 						>
@@ -347,14 +339,13 @@ function CategoryDropdown() {
 							<Button
 								key={cat}
 								type="button"
-								variant="ghost"
 								onClick={() => {
 									setSelectedCategory(cat);
 									setCategoryOpen(false);
 								}}
-								className={`w-full justify-start px-3.5 py-2.5 text-xs rounded-xl transition-all capitalize font-semibold ${
+								className={`w-full bg-transparent justify-start px-3.5 py-2.5 text-xs rounded-md transition-all capitalize font-semibold ${
 									selectedCategory === cat
-										? "bg-(--link) text-white hover:bg-(--link) shadow-md shadow-(--link)/20"
+										? "bg-(--link)  hover:bg-(--link)/80 shadow-md shadow-(--link)/20 text-(--text)"
 										: "text-(--text-secondary) hover:bg-(--border)/60 hover:text-(--text)"
 								}`}
 							>
@@ -374,7 +365,7 @@ function PostsGrid() {
 
 	return (
 		<div
-			className={`transition-opacity duration-300 ${
+			className={`transition-opacity duration-300 relative z-10 ${
 				isPending ? "opacity-40 pointer-events-none" : "opacity-100"
 			}`}
 		>
@@ -523,7 +514,7 @@ function ArticlesPageSkeleton() {
 				</div>
 
 				<div className="space-y-8">
-					<div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-(--bg-secondary)/40 p-4 rounded-3xl border border-(--border)">
+					<div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-(--bg-secondary)/40 p-4 rounded-md border border-(--border)">
 						<Skeleton className="h-12 w-full md:w-[420px] rounded-2xl bg-(--bg)" />
 						<Skeleton className="h-12 w-full md:w-72 rounded-2xl bg-(--bg)" />
 					</div>

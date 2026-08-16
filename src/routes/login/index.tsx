@@ -56,8 +56,10 @@ function LoginPage() {
 										{error.message ||
 											"Invalid email or password. Please try again."}
 									</span>
-								</div>,
-							);
+								</div>,{
+									position: "top-center",
+						});
+								
 						},
 					},
 				);
@@ -65,6 +67,9 @@ function LoginPage() {
 				logger("error", "Login failed:", error);
 				toast.error("An unexpected error occurred", {
 					description: "Please check your network connection and try again.",
+					
+	position: "top-center",
+								
 				});
 			}
 		},
@@ -178,7 +183,7 @@ function LoginPage() {
 										</p>
 									) : null}
 									<Link
-										to="/forgot-password"
+										to="/"
 										className="text-xs font-medium text-(--link) hover:underline"
 									>
 										<span className="text-(--link) hover:underline">

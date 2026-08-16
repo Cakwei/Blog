@@ -1,9 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { getSessionFn } from "#/lib/utils";
 
 export const Route = createFileRoute("/_protected")({
-	beforeLoad: async ({ location }) => {
-		const session = await getSessionFn();
+	beforeLoad: async ({ location ,context}) => {
+		const session = context.session;
 		const currentUrl = location.href;
 
 		if (!session) {
@@ -19,7 +18,6 @@ export const Route = createFileRoute("/_protected")({
 			});
 		}
 
-		return { user: session.user };
 	},
 	component: () => <Outlet />,
 });
