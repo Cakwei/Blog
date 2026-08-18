@@ -274,7 +274,7 @@ export function SimpleEditor({ setData }: SimpleEditorProps) {
 
 	const getResolvedInitialContent = () => {
 		try {
-			const rawDraft = localStorage.getItem(getDraftStorageKey());
+			const rawDraft = typeof window === 'undefined'? null : localStorage.getItem(getDraftStorageKey());
 			if (rawDraft) {
 				const parsedDraft = JSON.parse(rawDraft);
 				if (parsedDraft && typeof parsedDraft === "object") {

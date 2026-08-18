@@ -290,8 +290,7 @@ function EditPostForm({ postId }: { postId: string }) {
 				to="/posts"
 				className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
 			>
-				<ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />{" "}
-				Back to your posts
+				<span className="text-(--text-secondary) hover:text-(--link)">← Back to your posts</span>
 			</Link>
 
 			<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-(--border)/60 pb-8">
@@ -308,7 +307,7 @@ function EditPostForm({ postId }: { postId: string }) {
 				</div>
 				<Button
 					disabled={isSaving}
-					className="h-11 px-6 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-2xl shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
+					className="h-9 px-6 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
 					onClick={() => {
 						toast.promise(
 							async () => {

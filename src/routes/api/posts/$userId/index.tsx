@@ -27,11 +27,11 @@ export const Route = createFileRoute("/api/posts/$userId/")({
 							},
 						};
 
-						console.log({
+						/*console.log({
 							boolean: userId !== session.user.id,
 							userId,
 							userId2: session.user.id,
-						});
+						});*/
 
 						if (userId !== session.user.id)
 							return Response.json({

@@ -208,7 +208,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 						<div className="mt-14 pt-8 border-t border-(--border)/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
 							<p>{new Date().getFullYear()} • Made by Charlee Tan w/ ❤️</p>
-							<div className="flex items-center gap-6">
+							{/*<div className="flex items-center gap-6">
 								<span className="hover:text-(--text) transition-colors cursor-pointer">
 									Privacy Policy
 								</span>
@@ -216,7 +216,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								<span className="hover:text-(--text) transition-colors cursor-pointer">
 									Terms of Service
 								</span>
-							</div>
+							</div>*/}
 						</div>
 					</div>
 				</footer>
