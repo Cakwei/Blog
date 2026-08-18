@@ -40,6 +40,9 @@ const postQueryOptions = (postId: string) =>
 	queryOptions({
 		queryKey: ["post", postId],
 		queryFn: () => getPostById({ data: postId }),
+		staleTime: 15000,
+		gcTime: 15000,
+		refetchInterval: 15000,
 	});
 
 export const Route = createFileRoute("/posts/$postId")({

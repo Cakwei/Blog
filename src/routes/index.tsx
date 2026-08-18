@@ -28,7 +28,6 @@ interface IPost extends Post {
 
 // Functions
 async function getPosts() {
-	console.log(import.meta.env.SSR, 'btd')
 	const response = await axios.get(
 		`${API_URL}/api/posts`,
 		import.meta.env.SSR
@@ -47,7 +46,9 @@ async function getPosts() {
 const postsQueryOptions = queryOptions({
 	queryKey: ["posts"],
 	queryFn: async () => await getPosts(),
-	refetchInterval: 1000 * 1,
+	staleTime: 15000,
+	gcTime: 15000,
+	refetchInterval: 15000,
 });
 // ==================
 

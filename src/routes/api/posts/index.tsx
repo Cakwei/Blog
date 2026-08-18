@@ -44,6 +44,7 @@ export const Route = createFileRoute("/api/posts/")({
 									isFeatured: true,
 									excerpt: true,
 									image: true,
+									published: true,
 									title: true,
 									userId: true,
 									user: {
@@ -54,11 +55,7 @@ export const Route = createFileRoute("/api/posts/")({
 								},
 							});
 
-							logger(
-								"debug",
-								"vile",
-								posts.map((m) => m.categories.map((x) => x)),
-							);
+							logger("debug", "vile", posts);
 
 							return Response.json({
 								success: true,

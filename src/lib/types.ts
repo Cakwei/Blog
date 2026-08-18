@@ -19,6 +19,9 @@ export type IResponse = {
 	success: boolean;
 	data: any;
 	message: string;
+	totalPages?: number;
+	currentPage?: number;
+	totalCount?: string;
 };
 export type PostStatus = "draft" | "published";
 

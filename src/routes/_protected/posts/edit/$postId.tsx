@@ -62,7 +62,9 @@ const editPostQueryOptions = (postId: string) =>
 	queryOptions({
 		queryKey: ["editPost", postId],
 		queryFn: () => getPostForEdit({ data: postId }),
-		staleTime: 1000 * 60 * 5,
+		staleTime: 15000,
+		gcTime: 15000,
+		refetchInterval: 15000,
 	});
 
 export const Route = createFileRoute("/_protected/posts/edit/$postId")({

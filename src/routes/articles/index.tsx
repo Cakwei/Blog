@@ -101,7 +101,9 @@ const postsQueryOptions = (searchParams: ArticlesSearch) =>
 	queryOptions({
 		queryKey: ["articles", searchParams],
 		queryFn: () => getFilteredPosts({ data: searchParams }),
-		refetchInterval: 1000 * 60,
+		staleTime: 15000,
+		gcTime: 15000,
+		refetchInterval: 15000,
 	});
 
 export const Route = createFileRoute("/articles/")({

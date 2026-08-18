@@ -53,6 +53,9 @@ const profileQueryOptions = () =>
 	queryOptions({
 		queryKey: ["profile"],
 		queryFn: () => getUserProfile(),
+		staleTime: 15000,
+		gcTime: 15000,
+		refetchInterval: 15000,
 	});
 
 export const Route = createFileRoute("/_protected/profile/")({

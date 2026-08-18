@@ -4,11 +4,17 @@ import { getSessionFn } from "./utils";
 
 export const authMiddleware = createMiddleware().server(async ({ next }) => {
 	const session = await getSessionFn();
+
 	if (!session)
-		return Response.json({
-			success: false,
-			data: {},
-			message: MESSAGE.UNAUTHORIZED_ACCESS,
-		});
+		return Response.json(
+			{
+				success: false,
+				data: {},
+				message: MESSAGE.UNAUTHORIZED_ACCESS,
+			},
+			{ status: 401 },
+		);
+
+	console.log("success passed");
 	return await next({ context: { session: session } });
 });

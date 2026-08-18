@@ -21,6 +21,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPostsIndexRouteImport } from './routes/api/posts/index'
 import { Route as ProtectedPostsCreateIndexRouteImport } from './routes/_protected/posts/create/index'
 import { Route as ProtectedPostsEditPostIdRouteImport } from './routes/_protected/posts/edit/$postId'
+import { Route as ApiPostsUserIdIndexRouteImport } from './routes/api/posts/$userId/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +84,11 @@ const ProtectedPostsEditPostIdRoute =
     path: '/posts/edit/$postId',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ApiPostsUserIdIndexRoute = ApiPostsUserIdIndexRouteImport.update({
+  id: '/api/posts/$userId/',
+  path: '/api/posts/$userId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/api/posts': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create': typeof ProtectedPostsCreateIndexRoute
+  '/api/posts/$userId': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/_protected/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/_protected/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/posts/edit/$postId'
     | '/posts/create/'
+    | '/api/posts/$userId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/api/posts'
     | '/posts/edit/$postId'
     | '/posts/create'
+    | '/api/posts/$userId'
   id:
     | '__root__'
     | '/'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/_protected/posts/edit/$postId'
     | '/_protected/posts/create/'
+    | '/api/posts/$userId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   RegisterIndexRoute: typeof RegisterIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPostsIndexRoute: typeof ApiPostsIndexRoute
+  ApiPostsUserIdIndexRoute: typeof ApiPostsUserIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedPostsEditPostIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/api/posts/$userId/': {
+      id: '/api/posts/$userId/'
+      path: '/api/posts/$userId'
+      fullPath: '/api/posts/$userId/'
+      preLoaderRoute: typeof ApiPostsUserIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -295,6 +315,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterIndexRoute: RegisterIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPostsIndexRoute: ApiPostsIndexRoute,
+  ApiPostsUserIdIndexRoute: ApiPostsUserIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

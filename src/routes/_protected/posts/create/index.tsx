@@ -189,7 +189,7 @@ function NewPostForm() {
 					<Button
 						type="submit"
 						disabled={isSaving}
-						className="h-11 px-6 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-2xl shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
+						className="h-9 px-6 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
 					>
 						{isSaving ? "Publishing..." : "Publish Post"}
 					</Button>
