@@ -117,7 +117,8 @@ export const AccountScalarFieldEnum = {
   scope: 'scope',
   password: 'password',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  issuer: 'issuer'
 } as const
 
 export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
@@ -216,7 +217,8 @@ export const AccountOrderByRelevanceFieldEnum = {
   refreshToken: 'refreshToken',
   idToken: 'idToken',
   scope: 'scope',
-  password: 'password'
+  password: 'password',
+  issuer: 'issuer'
 } as const
 
 export type AccountOrderByRelevanceFieldEnum = (typeof AccountOrderByRelevanceFieldEnum)[keyof typeof AccountOrderByRelevanceFieldEnum]

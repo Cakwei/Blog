@@ -175,19 +175,39 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								<h3 className="text-xs font-extrabold uppercase tracking-widest text-(--text)">
 									Connect
 								</h3>
-								<ul className="space-y-2 text-xs text-(--text-secondary)">
-									<li className="hover:text-(--link) transition-colors cursor-pointer">
-										GitHub
+								<ul className="space-y-2 text-xs">
+									<li>
+										<a
+											href="https://github.com/cakwei"
+											target="_blank"
+											rel="noopener noreferrer"
+											onClick={(e) => e.stopPropagation()}
+											className="inline-flex items-center rounded-md bg-transparent text-(--secondary-text) transition-colors hover:text-(--link)"
+										>
+											<span className="hover:text-(--link) transition-colors cursor-pointer text-(--text-secondary)">
+												GitHub
+											</span>
+										</a>
 									</li>
-									<li className="hover:text-(--link) transition-colors cursor-pointer">
-										Twitter / X
+									<li>
+										<a
+											href="https://my.linkedin.com/in/charlee-tan-1833902b6"
+											target="_blank"
+											rel="noopener noreferrer"
+											onClick={(e) => e.stopPropagation()}
+											className="inline-flex items-center rounded-md bg-transparent text-(--secondary-text) transition-colors hover:text-(--link)"
+										>
+											<span className="hover:text-(--link) transition-colors cursor-pointer text-(--text-secondary)">
+												LinkedIn
+											</span>
+										</a>
 									</li>
 								</ul>
 							</div>
 						</div>
 
 						<div className="mt-14 pt-8 border-t border-(--border)/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
-							<p>© {new Date().getFullYear()} Charlee Tan. Made with ❤️</p>
+							<p>{new Date().getFullYear()} • Made by Charlee Tan w/ ❤️</p>
 							<div className="flex items-center gap-6">
 								<span className="hover:text-(--text) transition-colors cursor-pointer">
 									Privacy Policy

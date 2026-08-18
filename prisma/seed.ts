@@ -3,6 +3,7 @@ import type { Category } from '#/generated/prisma/client'
 import { hashPassword } from 'better-auth/crypto'
 
 const fetchThisEmailId = 'charleetan2020@gmail.com'
+const ISSUER = 'local:credential'
 
 async function main() {
     console.log('🌱 Seeding database...')
@@ -29,10 +30,12 @@ async function main() {
             accounts: {
                 create: {
                     id: 'acc_primary_1',
-                    accountId: fetchThisEmailId,
+                    accountId: 'FA96EjZ4aTQrdKvruz3kknCgGk5LkcwT',
                     providerId: 'credential',
                     password: defaultHashedPassword,
+                    'issuer': ISSUER,    
                 },
+                
             },
         },
     })
@@ -49,9 +52,10 @@ async function main() {
             accounts: {
                 create: {
                     id: 'acc_secondary_2',
-                    accountId: 'charleetan121@gmail.com',
+                    accountId: 'user_mock_2',
                     providerId: 'credential',
                     password: defaultHashedPassword,
+                    'issuer': ISSUER,
                 },
             },
         },

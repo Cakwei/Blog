@@ -4,7 +4,7 @@ import { PrismaClient } from "./generated/prisma/client.js";
 const adapter = new PrismaMariaDb(
 	process.env.NODE_ENV === "production"
 		? process.env.DATABASE_URL || ""
-		:process.env.DATABASE_URL || ""
+		: process.env.DATABASE_URL || "",
 );
 
 declare global {

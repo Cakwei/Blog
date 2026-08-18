@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -17,7 +18,6 @@ model User {
   updatedAt       DateTime  @updatedAt
   username        String?   @unique
   displayUsername String?   @db.Text
-  
   sessions        Session[]
   accounts        Account[]
   posts           Post[]
@@ -42,7 +42,7 @@ model Session {
 
 model Account {
   id                    String    @id
-  accountId             String    @db.Text
+  accountId             String    @db.VarChar(191)
   providerId            String    @db.Text
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -56,8 +56,11 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  issuer String @db.VarChar(191)
+
   @@index([userId(length: 191)])
   @@map("account")
+  @@unique([issuer, accountId], map: "account_issuer_accountId_uidx")
 }
 
 model Verification {
@@ -82,24 +85,22 @@ model Category {
 }
 
 model Post {
-  id          Int      @id @default(autoincrement())
-  slug        String   @unique @db.VarChar(191)
-  title       String
-  excerpt     String   @db.Text
-  date        DateTime @default(now())
-  image       String
-  content     Json
-  
+  id         Int      @id @default(autoincrement())
+  slug       String   @unique @db.VarChar(191)
+  title      String
+  excerpt    String   @db.Text
+  date       DateTime @default(now())
+  image      String
+  content    Json
   // Blog Management Features
-  published   Boolean  @default(false)
-  isFeatured  Boolean  @default(false)
-  views       Int      @default(0)
+  published  Boolean  @default(false)
+  isFeatured Boolean  @default(false)
+  views      Int      @default(0)
 
   // Relations
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  categories  Category[] 
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories Category[]
 
   @@index([userId(length: 191)])
   @@index([published, isFeatured])
