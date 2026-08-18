@@ -16,10 +16,9 @@ import StarterKit from "@tiptap/starter-kit";
 import DOMPurify from "dompurify";
 import { Suspense, useEffect, useState } from "react";
 import { prisma } from "#/db";
+import { logger } from "#/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import "#/index.css";
-import { logger } from "#/lib/utils";
 
 export const getPostById = createServerFn({ method: "GET" })
 	.validator((postId: string) => postId)

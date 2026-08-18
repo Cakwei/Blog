@@ -2,7 +2,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import axios from "axios";
-import type { Session } from "better-auth";
 import {
 	ArrowUpRight,
 	Calendar,

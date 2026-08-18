@@ -2,7 +2,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import type { Editor } from "@tiptap/core";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { toast } from "sonner";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
@@ -290,7 +290,9 @@ function EditPostForm({ postId }: { postId: string }) {
 				to="/posts"
 				className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
 			>
-				<span className="text-(--text-secondary) hover:text-(--link)">← Back to your posts</span>
+				<span className="text-(--text-secondary) hover:text-(--link)">
+					← Back to your posts
+				</span>
 			</Link>
 
 			<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-(--border)/60 pb-8">

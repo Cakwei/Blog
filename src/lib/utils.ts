@@ -1,8 +1,5 @@
 import { createIsomorphicFn, createServerFn } from "@tanstack/react-start";
-import {
-	getRequestHeader,
-	getRequestHeaders,
-} from "@tanstack/react-start/server";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import type { ClassValue } from "clsx";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
