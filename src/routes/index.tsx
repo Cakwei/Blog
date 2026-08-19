@@ -13,6 +13,8 @@ import {
 import { Suspense, useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
+import { Card } from "#/components/ui/card";
+import { Label } from "#/components/ui/label";
 import { Skeleton } from "#/components/ui/skeleton";
 import type { Category, Post, User } from "#/generated/prisma/client";
 import { API_URL } from "#/lib/const";
@@ -244,53 +246,60 @@ function HomeContent() {
 				</h3>
 
 				<div className="divide-y divide-(--border)">
-					{remainingPosts.map((post: IPost) => {
-						return (
-							<article
-								key={post.id}
-								className="group py-6 first:pt-0 last:pb-0"
-							>
-								<Link
-									to="/posts/$postId"
-									params={{ postId: post.id.toString() }}
-									className="grid sm:grid-cols-12 gap-4 sm:gap-6 items-start justify-between"
+					{Array.isArray(remainingPosts) && remainingPosts.length <= 0 && (
+						<Card className="px-2.5 bg-(--bg-secondary) rounded-md flex justify-center items-center">
+							<Label className="text-(--text) text-xs">No posts found.</Label>
+						</Card>
+					)}
+					{Array.isArray(remainingPosts) &&
+						remainingPosts.length >= 1 &&
+						remainingPosts?.map((post: IPost) => {
+							return (
+								<article
+									key={post.id}
+									className="group py-6 first:pt-0 last:pb-0"
 								>
-									<div className="sm:col-span-8 space-y-2">
-										<div className="flex items-center gap-3 text-xs text-(--text-secondary)">
-											<span className="text-(--link) font-semibold uppercase tracking-wider">
-												{post.categories && post.categories.length > 0
-													? post.categories[0].name
-													: "General"}
-											</span>
-											<span>•</span>
-											<span className="flex items-center gap-1">
-												<Clock className="w-3 h-3" />{" "}
-												{new Date(post.date).toLocaleDateString()}
-											</span>
+									<Link
+										to="/posts/$postId"
+										params={{ postId: post.id.toString() }}
+										className="grid sm:grid-cols-12 gap-4 sm:gap-6 items-start justify-between"
+									>
+										<div className="sm:col-span-8 space-y-2">
+											<div className="flex items-center gap-3 text-xs text-(--text-secondary)">
+												<span className="text-(--link) font-semibold uppercase tracking-wider">
+													{post.categories && post.categories.length > 0
+														? post.categories[0].name
+														: "General"}
+												</span>
+												<span>•</span>
+												<span className="flex items-center gap-1">
+													<Clock className="w-3 h-3" />{" "}
+													{new Date(post.date).toLocaleDateString()}
+												</span>
+											</div>
+
+											<h4 className="text-lg sm:text-xl font-bold text-(--text) group-hover:text-(--link) transition-colors">
+												{post.title}
+											</h4>
+
+											<p className="text-(--text-secondary) text-xs sm:text-sm line-clamp-2">
+												{post.excerpt}
+											</p>
 										</div>
 
-										<h4 className="text-lg sm:text-xl font-bold text-(--text) group-hover:text-(--link) transition-colors">
-											{post.title}
-										</h4>
-
-										<p className="text-(--text-secondary) text-xs sm:text-sm line-clamp-2">
-											{post.excerpt}
-										</p>
-									</div>
-
-									{post.image && (
-										<div className="sm:col-span-4 overflow-hidden rounded-lg bg-(--bg-secondary) aspect-[16/10] border border-(--border)">
-											<img
-												src={post.image}
-												alt={post.title}
-												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-											/>
-										</div>
-									)}
-								</Link>
-							</article>
-						);
-					})}
+										{post.image && (
+											<div className="sm:col-span-4 overflow-hidden rounded-lg bg-(--bg-secondary) aspect-[16/10] border border-(--border)">
+												<img
+													src={post.image}
+													alt={post.title}
+													className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+												/>
+											</div>
+										)}
+									</Link>
+								</article>
+							);
+						})}
 				</div>
 			</div>
 		</div>

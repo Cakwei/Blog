@@ -373,9 +373,6 @@ function PostsGrid() {
 		>
 			{posts.length === 0 ? (
 				<div className="text-center py-28 border border-dashed border-(--border) bg-(--bg-secondary)/20 rounded-3xl flex justify-center flex-col items-center space-y-4">
-					<div className="w-14 h-14 rounded-2xl bg-(--bg-secondary) border border-(--border) flex items-center justify-center text-(--link) shadow-inner">
-						<Sparkles className="w-7 h-7" />
-					</div>
 					<div className="space-y-1">
 						<h3 className="text-lg font-bold text-(--text)">
 							No matching posts found

@@ -93,104 +93,9 @@ async function main() {
 
     const postBlueprints = [
         {
-            title: 'The Future of Full-stack React',
-            categorySlugs: ['engineering', 'typescript'],
-            excerpt: 'Exploring why modern meta-frameworks are shifting the paradigm for React developers worldwide.',
-        },
-        {
-            title: 'Mastering Type-Safe Routing in Modern Apps',
-            categorySlugs: ['typescript'],
-            excerpt: 'How to leverage advanced TypeScript features to never write a broken layout route or link again.',
-        },
-        {
-            title: 'Server Functions Explained: Bridging the Gap',
-            categorySlugs: ['backend', 'engineering'],
-            excerpt: 'Bridge the gap seamlessly between your client frontend and backend database infrastructure.',
-        },
-        {
-            title: 'Why We Moved Back to Monoliths',
-            categorySlugs: ['engineering'],
-            excerpt: 'Microservices added unnecessary overhead. Here is why consolidating our architecture scaled better.',
-        },
-        {
-            title: 'Deep Dive into Prisma Performance',
-            categorySlugs: ['backend', 'typescript'],
-            excerpt: 'Unlock maximum database query efficiency using indexes, selective payloads, and connection pooling.',
-        },
-        {
-            title: 'Writing Clean Tailwind CSS Architecture',
-            categorySlugs: ['design-systems', 'productivity'],
-            excerpt: 'Structure utility classes cleanly using component patterns and layout abstraction systems.',
-        },
-        {
-            title: 'State Management: What Actually Matters',
-            categorySlugs: ['productivity'],
-            excerpt: 'Ditch global bloat. Learn when to use URL search params, React context, or server cache states.',
-        },
-        {
-            title: 'Building Resilient Micro-Frontends',
-            categorySlugs: ['engineering', 'design-systems'],
-            excerpt: 'Decouple large team workflows without sacrificing bundle performance or layout consistency.',
-        },
-        {
-            title: 'A Practical Guide to Database Indexing',
-            categorySlugs: ['backend'],
-            excerpt: 'Composite indexes, B-trees, and query optimization strategies every fullstack engineer should know.',
-        },
-        {
-            title: 'Async/Await Patterns You Should Know',
-            categorySlugs: ['typescript', 'backend'],
-            excerpt: 'Clean up asynchronous JavaScript code with advanced concurrency handling and error boundaries.',
-        },
-        {
-            title: 'Securing Node.js Applications with Better Auth',
-            categorySlugs: ['backend', 'security' as any], // Fallback gracefully if slug missing
-            excerpt: 'Implement bulletproof sessions, credential hashing, and OAuth guards effortlessly.',
-        },
-        {
-            title: 'Optimizing Core Web Vitals for Blogs',
-            categorySlugs: ['productivity', 'engineering'],
-            excerpt: 'Boost SEO rankings by optimizing Largest Contentful Paint and Cumulative Layout Shift.',
-        },
-        {
-            title: 'The Hidden Power of TypeScript Conditional Types',
-            categorySlugs: ['typescript'],
-            excerpt: 'Write dynamic types that adapt based on input shapes using infer constraints and utility helpers.',
-        },
-        {
-            title: 'Dockerizing Fullstack Apps Made Simple',
-            categorySlugs: ['engineering', 'backend'],
-            excerpt: 'Multi-stage Docker builds optimized for lightning-fast container deployment pipelines.',
-        },
-        {
-            title: 'UI/UX Trends Shaping Software Today',
-            categorySlugs: ['design-systems'],
-            excerpt: 'Minimalist layouts, micro-interactions, and accessible design principles for modern web apps.',
-        },
-        {
-            title: 'Introduction to Edge Computing',
-            categorySlugs: ['backend', 'engineering'],
-            excerpt: 'Run code closer to your users with serverless edge functions and distributed key-value stores.',
-        },
-        {
-            title: 'Writing Automated Tests That Don’t Flake',
-            categorySlugs: ['productivity', 'typescript'],
-            excerpt: 'Best practices for writing predictable, maintainable end-to-end integration test suites.',
-        },
-        {
-            title: 'Refactoring Legacy Code Without Fear',
-            categorySlugs: ['engineering'],
-            excerpt: 'The Boy Scout rule in action: incremental refactoring strategies supported by robust type checking.',
-        },
-        {
-            title: 'Effective Code Reviews for Fast Teams',
-            categorySlugs: ['productivity'],
-            excerpt: 'Build psychological safety, automate style checks, and review PRs with high developer empathy.',
-        },
-        {
-            title: 'Building a Personal Brand as a Developer',
-            categorySlugs: ['productivity'],
-            excerpt: 'Why sharing your daily engineering learnings publicly accelerates your career trajectory.',
+            title: 'Self-Introduction',
+            categorySlugs: [] as string[],
+            excerpt: 'A short first post introduction and for testing purposes',
         },
     ]
 
@@ -207,62 +112,13 @@ async function main() {
 
         // Rich Tiptap JSON Document Structure
         const tiptapContent = {
-            type: 'doc',
-            content: [
-                {
-                    type: 'heading',
-                    attrs: { level: 1 },
-                    content: [{ type: 'text', text: blueprint.title }],
-                },
-                {
-                    type: 'paragraph',
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Welcome to this deep dive. In this article, we explore the core principles of ${blueprint.title.toLowerCase()} and how modern web architecture is evolving to meet higher standards of speed and developer ergonomics.`,
-                        },
-                    ],
-                },
-                {
-                    type: 'heading',
-                    attrs: { level: 2 },
-                    content: [{ type: 'text', text: 'Key Architectural Concepts' }],
-                },
-                {
-                    type: 'paragraph',
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'When building production-ready systems, maintaining type safety and clean component boundaries is crucial. Here is a quick example showcasing how modern tooling simplifies complex workflows:',
-                        },
-                    ],
-                },
-                {
-                    type: 'codeBlock',
-                    attrs: { language: 'typescript' },
-                    content: [
-                        {
-                            type: 'text',
-                            text: `// Example configuration for modern workflows\nconst config = {\n  name: "${blueprint.title}",\n  version: "1.0.0",\n  enabled: true,\n};\n\nexport function bootstrap() {\n  console.log("System initialized successfully.");\n}`,
-                        },
-                    ],
-                },
-                {
-                    type: 'heading',
-                    attrs: { level: 2 },
-                    content: [{ type: 'text', text: 'Conclusion & Next Steps' }],
-                },
-                {
-                    type: 'paragraph',
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'By implementing these strategies early in your project lifecycle, you can avoid technical debt and scale your application effortlessly. Happy coding!',
-                        },
-                    ],
-                },
-            ],
-        }
+            "type":"doc","content":[
+                {"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"Hello! To anyone reading this, I have developed this blog application as a way to demonstrate my fundamentals of programming and web development skills. I hope you like it alot."}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"Also anything below this line of text will be for testing purposes:"}]},{"type":"heading","attrs":{"textAlign":null,"level":1},"content":[{"type":"text","text":"Heading 1"}]},{"type":"heading","attrs":{"textAlign":null,"level":2},"content":[{"type":"text","text":"Heading 2"}]},{"type":"heading","attrs":{"textAlign":null,"level":3},"content":[{"type":"text","text":"Heading 3"}]},{"type":"heading","attrs":{"textAlign":null,"level":4},"content":[{"type":"text","text":"Heading 4"}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"1"}]}]},{"type":"listItem","content":[{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"2"}]}]}]},{"type":"orderedList","attrs":{"start":1,"type":null},"content":[{"type":"listItem","content":[{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"1"}]}]},{"type":"listItem","content":[{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"2"}]}]}]},{"type":"blockquote","content":[{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"Test blockquote"}]}]},{"type":"codeBlock","attrs":{"language":null},"content":[{"type":"text","text":"console.log(\"Hello, world!\") // Boom"}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","marks":[{"type":"bold"}],"text":"Bold "},{"type":"text","text":"vs not bold"}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","marks":[{"type":"italic"}],"text":"Italic vs not "},{"type":"text","text":"italic"}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","marks":[{"type":"strike"}],"text":"Strike"}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","marks":[{"type":"underline"}],"text":"Underline"}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","marks":[{"type":"link","attrs":{"href":"https://www.youtube.com","target":"_blank","rel":"noopener noreferrer nofollow","class":null,"title":null}}],"text":"https://www.youtube.com"}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"Superscript"},{"type":"text","marks":[{"type":"superscript"}],"text":"1"}]},{"type":"paragraph","attrs":{"textAlign":null},"content":[{"type":"text","text":"Subscript"},{"type":"text","marks":[{"type":"subscript"}],"text":"2"}]},{"type":"image","attrs":{"src":"https://s3.cakwei.dev/blog/editor/c882014d-a835-4d15-9972-52175fcbbdb7-bom.gif","alt":"bom","title":"bom","width":159,"height":91}},{"type":"paragraph","attrs":{"textAlign":null}}]}
+
+
+
+
+        
 
         await prisma.post.create({
             data: {
@@ -271,7 +127,7 @@ async function main() {
                 excerpt: blueprint.excerpt,
                 date: new Date(Date.now() - index * 86400000 * 2),
                 userId,
-                image: `https://picsum.photos/seed/post${id}/800/450`,
+                image: `https://s3.cakwei.dev/blog/4ab8e8e3-a39b-416e-a53a-8c73fc67a732-ProfilePic.jpeg`,
                 content: tiptapContent,
                 published: true,
                 isFeatured: index < 3,
