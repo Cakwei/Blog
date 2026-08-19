@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import type { Editor } from "@tiptap/core";
 import axios from "axios";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { toast } from "sonner";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
@@ -25,6 +25,7 @@ import {
 	useComboboxAnchor,
 } from "#/components/ui/combobox";
 import ImageUploader from "#/components/ui/fileUpload";
+import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { CATEGORIES } from "#/lib/const";
 import type { IEditorSavingContext, IResponse } from "#/lib/types";
@@ -155,14 +156,11 @@ function NewPostForm() {
 		<div className="space-y-8">
 			<Link
 				to="/posts"
-				className="hover inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
+				className="flex items-center group text-xs transition-colors"
 			>
-				<div className="group-hover:border-b gap-1 border-(--link) flex items-center">
-					<ArrowLeft className="w-3.5 h-3.5 text-(--text-secondary)" />
-					<span className="hover-(--link) text-(--text-secondary)">
-						Back to your posts
-					</span>
-				</div>
+				<span className="text-(--text-secondary) group-hover:text-(--link)">
+					← Back to your posts
+				</span>
 			</Link>
 
 			<form
@@ -212,13 +210,13 @@ function NewPostForm() {
 								<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 									Post Title
 								</Label>
-								<input
+								<Input
 									type="text"
 									value={field.state.value}
 									onChange={(e) => field.handleChange(e.target.value)}
 									onBlur={field.handleBlur}
 									placeholder="What is your blog post about?"
-									className="w-full bg-(--bg) border border-(--border) focus:border-(--link) focus:ring-1 focus:ring-(--link)/50 rounded-2xl px-4 py-3 text-xs sm:text-sm text-(--text) placeholder:text-(--text-secondary) transition-all outline-none"
+									className="w-full bg-(--bg) border border-(--border) focus:border-(--link) placeholder:text-xs py-1.5 focus:ring-1 focus:ring-(--link)/50 rounded-md px-4 text-xs text-(--text) placeholder:text-(--text-secondary) transition-all outline-none"
 								/>
 								{field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0 ? (
@@ -265,7 +263,7 @@ function NewPostForm() {
 								>
 									<ComboboxChips
 										ref={anchor}
-										className="w-full bg-(--bg) border border-(--border) focus-within:border-(--link) rounded-2xl px-3.5 py-2.5 min-h-[50px] transition-all"
+										className="w-full bg-(--bg) border border-(--border) focus-within:border-(--link) rounded-md px-3.5 py-2.5 transition-all"
 									>
 										<ComboboxValue>
 											{(values) => (
@@ -279,7 +277,7 @@ function NewPostForm() {
 														</ComboboxChip>
 													))}
 													<ComboboxChipsInput
-														className="text-(--text) bg-transparent placeholder:text-(--text-secondary) outline-none text-xs sm:text-sm ml-1 py-1 flex-1"
+														className="text-(--text) bg-transparent placeholder:text-(--text-secondary) outline-none text-xs ml-1 flex-1"
 														placeholder={
 															field.state.value.length > 0
 																? ""

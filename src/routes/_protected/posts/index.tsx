@@ -63,7 +63,6 @@ async function fetchPaginatedPosts({
 export const Route = createFileRoute("/_protected/posts/")({
 	component: AdminPostsPage,
 	loader: async ({ context }) => {
-		console.log("wait", context.session?.user.id);
 		await context.queryClient.ensureQueryData(
 			myPostsCourseQueryOptions({ userId: context.session?.user.id }),
 		);

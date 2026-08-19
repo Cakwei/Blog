@@ -20,6 +20,7 @@ import {
 	useComboboxAnchor,
 } from "#/components/ui/combobox";
 import ImageUploader from "#/components/ui/fileUpload";
+import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { prisma } from "#/db";
 import { CATEGORIES } from "#/lib/const";
@@ -387,12 +388,12 @@ function EditPostForm({ postId }: { postId: string }) {
 					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Post Title
 					</Label>
-					<input
+					<Input
 						type="text"
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 						placeholder="What is your blog post about?"
-						className="w-full bg-(--bg) border border-(--border) focus:border-(--link) focus:ring-1 focus:ring-(--link)/50 rounded-2xl px-4 py-3 text-xs sm:text-sm text-(--text) placeholder:text-(--text-secondary) transition-all outline-none"
+						className="w-full bg-(--bg) border border-border focus:border-(--link) focus:ring-1 focus:ring-(--link)/50 rounded-md px-4 py-1.5 text-xs placeholder:text-xs text-(--text) placeholder:text-(--text-secondary) transition-all outline-none"
 					/>
 				</div>
 
@@ -430,7 +431,7 @@ function EditPostForm({ postId }: { postId: string }) {
 					>
 						<ComboboxChips
 							ref={anchor}
-							className="w-full bg-(--bg) border border-(--border) focus-within:border-(--link) rounded-2xl px-3.5 py-2.5 min-h-[50px] transition-all"
+							className="w-full bg-(--bg) border border-border focus-within:border-(--link) rounded-md px-3.5 py-1.5 transition-all"
 						>
 							<ComboboxValue>
 								{(values) => (
@@ -444,7 +445,7 @@ function EditPostForm({ postId }: { postId: string }) {
 											</ComboboxChip>
 										))}
 										<ComboboxChipsInput
-											className="text-(--text) bg-transparent placeholder:text-(--text-secondary) outline-none text-xs sm:text-sm ml-1 py-1 flex-1"
+											className="text-(--text) bg-transparent placeholder:text-(--text-secondary) outline-none text-xs ml-1 py-1 flex-1"
 											placeholder={tags.length > 0 ? "" : "Select tags..."}
 										/>
 									</div>

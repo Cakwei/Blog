@@ -69,6 +69,20 @@ body,
   flex-direction: column;
   flex: 1;
 }
+/* Style inline code: e.g., `const test = 1` */
+.simple-editor-content .tiptap.ProseMirror.simple-editor code {
+  color: var(--text);
+  opacity: 0.75;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+/* Style larger code blocks */
+.simple-editor-content .tiptap.ProseMirror.simple-editor pre {
+  background: var(--bg-secondary);
+  /* color: #fff;*/
+  border-radius: 0.5rem;
+}
 
 .simple-editor-content .tiptap.ProseMirror.simple-editor {
   flex: 1;

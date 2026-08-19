@@ -15,6 +15,5 @@ export const authMiddleware = createMiddleware().server(async ({ next }) => {
 			{ status: 401 },
 		);
 
-	console.log("success passed");
 	return await next({ context: { session: session } });
 });

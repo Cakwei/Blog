@@ -152,8 +152,7 @@ function ProfilePage() {
 						onClick={() => navigate({ to: "/" })}
 						className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group cursor-pointer"
 					>
-						<ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />{" "}
-						Return Home
+						← Return Home
 					</button>
 
 					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-(--border)/60 pb-8">
@@ -167,15 +166,15 @@ function ProfilePage() {
 						</div>
 
 						{/* Mini Identity Chip */}
-						<div className="flex items-center gap-3 bg-(--bg-secondary)/60 border border-(--border) p-2.5 rounded-2xl backdrop-blur-md">
+						<div className="flex items-center gap-3 bg-(--bg-secondary)/60 border border-(--border) p-2.5 rounded-md backdrop-blur-md">
 							{user?.image ? (
 								<img
 									src={user.image}
 									alt={user.name || "Avatar"}
-									className="w-10 h-10 rounded-xl object-cover border border-(--border)"
+									className="w-10 h-10 rounded-md object-cover border border-(--border)"
 								/>
 							) : (
-								<div className="w-10 h-10 rounded-xl bg-(--link)/10 border border-(--link)/30 flex items-center justify-center text-(--link) font-bold text-xs">
+								<div className="w-10 h-10 rounded-md bg-(--link)/10 border border-(--link)/30 flex items-center justify-center text-(--link) font-bold text-xs">
 									{user?.name?.charAt(0).toUpperCase() || "U"}
 								</div>
 							)}
@@ -202,7 +201,7 @@ function ProfilePage() {
 				>
 					{message && (
 						<div
-							className={`p-4 rounded-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
+							className={`p-4 rounded-md text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
 								message.type === "success"
 									? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/5"
 									: "bg-(--error)/15 text-(--error) border border-(--error)/30 shadow-lg shadow-(--error)/5"
@@ -213,7 +212,7 @@ function ProfilePage() {
 					)}
 
 					{/* Section 1: General Credentials */}
-					<div className="bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-xl space-y-6">
+					<div className="bg-(--bg-secondary)/40 border border-(--border) rounded-md p-6 sm:p-8 backdrop-blur-2xl shadow-xl space-y-6">
 						<div className="flex items-center gap-2 pb-4 border-b border-(--border)/60">
 							<UserIcon className="w-4 h-4 text-(--link)" />
 							<h2 className="text-sm font-extrabold uppercase tracking-widest text-(--text)">
@@ -237,7 +236,7 @@ function ProfilePage() {
 											value={field.state.value}
 											onChange={(e) => field.handleChange(e.target.value)}
 											required
-											className="text-xs sm:text-sm rounded-2xl border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 h-11"
+											className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 										/>
 									</div>
 								)}
@@ -258,7 +257,7 @@ function ProfilePage() {
 											value={field.state.value}
 											onChange={(e) => field.handleChange(e.target.value)}
 											required
-											className="text-xs sm:text-sm rounded-2xl border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 h-11"
+											className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 										/>
 									</div>
 								)}
@@ -267,7 +266,7 @@ function ProfilePage() {
 					</div>
 
 					{/* Section 2: Security & Password */}
-					<div className="bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-xl space-y-6">
+					<div className="bg-(--bg-secondary)/40 border border-(--border) rounded-md p-6 sm:p-8 backdrop-blur-2xl shadow-xl space-y-6">
 						<div className="flex items-center gap-2 pb-4 border-b border-(--border)/60">
 							<KeyRound className="w-4 h-4 text-(--link)" />
 							<h2 className="text-sm font-extrabold uppercase tracking-widest text-(--text)">
@@ -295,7 +294,7 @@ function ProfilePage() {
 									onChange={(e) => setCurrentPassword(e.target.value)}
 									required={!!newPassword}
 									placeholder="••••••••••••"
-									className="text-xs sm:text-sm rounded-2xl border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 h-11"
+									className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 								/>
 							</div>
 
@@ -313,7 +312,7 @@ function ProfilePage() {
 										value={newPassword}
 										onChange={(e) => setNewPassword(e.target.value)}
 										placeholder="••••••••••••"
-										className="text-xs sm:text-sm rounded-2xl border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 h-11"
+										className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 									/>
 								</div>
 								<div className="space-y-2">
@@ -329,7 +328,7 @@ function ProfilePage() {
 										value={confirmPassword}
 										onChange={(e) => setConfirmPassword(e.target.value)}
 										placeholder="••••••••••••"
-										className="text-xs sm:text-sm rounded-2xl border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 h-11"
+										className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 "
 									/>
 								</div>
 							</div>
