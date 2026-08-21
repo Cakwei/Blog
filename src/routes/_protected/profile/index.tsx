@@ -236,7 +236,7 @@ function ProfilePage() {
 											value={field.state.value}
 											onChange={(e) => field.handleChange(e.target.value)}
 											required
-											className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
+											className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 										/>
 									</div>
 								)}
@@ -257,7 +257,7 @@ function ProfilePage() {
 											value={field.state.value}
 											onChange={(e) => field.handleChange(e.target.value)}
 											required
-											className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
+											className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 										/>
 									</div>
 								)}
@@ -294,7 +294,7 @@ function ProfilePage() {
 									onChange={(e) => setCurrentPassword(e.target.value)}
 									required={!!newPassword}
 									placeholder="••••••••••••"
-									className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
+									className="text-xs rounded-md border-border bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 								/>
 							</div>
 
@@ -312,7 +312,7 @@ function ProfilePage() {
 										value={newPassword}
 										onChange={(e) => setNewPassword(e.target.value)}
 										placeholder="••••••••••••"
-										className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
+										className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 									/>
 								</div>
 								<div className="space-y-2">
@@ -328,7 +328,7 @@ function ProfilePage() {
 										value={confirmPassword}
 										onChange={(e) => setConfirmPassword(e.target.value)}
 										placeholder="••••••••••••"
-										className="text-xs sm:text-sm rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 "
+										className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 "
 									/>
 								</div>
 							</div>
@@ -340,7 +340,7 @@ function ProfilePage() {
 						<Button
 							type="submit"
 							disabled={isPending}
-							className="h-9 px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
+							className="px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
 						>
 							{isPending ? "Saving Modifications..." : "Save Modifications"}
 						</Button>

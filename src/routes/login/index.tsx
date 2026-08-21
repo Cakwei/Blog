@@ -56,10 +56,11 @@ function LoginPage() {
 										{error.message ||
 											"Invalid email or password. Please try again."}
 									</span>
-								</div>,{
+								</div>,
+								{
 									position: "top-center",
-						});
-								
+								},
+							);
 						},
 					},
 				);
@@ -67,9 +68,8 @@ function LoginPage() {
 				logger("error", "Login failed:", error);
 				toast.error("An unexpected error occurred", {
 					description: "Please check your network connection and try again.",
-					
-	position: "top-center",
-								
+
+					position: "top-center",
 				});
 			}
 		},
@@ -134,11 +134,11 @@ function LoginPage() {
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											placeholder="name@example.com"
-											className="pl-10 bg-(--bg) border-(--border) text-(--text) placeholder:text-(--text-secondary)/60 focus-visible:ring-(--link) h-11 rounded-md text-sm"
+											className="pl-10 bg-(--bg) border-(--border) placeholder:text-xs text-(--text) placeholder:text-(--text-secondary)/60 focus-visible:ring-(--link) rounded-md text-xs"
 										/>
 									</div>
 									{field.state.meta.errors ? (
-										<p className="text-xs text-(--error) font-medium">
+										<p className="text-xs text-(--error)">
 											{field.state.meta.errors.join(", ")}
 										</p>
 									) : null}
@@ -174,7 +174,7 @@ function LoginPage() {
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											placeholder="••••••••"
-											className="pl-10 bg-(--bg) text-sm border-(--border) text-(--text) placeholder:text-(--text-secondary)/60 focus-visible:ring-(--link) h-11 rounded-md"
+											className="pl-10 bg-(--bg) placeholder:text-xs text-xs border-(--border) text-(--text) placeholder:text-(--text-secondary)/60 focus-visible:ring-(--link) rounded-md"
 										/>
 									</div>
 									{field.state.meta.errors ? (
@@ -186,7 +186,7 @@ function LoginPage() {
 										to="/"
 										className="text-xs font-medium text-(--link) hover:underline"
 									>
-										<span className="text-(--link) hover:underline">
+										<span className="text-(--link) text-xs hover:underline">
 											Forgot password?
 										</span>
 									</Link>
@@ -202,7 +202,7 @@ function LoginPage() {
 								<Button
 									type="submit"
 									disabled={!canSubmit}
-									className="w-full bg-(--link) hover:bg-(--link) font-semibold text-white hover:opacity-90 transition-all duration-200 h-11 rounded-md flex items-center justify-center gap-2 group shadow-lg shadow-(--link)/25"
+									className="w-full bg-(--link) hover:bg-(--link) font-semibold text-white hover:opacity-90 transition-all duration-200 rounded-md flex items-center justify-center gap-2 group shadow-lg shadow-(--link)/25 text-xs"
 								>
 									{isSubmitting ? (
 										"Signing in..."
@@ -218,7 +218,7 @@ function LoginPage() {
 					</form>
 
 					{/* Footer Register Link */}
-					<div className="text-center text-sm text-(--text-secondary) pt-4 border-t border-(--border)/60">
+					<div className="text-center text-xs text-(--text-secondary) pt-4 border-t border-(--border)/60">
 						Don't have an account?{" "}
 						<Link
 							to="/register"

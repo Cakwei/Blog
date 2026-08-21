@@ -168,13 +168,12 @@ export function SearchDialog() {
 					>
 						{/* Immersive Spotlight Header */}
 						<div className="flex items-center px-4 py-3 bg-(--bg-secondary)/60 border-b border-(--border)">
-							<Search className="h-4 w-4 text-(--link) mr-3 shrink-0" />
 							<CommandInput
 								value={inputValue}
 								onValueChange={handleInputChange}
 								placeholder="Type to search archive..."
 								maxLength={MAX_SEARCH_LENGTH + 5}
-								className="flex-1 text-(--text) placeholder:text-(--text-secondary) bg-transparent border-none outline-none text-sm font-medium"
+								className="flex-1 text-(--text) text-xs placeholder:text-xs placeholder:text-(--text-secondary) bg-transparent border-none outline-none text-sm font-medium"
 							/>
 							<div className="text-[10px] font-mono text-(--text-secondary) bg-(--bg) px-2 py-0.5 rounded border border-(--border)">
 								ESC

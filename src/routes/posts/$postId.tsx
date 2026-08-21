@@ -26,8 +26,8 @@ export const getPostById = createServerFn({ method: "GET" })
 		const post = await prisma.post.findUnique({
 			where: { id: parseInt(postId, 10) },
 			include: {
-				categories: true, // Fixed: include the many-to-many relation
-				user: true, // Include author relation for display purposes
+				categories: true,
+				user: true,
 			},
 		});
 
@@ -138,7 +138,7 @@ function PostContent({ postId }: { postId: string }) {
 				<h1 className="text-4xl md:text-5xl text-(--text) font-extrabold tracking-tight">
 					{post.title}
 				</h1>
-				<div className="text-(--text-secondary) text-sm flex items-center justify-center gap-2">
+				<div className="text-(--text-secondary) text-xs flex items-center justify-center gap-2">
 					<span>
 						By{" "}
 						<strong className="text-(--text)">

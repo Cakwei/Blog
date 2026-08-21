@@ -74,7 +74,7 @@ function AdminPostsPage() {
 
 	return (
 		<div className="flex justify-center w-full bg-(--bg)">
-			<div className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-10 text-(--text) selection:bg-(--link)/20 selection:text-(--link)">
+			<div className="w-full max-w-6xl portrait:min-h-[75vh] landscape:min-h-[60vh] px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-10 text-(--text) selection:bg-(--link)/20 selection:text-(--link)">
 				{/* Ambient Background Glow */}
 				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-(--link)/10 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
 
@@ -93,7 +93,7 @@ function AdminPostsPage() {
 					</div>
 					<Button
 						onClick={() => navigate({ to: "/posts/create" })}
-						className="h-9 px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all duration-300 flex items-center gap-2 cursor-pointer"
+						className="px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all duration-300 flex items-center gap-2 cursor-pointer"
 					>
 						<Plus className="w-4 h-4" />
 						<span>New Post</span>

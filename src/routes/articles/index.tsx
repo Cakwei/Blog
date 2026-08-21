@@ -347,8 +347,8 @@ function CategoryDropdown() {
 								}}
 								className={`w-full bg-transparent justify-start px-3.5 py-2.5 text-xs rounded-md transition-all capitalize font-semibold ${
 									selectedCategory === cat
-										? "bg-(--link)  hover:bg-(--link)/80 shadow-md shadow-(--link)/20 text-(--text)"
-										: "text-(--text-secondary) hover:bg-(--border)/60 hover:text-(--text)"
+										? "bg-(--link)  hover:bg-(--link)/80 shadow-md shadow-(--link)/20 text-(--text) text-xs"
+										: "text-(--text-secondary) hover:bg-(--border)/60 hover:text-(--text) text-xs"
 								}`}
 							>
 								{cat}
