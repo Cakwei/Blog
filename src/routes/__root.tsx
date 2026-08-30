@@ -207,7 +207,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						</div>
 
 						<div className="mt-14 pt-8 border-t border-(--border)/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
-							<p>{new Date().getFullYear()} • Made by Charlee Tan w/ ❤️</p>
+							<p>
+								{new Date().getFullYear()} • Built with{" "}
+								<span className="text-(--link)">Tanstack Start</span>. Hosted on{" "}
+								<span className="text-(--link)">Oracle Cloud.</span>
+							</p>
 							{/*<div className="flex items-center gap-6">
 								<span className="hover:text-(--text) transition-colors cursor-pointer">
 									Privacy Policy
