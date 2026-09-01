@@ -5,16 +5,21 @@ const URL = 'http://localhost:3000';
 test('Check pages via UI navigation', async ({ page }) => {
   // Homepage
   await page.goto(URL);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Curated Stories.');
+  const homeHeading = page.getByRole('heading', { level: 1 });
+  await expect(homeHeading).toBeVisible();
+  await expect(homeHeading).toContainText('Curated Stories.');
 
   // Navigate to Articles via link click
   await page.getByRole('link', { name: 'Explore Archive' }).click();
   await expect(page).toHaveURL(new RegExp(`${URL}/articles(\\?.*)?$`));
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Article Archive.');
+  const articlesHeading = page.getByRole('heading', { level: 1 });
+  await expect(articlesHeading).toBeVisible();
+  await expect(articlesHeading).toContainText('Article Archive.');
 
   // Go back to index & click on a post
   await page.getByTestId('homeBtn').click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Curated Stories.');
+  await expect(homeHeading).toBeVisible();
+  await expect(homeHeading).toContainText('Curated Stories.');
   await page.getByTestId('postBtn').click();
 
   // On enter post page
@@ -22,7 +27,9 @@ test('Check pages via UI navigation', async ({ page }) => {
 
   // Go to login page
   await page.goto(`${URL}/login`);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Welcome back');
+  const loginHeading = page.getByRole('heading', { level: 1 });
+  await expect(loginHeading).toBeVisible();
+  await expect(loginHeading).toHaveText('Welcome back');
 
   // Fill credentials using pressSequentially to prevent state/re-render issues
   const emailInput = page.getByTestId('emailInput');
