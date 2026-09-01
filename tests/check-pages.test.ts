@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const URL = process.env.GITHUB_ACTIONS === 'true' ? 'https://':'http://localhost:3000'; 
+const URL = 'http://localhost:3000'; 
 
 test('Check pages via UI navigation', async ({ page }) => {
   // Homepage
