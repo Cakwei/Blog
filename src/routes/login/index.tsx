@@ -127,6 +127,7 @@ function LoginPage() {
 									<div className="relative">
 										<Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-secondary)" />
 										<Input
+											data-testid="emailInput"
 											id={field.name}
 											name={field.name}
 											type="email"
@@ -167,6 +168,7 @@ function LoginPage() {
 									<div className="relative">
 										<Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-secondary)" />
 										<Input
+											data-testid="passwordInput"
 											id={field.name}
 											name={field.name}
 											type="password"
@@ -200,6 +202,7 @@ function LoginPage() {
 						>
 							{([canSubmit, isSubmitting]) => (
 								<Button
+									data-testid="submitLoginBtn"
 									type="submit"
 									disabled={!canSubmit}
 									className="w-full bg-(--link) hover:bg-(--link) font-semibold text-white hover:opacity-90 transition-all duration-200 rounded-md flex items-center justify-center gap-2 group shadow-lg shadow-(--link)/25 text-xs"

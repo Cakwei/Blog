@@ -146,7 +146,7 @@ function PostContent({ postId }: { postId: string }) {
 						</strong>
 					</span>
 					<span>•</span>
-					<span>
+					<span data-testid="publishedText">
 						Published on{" "}
 						{new Date(post.date).toLocaleDateString("en", {
 							day: "numeric",

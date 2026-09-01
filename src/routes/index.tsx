@@ -152,6 +152,7 @@ function HomeContent() {
 				<section className="space-y-4">
 					<div className="relative">
 						<Link
+							data-testid="postBtn"
 							to="/posts/$postId"
 							params={{ postId: currentFeatured.id.toString() }}
 							className="group grid lg:grid-cols-12 gap-6 items-center bg-(--bg-secondary)/30 p-6 sm:p-8 rounded-2xl border border-(--border) hover:border-(--link)/40 transition-all block"

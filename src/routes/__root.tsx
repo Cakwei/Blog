@@ -67,6 +67,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					<div className="h-18 w-full max-w-7xl mx-auto flex items-center justify-between">
 						<div className="flex items-center gap-10">
 							<Link
+								data-testid="homeBtn"
 								to="/"
 								onClick={(e) => {
 									e.preventDefault();
@@ -114,7 +115,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 								</Link>
 
 								<Link to="/register">
-									<Button className="bg-(--link) hover:bg-(--link)/90 text-white text-xs h-9 px-4 rounded-md shadow-lg shadow-(--link)/20 transition-all">
+									<Button
+										data-testid="registerBtn"
+										className="bg-(--link) hover:bg-(--link)/90 text-white text-xs h-9 px-4 rounded-md shadow-lg shadow-(--link)/20 transition-all"
+									>
 										Sign up
 									</Button>
 								</Link>
@@ -126,7 +130,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				{/* MAIN CONTENT WRAPPER */}
 				{children}
 
-				<Toaster closeButton={true} duration={1600} />
+				<Toaster data-testid="toast" closeButton={true} duration={1600} />
 
 				{/* FOOTER */}
 				<footer className="border-t border-(--border)/60 py-16 bg-(--bg-secondary)/40 backdrop-blur-md">
