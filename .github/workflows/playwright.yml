@@ -17,15 +17,30 @@ jobs:
         run: npm i
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      - name: Run Playwright tests
+      
+      - name: Build application
         env:
           BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL}}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           VITE_RUSTFS_ACCESS_KEY_ID: ${{ secrets.VITE_RUSTFS_ACCESS_KEY_ID }}
           VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
           VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
-        run: npx playwright test
+        run: npm run build
+
+      - name: Run Playwright tests
+        env:
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          VITE_RUSTFS_ACCESS_KEY_ID: ${{ secrets.VITE_RUSTFS_ACCESS_KEY_ID }}
+          VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
+          VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
+        run: |
+          npm run start &
+          npx wait-on http://localhost:3000
+          npx playwright test
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
