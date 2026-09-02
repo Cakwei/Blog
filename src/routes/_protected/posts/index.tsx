@@ -92,6 +92,7 @@ function AdminPostsPage() {
 						</p>
 					</div>
 					<Button
+						data-testid="newPostBtn"
 						onClick={() => navigate({ to: "/posts/create" })}
 						className="px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all duration-300 flex items-center gap-2 cursor-pointer"
 					>

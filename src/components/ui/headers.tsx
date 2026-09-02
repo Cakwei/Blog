@@ -40,12 +40,15 @@ export default function BetterAuthHeader() {
 
 				{pathname !== "/posts" && (
 					<Button
+						data-testid="goPostsBtn"
 						onClick={() => navigate({ to: "/posts" })}
 						variant="ghost"
 						className="hidden group sm:inline-flex items-center gap-2 rounded-xl bg-(--bg-secondary)/60 hover:bg-(--bg-secondary) border border-(--border) hover:border-(--link)/40 text-(--text) font-medium text-xs h-9 px-3.5 transition-all"
 					>
 						<PenSquare className="w-3.5 h-3.5 text-(--link)" />
-						<span className="group-hover:text-(--text) text-(--text-secondary)">Write</span>
+						<span className="group-hover:text-(--text) text-(--text-secondary)">
+							Write
+						</span>
 					</Button>
 				)}
 
@@ -53,6 +56,7 @@ export default function BetterAuthHeader() {
 					<DropdownMenuTrigger asChild>
 						<button
 							type="button"
+							data-testid="profileBtn"
 							className="group relative flex items-center justify-center rounded-full focus:outline-none transition-transform active:scale-95"
 						>
 							{session.user.image ? (
@@ -70,6 +74,7 @@ export default function BetterAuthHeader() {
 					</DropdownMenuTrigger>
 
 					<DropdownMenuContent
+						data-testid="profileContent"
 						align="end"
 						className="w-56 p-1.5 rounded-2xl border border-(--border) bg-(--bg-secondary) backdrop-blur-xl shadow-2xl text-(--text)"
 					>
@@ -84,11 +89,12 @@ export default function BetterAuthHeader() {
 
 						<DropdownMenuGroup className="space-y-0.5">
 							<DropdownMenuItem
+								data-testid="goToProfileBtn"
 								onClick={() => navigate({ to: "/profile" })}
 								className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-(--text) focus:bg-(--link)/15 focus:text-(--link) cursor-pointer transition-colors"
 							>
 								<UserIcon className="w-3.5 h-3.5 text-(--link)" />
-								<span>Profile & Dashboard</span>
+								<span>Profile</span>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 

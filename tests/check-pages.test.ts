@@ -47,4 +47,28 @@ test('Check pages via UI navigation', async ({ page }) => {
 
   // Final assertion
   await expect(page).toHaveURL(URL);
+
+  // Check if logged in 
+  await page.getByTestId('profileBtn').click();
+  await expect(page.getByTestId('profileContent')).toContainText('Charlee');
+
+  // Enter profile
+  await page.getByTestId('goToProfileBtn').click();
+  await page.waitForURL(`${URL}/profile`)
+  await expect(page).toHaveURL(`${URL}/profile`)
+  
+  // Attempt update profile
+  await page.getByTestId('saveProfileBtn').click();
+  await expect(page.getByTestId('statusMsg')).toContainText('successfully');
+
+  // Moves on to posts page, check if page is accessible
+  await page.getByTestId('goPostsBtn').click();
+  await expect(homeHeading).toBeVisible();
+  await expect(homeHeading).toContainText('Your Articles');
+
+  // Click on New Post in posts page to check page
+  await page.getByTestId('newPostBtn').click();
+  await expect(homeHeading).toBeVisible();
+  await expect(homeHeading).toContainText('Create New Post');
+
 });

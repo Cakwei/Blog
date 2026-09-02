@@ -201,6 +201,7 @@ function ProfilePage() {
 				>
 					{message && (
 						<div
+							data-testid="statusMsg"
 							className={`p-4 rounded-md text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
 								message.type === "success"
 									? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/5"
@@ -338,6 +339,7 @@ function ProfilePage() {
 					{/* Submit Action Bar */}
 					<div className="flex items-center justify-end pt-2">
 						<Button
+							data-testid="saveProfileBtn"
 							type="submit"
 							disabled={isPending}
 							className="px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
