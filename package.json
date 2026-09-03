@@ -10,7 +10,7 @@
     "start:dev": "node --env-file:.env .output/server/index.mjs",
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build",
+    "build": "dotenv -e .env -- prisma generate && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "format": "biome format",
