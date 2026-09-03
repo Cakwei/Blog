@@ -34,6 +34,7 @@ dist/
 *.njsproj
 *.sln
 *.sw?
+src/generated
 
 # OS Files
 .DS_Store

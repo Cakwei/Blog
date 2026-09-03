@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedRouteImport } from './routes/_protected'
+import { Route as Privacy_policyRouteImport } from './routes/privacy_policy'
 import { Route as ArticlesIndexRouteImport } from './routes/articles/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Privacy_policyRoute = Privacy_policyRouteImport.update({
+  id: '/privacy_policy',
+  path: '/privacy_policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArticlesIndexRoute = ArticlesIndexRouteImport.update({
@@ -92,6 +98,7 @@ const ApiPostsUserIdIndexRoute = ApiPostsUserIdIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/privacy_policy': typeof Privacy_policyRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/articles/': typeof ArticlesIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacy_policy': typeof Privacy_policyRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/articles': typeof ArticlesIndexRoute
   '/login': typeof LoginIndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
+  '/privacy_policy': typeof Privacy_policyRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/articles/': typeof ArticlesIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/privacy_policy'
     | '/posts/$postId'
     | '/articles/'
     | '/login/'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/privacy_policy'
     | '/posts/$postId'
     | '/articles'
     | '/login'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_protected'
+    | '/privacy_policy'
     | '/posts/$postId'
     | '/articles/'
     | '/login/'
@@ -183,6 +195,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
+  Privacy_policyRoute: typeof Privacy_policyRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   ArticlesIndexRoute: typeof ArticlesIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof ProtectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy_policy': {
+      id: '/privacy_policy'
+      path: '/privacy_policy'
+      fullPath: '/privacy_policy'
+      preLoaderRoute: typeof Privacy_policyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/articles/': {
@@ -309,6 +329,7 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
+  Privacy_policyRoute: Privacy_policyRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   ArticlesIndexRoute: ArticlesIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
