@@ -13,6 +13,7 @@ export const Route = createFileRoute("/register/")({
 });
 
 function RegisterPage() {
+	const navigate = Route.useNavigate();
 	const form = useForm({
 		defaultValues: {
 			fullName: "",
@@ -29,7 +30,7 @@ function RegisterPage() {
 						displayUsername: value.username,
 						email: value.email,
 						password: value.password,
-						callbackURL: "/login",
+						callbackURL: "/verify-email?success=true",
 					},
 					{
 						onSuccess: () => {
@@ -46,7 +47,14 @@ function RegisterPage() {
 									position: "top-center",
 								},
 							);
-							window.location.href = "/login";
+
+							navigate({
+								to: "/verify-email",
+								search: {
+									email: value.email,
+									success: false,
+								},
+							});
 						},
 						onError: ({ error }) => {
 							logger("error", "", error);

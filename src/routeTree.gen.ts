@@ -11,7 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedRouteImport } from './routes/_protected'
-import { Route as Privacy_policyRouteImport } from './routes/privacy_policy'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as ArticlesIndexRouteImport } from './routes/articles/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
@@ -33,9 +34,14 @@ const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Privacy_policyRoute = Privacy_policyRouteImport.update({
-  id: '/privacy_policy',
-  path: '/privacy_policy',
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArticlesIndexRoute = ArticlesIndexRouteImport.update({
@@ -98,7 +104,8 @@ const ApiPostsUserIdIndexRoute = ApiPostsUserIdIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/privacy_policy': typeof Privacy_policyRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/articles/': typeof ArticlesIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -113,7 +120,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/privacy_policy': typeof Privacy_policyRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/articles': typeof ArticlesIndexRoute
   '/login': typeof LoginIndexRoute
@@ -130,7 +138,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
-  '/privacy_policy': typeof Privacy_policyRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/articles/': typeof ArticlesIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -147,7 +156,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/privacy_policy'
+    | '/privacy-policy'
+    | '/verify-email'
     | '/posts/$postId'
     | '/articles/'
     | '/login/'
@@ -162,7 +172,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/privacy_policy'
+    | '/privacy-policy'
+    | '/verify-email'
     | '/posts/$postId'
     | '/articles'
     | '/login'
@@ -178,7 +189,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_protected'
-    | '/privacy_policy'
+    | '/privacy-policy'
+    | '/verify-email'
     | '/posts/$postId'
     | '/articles/'
     | '/login/'
@@ -195,7 +207,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
-  Privacy_policyRoute: typeof Privacy_policyRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   ArticlesIndexRoute: typeof ArticlesIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -221,11 +234,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/privacy_policy': {
-      id: '/privacy_policy'
-      path: '/privacy_policy'
-      fullPath: '/privacy_policy'
-      preLoaderRoute: typeof Privacy_policyRouteImport
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/articles/': {
@@ -329,7 +349,8 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
-  Privacy_policyRoute: Privacy_policyRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   ArticlesIndexRoute: ArticlesIndexRoute,
   LoginIndexRoute: LoginIndexRoute,

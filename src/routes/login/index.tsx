@@ -22,11 +22,12 @@ function LoginPage() {
 		},
 		onSubmit: async ({ value }) => {
 			try {
-				logger("debug", value.email, value.password);
+				// logger("debug", value.email, value.password);
 				await authClient.signIn.email(
 					{
 						email: value.email,
 						password: value.password,
+						// callbackURL: "/verify-email?success=true",
 					},
 					{
 						onSuccess: () => {
@@ -45,9 +46,15 @@ function LoginPage() {
 							);
 							navigate({ to: "/" });
 						},
-						onError: ({ error }) => {
+						onError: async ({ error }) => {
+							if (error.status === 403) {
+								navigate({
+									to: "/verify-email",
+									search: { email: value.email, success: false },
+								});
+							}
 							logger("error", "", error);
-							toast.error(
+							/*	toast.error(
 								<div className="flex flex-col gap-1">
 									<span className="text-(--text) font-semibold text-xs">
 										Sign in failed
@@ -61,6 +68,7 @@ function LoginPage() {
 									position: "top-center",
 								},
 							);
+						*/
 						},
 					},
 				);
