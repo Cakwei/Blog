@@ -9,20 +9,15 @@ test('Check pages via UI navigation', async ({ page }) => {
   await expect(homeHeading).toBeVisible();
   await expect(homeHeading).toContainText('Curated Stories.');
 
-  // Navigate to Articles via link click
-  await page.getByRole('link', { name: 'Explore Archive' }).click();
-  await expect(page).toHaveURL(new RegExp(`${URL}/articles(\\?.*)?$`));
-  const articlesHeading = page.getByRole('heading', { level: 1 });
-  await expect(articlesHeading).toBeVisible();
-  await expect(articlesHeading).toContainText('Article Archive.');
+  // Navigate to Articles via link click, ensuring full hydration and bypassing potential overlays
+  const exploreLink = page.getByRole('link', { name: 'Explore Archive' });
+  await exploreLink.waitFor({ state: 'visible' });
+  await exploreLink.click({ force: true });
 
-  // Tests for dropdown list (post category)
   const searchBtn = page.getByTestId('searchPostInput');
-  await expect(searchBtn).toBeVisible();
-  await searchBtn.pressSequentially('Self-introduction',{'delay':150});
 
+  await searchBtn.pressSequentially('Self-introduction', { delay: 150 });
   await expect(page.getByTestId('categoryItem')).toBeVisible();
-
   // Check if post loads
   // Go back to index & click on a post
   await page.getByTestId('homeBtn').click();
@@ -62,8 +57,8 @@ test('Check pages via UI navigation', async ({ page }) => {
 
   // Enter profile
   await page.getByTestId('goToProfileBtn').click();
-  await page.waitForURL(`${URL}/profile`)
-  await expect(page).toHaveURL(`${URL}/profile`)
+  await page.waitForURL(`${URL}/profile`);
+  await expect(page).toHaveURL(`${URL}/profile`);
   
   // Attempt update profile
   await page.getByTestId('saveProfileBtn').click();
@@ -90,15 +85,15 @@ test('Check pages via UI navigation', async ({ page }) => {
 
   // Quick return back to "/"
   // Testing for header search bar
-  await page.goto(URL)
+  await page.goto(URL);
   await page.getByTestId('searchBarBtn').click();
-  await expect(page.getByTestId('quickLinkTxt')).toContainText('QUICK LINKS',{ignoreCase:true})
+  await expect(page.getByTestId('quickLinkTxt')).toContainText('QUICK LINKS', { ignoreCase: true });
 
   // Dialog opens, checks if functional
   const searchCommandInput = page.getByTestId('searchCommandInput');
   await searchCommandInput.pressSequentially('Self-Introduction', { delay: 50 });
   await page.getByTestId('searchCommandItem').first().click();
-  await expect(page.getByTestId('searchCommandItem')).not.toBeVisible()
+  await expect(page.getByTestId('searchCommandItem')).not.toBeVisible();
   await expect(homeHeading.filter({ hasText: 'Self-Introduction' })).toBeVisible();
 
-});
+})

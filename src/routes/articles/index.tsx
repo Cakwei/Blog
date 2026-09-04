@@ -258,7 +258,7 @@ function FilterControlsBar() {
 			<div className="relative w-full md:w-[420px]">
 				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--link)" />
 				<Input
-				data-testid="searchPostInput"
+					data-testid="searchPostInput"
 					type="text"
 					placeholder="Search by title, topic, or keyword..."
 					value={searchTerm}
