@@ -111,7 +111,7 @@ function RegisterPage() {
 							<User className="w-5 h-5" />
 						</div>
 						<CardTitle className="text-2xl font-black tracking-tight text-(--text)">
-							Create an account
+							<h1>Create an account</h1>
 						</CardTitle>
 						<CardDescription className="text-(--text-secondary) text-xs sm:text-sm">
 							Enter your details to sign up for an account.

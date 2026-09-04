@@ -81,8 +81,8 @@ function LoginPage() {
 						<div className="mx-auto inline-flex items-center justify-center w-12 h-12 rounded-xl bg-(--link)/10 border border-(--link)/30 text-(--link)">
 							<Lock className="w-5 h-5" />
 						</div>
-						<CardTitle className="text-2xl font-black tracking-tight text-(--text)">
-							Welcome back
+						<CardTitle className="text-3xl font-black tracking-tight text-(--text)">
+							<h1>Welcome back</h1>
 						</CardTitle>
 						<CardDescription className="text-(--text-secondary) text-xs sm:text-sm">
 							Please enter your details to sign in.
