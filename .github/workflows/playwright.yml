@@ -26,6 +26,7 @@ jobs:
           VITE_RUSTFS_ACCESS_KEY_ID: ${{ secrets.VITE_RUSTFS_ACCESS_KEY_ID }}
           VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
           VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: npm run build
 
       - name: Run Playwright tests
@@ -37,6 +38,7 @@ jobs:
           VITE_RUSTFS_ACCESS_KEY_ID: ${{ secrets.VITE_RUSTFS_ACCESS_KEY_ID }}
           VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
           VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: |
           npm run start &
           npx wait-on http://localhost:3000

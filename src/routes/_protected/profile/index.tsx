@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { ArrowLeft, KeyRound, User as UserIcon } from "lucide-react";
+import { KeyRound, User as UserIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
@@ -70,9 +70,7 @@ function ProfilePage() {
 	const queryClient = useQueryClient();
 	const { data: user } = useSuspenseQuery(profileQueryOptions());
 
-	const [currentPassword, setCurrentPassword] = useState("");
-	const [newPassword, setNewPassword] = useState("");
-	const [confirmPassword, setConfirmPassword] = useState("");
+	const [isResettingPassword, setIsResettingPassword] = useState(false);
 	const [message, setMessage] = useState<{
 		type: "success" | "error";
 		text: string;
@@ -103,41 +101,39 @@ function ProfilePage() {
 		},
 		onSubmit: async ({ value }) => {
 			setMessage(null);
-
-			if (newPassword) {
-				if (newPassword !== confirmPassword) {
-					setMessage({
-						type: "error",
-						text: "New confirmation passwords do not match.",
-					});
-					return;
-				}
-
-				await authClient.changePassword({
-					newPassword,
-					currentPassword,
-					revokeOtherSessions: true,
-					fetchOptions: {
-						onError: ({ error }) => {
-							setMessage({
-								type: "error",
-								text: error.message || "Failed to update password security.",
-							});
-						},
-						onSuccess: () => {
-							authClient.revokeSessions();
-							navigate({ to: "/", reloadDocument: true });
-						},
-					},
-				});
-			}
-
 			mutate({
 				name: value.name,
 				email: value.email,
 			});
 		},
 	});
+
+	const handlePasswordReset = async () => {
+		if (!user?.email) return;
+		setMessage(null);
+		setIsResettingPassword(true);
+
+		await authClient.requestPasswordReset({
+			email: user.email,
+			redirectTo: "/profile/reset-password", // Change to match your actual password reset page route
+			fetchOptions: {
+				onError: ({ error }) => {
+					setMessage({
+						type: "error",
+						text: error.message || "Failed to request password reset.",
+					});
+					setIsResettingPassword(false);
+				},
+				onSuccess: () => {
+					setMessage({
+						type: "success",
+						text: "Password reset instructions have been sent to your email address.",
+					});
+					setIsResettingPassword(false);
+				},
+			},
+		});
+	};
 
 	return (
 		<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden">
@@ -266,7 +262,7 @@ function ProfilePage() {
 						</div>
 					</div>
 
-					{/* Section 2: Security & Password */}
+					{/* Section 2: Security & Password Reset */}
 					<div className="bg-(--bg-secondary)/40 border border-(--border) rounded-md p-6 sm:p-8 backdrop-blur-2xl shadow-xl space-y-6">
 						<div className="flex items-center gap-2 pb-4 border-b border-(--border)/60">
 							<KeyRound className="w-4 h-4 text-(--link)" />
@@ -275,64 +271,22 @@ function ProfilePage() {
 							</h2>
 						</div>
 
-						<p className="text-xs text-(--text-secondary)">
-							Leave password fields empty unless you want to execute a security
-							credential rotation.
-						</p>
-
-						<div className="space-y-4">
-							<div className="space-y-2">
-								<Label
-									htmlFor="current-password"
-									className="text-xs font-bold uppercase tracking-wider text-(--text-secondary)"
-								>
-									Current Password
-								</Label>
-								<Input
-									id="current-password"
-									type="password"
-									value={currentPassword}
-									onChange={(e) => setCurrentPassword(e.target.value)}
-									required={!!newPassword}
-									placeholder="••••••••••••"
-									className="text-xs rounded-md border-border bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
-								/>
-							</div>
-
-							<div className="grid sm:grid-cols-2 gap-4">
-								<div className="space-y-2">
-									<Label
-										htmlFor="new-password"
-										className="text-xs font-bold uppercase tracking-wider text-(--text-secondary)"
-									>
-										New Password
-									</Label>
-									<Input
-										id="new-password"
-										type="password"
-										value={newPassword}
-										onChange={(e) => setNewPassword(e.target.value)}
-										placeholder="••••••••••••"
-										className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
-									/>
-								</div>
-								<div className="space-y-2">
-									<Label
-										htmlFor="confirm-password"
-										className="text-xs font-bold uppercase tracking-wider text-(--text-secondary)"
-									>
-										Confirm Password
-									</Label>
-									<Input
-										id="confirm-password"
-										type="password"
-										value={confirmPassword}
-										onChange={(e) => setConfirmPassword(e.target.value)}
-										placeholder="••••••••••••"
-										className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50 "
-									/>
-								</div>
-							</div>
+						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+							<p className="text-xs text-(--text-secondary) max-w-md">
+								Need to update your password? Request a secure password reset
+								link to be sent to your registered email address.
+							</p>
+							<Button
+								type="button"
+								variant="outline"
+								disabled={isResettingPassword}
+								onClick={handlePasswordReset}
+								className="text-xs font-semibold border-(--border) bg-(--bg) hover:bg-(--bg-secondary) text-(--text) cursor-pointer shrink-0"
+							>
+								{isResettingPassword
+									? "Sending Link..."
+									: "Reset Password via Email"}
+							</Button>
 						</div>
 					</div>
 

@@ -44,7 +44,7 @@ export const auth = betterAuth({
                                             <td style="padding: 40px;">
                                                 <h2 style="margin: 0 0 16px 0; color: #09090b; font-size: 20px; font-weight: 600;">Check your inbox, almost there!</h2>
                                                 <p style="margin: 0 0 24px 0; color: #71717a; font-size: 16px; line-height: 24px;">
-                                                    Hi ${user.name || "there"}, thanks for signing up for Cakwei. Please confirm your email address by clicking the button below.
+                                                    Hi ${user.name || "there"}, thanks for signing up. Please confirm your email address by clicking the button below.
                                                 </p>
                                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                                                     <tr>
@@ -54,7 +54,7 @@ export const auth = betterAuth({
                                                     </tr>
                                                 </table>
                                                 <p style="margin: 0 0 16px 0; color: #71717a; font-size: 14px; line-height: 20px;">
-                                                    If you didn't create an account with Cakwei, you can safely ignore this email.
+                                                    If you didn't create an account yet, you can safely ignore this email.
                                                 </p>
                                                 <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0;">
                                                 <p style="margin: 0; color: #a1a1aa; font-size: 12px; line-height: 16px; word-break: break-all;">
@@ -77,12 +77,12 @@ export const auth = betterAuth({
                 `,
 			});
 		},
-		sendOnSignIn: true, // <--- Only send verification email upon registration/signup
+		sendOnSignIn: true,
 	},
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: true,
-		sendResetPassword: async ({ user, url }) => {
+		sendResetPassword: async ({ user, url, token }, request) => {
 			void resend.emails.send({
 				from: "Cakwei <auth@cakwei.dev>",
 				to: user.email,
@@ -111,7 +111,7 @@ export const auth = betterAuth({
                                             <td style="padding: 40px;">
                                                 <h2 style="margin: 0 0 16px 0; color: #09090b; font-size: 20px; font-weight: 600;">Reset your password</h2>
                                                 <p style="margin: 0 0 24px 0; color: #71717a; font-size: 16px; line-height: 24px;">
-                                                    We received a request to reset the password for your Cakwei account. Click the button below to choose a new password.
+                                                    We received a request to reset the password for your account. Click the button below to choose a new password.
                                                 </p>
                                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                                                     <tr>
@@ -143,6 +143,10 @@ export const auth = betterAuth({
                     </html>
                 `,
 			});
+		},
+		onPasswordReset: async ({ user }, request) => {
+			// your logic here
+			console.log(`Password for user ${user.email} has been reset.`);
 		},
 	},
 	plugins: [tanstackStartCookies(), username()],

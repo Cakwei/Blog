@@ -75,7 +75,7 @@ function VerifyEmailePage() {
 							className="flex items-center justify-center gap-2 text-xs font-bold tracking-wider"
 						>
 							<Label className="text-(--text) text-xs">
-								{success ? "Go to Dashboard" : "← Back to Home"}
+								{success ? "← Go to login" : "← Back to Home"}
 							</Label>
 						</Link>
 					</Button>

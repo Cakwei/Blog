@@ -23,6 +23,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPostsIndexRouteImport } from './routes/api/posts/index'
 import { Route as ProtectedPostsCreateIndexRouteImport } from './routes/_protected/posts/create/index'
 import { Route as ProtectedPostsEditPostIdRouteImport } from './routes/_protected/posts/edit/$postId'
+import { Route as ProtectedProfileResetPasswordIndexRouteImport } from './routes/_protected/profile/reset-password/index'
 import { Route as ApiPostsUserIdIndexRouteImport } from './routes/api/posts/$userId/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -96,6 +97,12 @@ const ProtectedPostsEditPostIdRoute =
     path: '/posts/edit/$postId',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedProfileResetPasswordIndexRoute =
+  ProtectedProfileResetPasswordIndexRouteImport.update({
+    id: '/profile/reset-password/',
+    path: '/profile/reset-password/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 const ApiPostsUserIdIndexRoute = ApiPostsUserIdIndexRouteImport.update({
   id: '/api/posts/$userId/',
   path: '/api/posts/$userId/',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/profile/reset-password/': typeof ProtectedProfileResetPasswordIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/api/posts': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create': typeof ProtectedPostsCreateIndexRoute
+  '/profile/reset-password': typeof ProtectedProfileResetPasswordIndexRoute
   '/api/posts/$userId': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesById {
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/_protected/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/_protected/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/_protected/profile/reset-password/': typeof ProtectedProfileResetPasswordIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/posts/edit/$postId'
     | '/posts/create/'
+    | '/profile/reset-password/'
     | '/api/posts/$userId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/api/posts'
     | '/posts/edit/$postId'
     | '/posts/create'
+    | '/profile/reset-password'
     | '/api/posts/$userId'
   id:
     | '__root__'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/_protected/posts/edit/$postId'
     | '/_protected/posts/create/'
+    | '/_protected/profile/reset-password/'
     | '/api/posts/$userId/'
   fileRoutesById: FileRoutesById
 }
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedPostsEditPostIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/profile/reset-password/': {
+      id: '/_protected/profile/reset-password/'
+      path: '/profile/reset-password'
+      fullPath: '/profile/reset-password/'
+      preLoaderRoute: typeof ProtectedProfileResetPasswordIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/api/posts/$userId/': {
       id: '/api/posts/$userId/'
       path: '/api/posts/$userId'
@@ -333,6 +353,7 @@ interface ProtectedRouteChildren {
   ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute
   ProtectedPostsEditPostIdRoute: typeof ProtectedPostsEditPostIdRoute
   ProtectedPostsCreateIndexRoute: typeof ProtectedPostsCreateIndexRoute
+  ProtectedProfileResetPasswordIndexRoute: typeof ProtectedProfileResetPasswordIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -340,6 +361,8 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedProfileIndexRoute: ProtectedProfileIndexRoute,
   ProtectedPostsEditPostIdRoute: ProtectedPostsEditPostIdRoute,
   ProtectedPostsCreateIndexRoute: ProtectedPostsCreateIndexRoute,
+  ProtectedProfileResetPasswordIndexRoute:
+    ProtectedProfileResetPasswordIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
