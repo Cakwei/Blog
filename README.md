@@ -6,10 +6,9 @@
   -->
     <!--<a href="LICENSE"><img src="https://img.shields.io/github/license/username/repo-name?style=flat-square" alt="License"></a>-->
     <a href="https://github.com/username/repo-name/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome"></a>
-    <!-- <a href="https://github.com/username/repo-name/stargazers"><img src="https://img.shields.io/github/stars/username/repo-name?style=flat-square" alt="GitHub Stars"></a>
+    <a href="https://github.com/username/repo-name/stargazers"><img src="https://img.shields.io/github/stars/username/repo-name?style=flat-square" alt="GitHub Stars"></a>
 
   </p>
-    -->
 
 </div>
 
