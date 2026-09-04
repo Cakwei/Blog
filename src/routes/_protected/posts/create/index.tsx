@@ -155,6 +155,7 @@ function NewPostForm() {
 	return (
 		<div className="space-y-8">
 			<Link
+				data-testid="backToPostsBtn"
 				to="/posts"
 				className="flex items-center group text-xs transition-colors"
 			>

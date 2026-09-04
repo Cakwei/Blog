@@ -35,11 +35,11 @@ test('Check pages via UI navigation', async ({ page }) => {
   const emailInput = page.getByTestId('emailInput');
   const passwordInput = page.getByTestId('passwordInput');
 
-  await emailInput.pressSequentially('charleetan121@gmail.com', { delay: 50 });
+  await emailInput.pressSequentially('charleetan2020@gmail.com', { delay: 50 });
   await passwordInput.pressSequentially('123456789', { delay: 50 });
 
   // Check mock values
-  await expect(emailInput).toHaveValue('charleetan121@gmail.com');
+  await expect(emailInput).toHaveValue('charleetan2020@gmail.com');
   await expect(passwordInput).toHaveValue('123456789');
 
   // Submit form
@@ -71,4 +71,11 @@ test('Check pages via UI navigation', async ({ page }) => {
   await expect(homeHeading).toBeVisible();
   await expect(homeHeading).toContainText('Create New Post');
 
+  await page.getByTestId('backToPostsBtn').click();
+  await expect(homeHeading).toBeVisible();
+  await expect(homeHeading).toContainText('Your Articles');
+
+  await page.getByTestId('editPostBtn').first().click();
+  await expect(page.getByTestId('editPostTxt')).toBeVisible();
+  await expect(page.getByTestId('editPostTxt')).toContainText('Edit Post');
 });

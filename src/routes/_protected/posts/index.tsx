@@ -254,6 +254,7 @@ function PostRow({ post }: { post: any }) {
 					<ArrowUpRight className="w-3 h-3 group-hover/2:text-(--text) text-(--link)" />
 				</Link>
 				<Link
+					data-testid="editPostBtn"
 					to="/posts/edit/$postId"
 					params={{ postId: post.id.toString() }}
 					className="group/2 inline-flex items-center px-3.5 py-2 text-xs font-semibold rounded-md bg-(--link)/10 text-(--link) border border-(--link)/20 hover:bg-(--link) hover:text-white transition-all shadow-xs"
