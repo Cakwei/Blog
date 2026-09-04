@@ -15,10 +15,6 @@ export function NotFound({
 }) {
 	return (
 		<div className="min-h-[calc(100vh-10rem)] text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden flex items-center justify-center px-4 py-12">
-			{/* Background ambient glow effect */}
-			<div className="absolute w-96 h-96 bg-(--link)/10 rounded-full blur-3xl pointer-events-none -top-20 -left-20 animate-pulse" />
-			<div className="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -bottom-20 -right-20 animate-pulse delay-700" />
-
 			<div className="w-full max-w-md relative z-10 text-center space-y-6">
 				{/* Animated SVG Illustration */}
 				<div className="relative mx-auto w-40 h-40 flex items-center justify-center">
