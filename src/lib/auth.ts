@@ -81,6 +81,7 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
+		revokeSessionsOnPasswordReset: true, // Revoke all other sessions when resetting password
 		requireEmailVerification: true,
 		sendResetPassword: async ({ user, url, token }, request) => {
 			void resend.emails.send({

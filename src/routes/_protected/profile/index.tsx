@@ -115,7 +115,7 @@ function ProfilePage() {
 
 		await authClient.requestPasswordReset({
 			email: user.email,
-			redirectTo: "/profile/reset-password", // Change to match your actual password reset page route
+			redirectTo: "/reset-password", // Change to match your actual password reset page route
 			fetchOptions: {
 				onError: ({ error }) => {
 					setMessage({
@@ -281,7 +281,7 @@ function ProfilePage() {
 								variant="outline"
 								disabled={isResettingPassword}
 								onClick={handlePasswordReset}
-								className="text-xs font-semibold border-(--border) bg-(--bg) hover:bg-(--bg-secondary) text-(--text) cursor-pointer shrink-0"
+								className="text-xs font-semibold hover:text-(--text) border-border bg-(--bg) hover:bg-(--bg-secondary) text-(--text) cursor-pointer shrink-0"
 							>
 								{isResettingPassword
 									? "Sending Link..."

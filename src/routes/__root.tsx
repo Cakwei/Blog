@@ -17,6 +17,7 @@ import { getSessionFn } from "#/lib/utils";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 //import appCss from "../styles.css?url";
 import "../styles.css";
+import { NotFound } from "#/components/ui/errorComponent";
 import { Label } from "#/components/ui/label";
 
 export interface MyRouterContext {
@@ -49,6 +50,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 		],*/
 	}),
+	notFoundComponent: NotFound,
 	shellComponent: RootDocument,
 });
 
