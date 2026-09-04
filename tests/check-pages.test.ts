@@ -16,6 +16,14 @@ test('Check pages via UI navigation', async ({ page }) => {
   await expect(articlesHeading).toBeVisible();
   await expect(articlesHeading).toContainText('Article Archive.');
 
+  // Tests for dropdown list (post category)
+  const searchBtn = page.getByTestId('searchPostInput');
+  await expect(searchBtn).toBeVisible();
+  await searchBtn.pressSequentially('Self-introduction',{'delay':150});
+
+  await expect(page.getByTestId('categoryItem')).toBeVisible();
+
+  // Check if post loads
   // Go back to index & click on a post
   await page.getByTestId('homeBtn').click();
   await expect(homeHeading).toBeVisible();
@@ -75,7 +83,22 @@ test('Check pages via UI navigation', async ({ page }) => {
   await expect(homeHeading).toBeVisible();
   await expect(homeHeading).toContainText('Your Articles');
 
+  // Checks if edit button works and accessible to page
   await page.getByTestId('editPostBtn').first().click();
   await expect(page.getByTestId('editPostTxt')).toBeVisible();
   await expect(page.getByTestId('editPostTxt')).toContainText('Edit Post');
+
+  // Quick return back to "/"
+  // Testing for header search bar
+  await page.goto(URL)
+  await page.getByTestId('searchBarBtn').click();
+  await expect(page.getByTestId('quickLinkTxt')).toContainText('QUICK LINKS',{ignoreCase:true})
+
+  // Dialog opens, checks if functional
+  const searchCommandInput = page.getByTestId('searchCommandInput');
+  await searchCommandInput.pressSequentially('Self-Introduction', { delay: 50 });
+  await page.getByTestId('searchCommandItem').first().click();
+  await expect(page.getByTestId('searchCommandItem')).not.toBeVisible()
+  await expect(homeHeading.filter({ hasText: 'Self-Introduction' })).toBeVisible();
+
 });

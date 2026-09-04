@@ -258,6 +258,7 @@ function FilterControlsBar() {
 			<div className="relative w-full md:w-[420px]">
 				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--link)" />
 				<Input
+				data-testid="searchPostInput"
 					type="text"
 					placeholder="Search by title, topic, or keyword..."
 					value={searchTerm}
@@ -301,6 +302,7 @@ function CategoryDropdown() {
 	return (
 		<div className="relative w-full md:w-72 isolate" ref={dropdownRef}>
 			<Button
+				data-testid="dropdownSelectInput"
 				type="button"
 				variant="outline"
 				onClick={() => setCategoryOpen(!categoryOpen)}
@@ -313,7 +315,7 @@ function CategoryDropdown() {
 			</Button>
 
 			{categoryOpen && (
-				<div className="absolute right-0 z-50 mt-2 w-full bg-(--bg-secondary) border border-(--border) rounded-md shadow-2xl overflow-hidden p-3 backdrop-blur-2xl">
+				<div data-testid="dropdownContent" className="absolute right-0 z-50 mt-2 w-full bg-(--bg-secondary) border border-(--border) rounded-md shadow-2xl overflow-hidden p-3 backdrop-blur-2xl">
 					<input
 						type="text"
 						placeholder="Filter categories..."
@@ -339,6 +341,7 @@ function CategoryDropdown() {
 						</Button>
 						{filteredCategories.map((cat) => (
 							<Button
+								data-testid="categoriesBtn"
 								key={cat}
 								type="button"
 								onClick={() => {
@@ -405,7 +408,10 @@ function ArticleCard({ post }: { post: any }) {
 				params={{ postId: post.id.toString() }}
 				className="w-full flex"
 			>
-				<Card className="w-full bg-(--bg-secondary)/40 hover:bg-(--bg-secondary)/80 border-(--border) hover:border-(--link)/50 transition-all duration-300 hover:shadow-2xl hover:shadow-(--link)/10 flex flex-col overflow-hidden rounded-3xl">
+				<Card
+					data-testid="categoryItem"
+					className="w-full bg-(--bg-secondary)/40 hover:bg-(--bg-secondary)/80 border-(--border) hover:border-(--link)/50 transition-all duration-300 hover:shadow-2xl hover:shadow-(--link)/10 flex flex-col overflow-hidden rounded-3xl"
+				>
 					<div className="overflow-hidden aspect-[16/10] bg-(--bg) relative border-b border-(--border)">
 						{post.image && !imageError ? (
 							<img

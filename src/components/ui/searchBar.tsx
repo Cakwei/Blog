@@ -145,6 +145,7 @@ export function SearchDialog() {
 		<>
 			{/* Sleek Minimalist Terminal Trigger */}
 			<Button
+				data-testid="searchBarBtn"
 				onClick={() => setOpen(true)}
 				variant="ghost"
 				className="h-9 px-3 gap-3 rounded-lg font-mono text-xs text-(--text-secondary) hover:text-(--text) bg-(--bg-secondary)/40 hover:bg-(--bg-secondary) border border-(--border) transition-all group"
@@ -169,11 +170,12 @@ export function SearchDialog() {
 						{/* Immersive Spotlight Header */}
 						<div className="flex items-center px-4 py-3 bg-(--bg-secondary)/60 border-b border-(--border)">
 							<CommandInput
+								data-testid="searchCommandInput"
 								value={inputValue}
 								onValueChange={handleInputChange}
 								placeholder="Type to search archive..."
 								maxLength={MAX_SEARCH_LENGTH + 5}
-								className="flex-1 text-(--text) text-xs placeholder:text-xs placeholder:text-(--text-secondary) bg-transparent border-none outline-none text-sm font-medium"
+								className="flex-1 text-(--text) text-xs placeholder:text-xs placeholder:text-(--text-secondary) bg-transparent border-none outline-none font-medium"
 							/>
 							<div className="text-[10px] font-mono text-(--text-secondary) bg-(--bg) px-2 py-0.5 rounded border border-(--border)">
 								ESC
@@ -215,6 +217,7 @@ export function SearchDialog() {
 										>
 											{searchResults.map((post: any) => (
 												<CommandItem
+													data-testid="searchCommandItem"
 													key={post.id}
 													onSelect={() => handleNavigation(`/posts/${post.id}`)}
 													className="group flex items-center justify-between text-(--text) bg-transparent aria-selected:bg-(--link)/10 aria-selected:text-(--link) rounded-xl px-3 py-2.5 cursor-pointer transition-all"
@@ -234,7 +237,10 @@ export function SearchDialog() {
 									{/* Quick Actions List */}
 									<CommandGroup
 										heading={
-											<span className="text-[10px] font-mono uppercase tracking-widest text-(--text-secondary) px-2 py-1 mt-2">
+											<span
+												data-testid="quickLinkTxt"
+												className="text-[10px] font-mono uppercase tracking-widest text-(--text-secondary) px-2 py-1 mt-2"
+											>
 												Quick Links
 											</span>
 										}
