@@ -2,11 +2,15 @@
   <h1>Blog</h1>
   <p><b>A modern, high-performance blogging platform built for seamless content creation and distribution.</b></p>
   <p>
-    <a href="#"><img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build Status"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/username/repo-name?style=flat-square" alt="License"></a>
+  <!-- <a href="#"><img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build Status"></a>
+  -->
+    <!--<a href="LICENSE"><img src="https://img.shields.io/github/license/username/repo-name?style=flat-square" alt="License"></a>-->
     <a href="https://github.com/username/repo-name/pulls"><img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square" alt="PRs Welcome"></a>
-    <a href="https://github.com/username/repo-name/stargazers"><img src="https://img.shields.io/github/stars/username/repo-name?style=flat-square" alt="GitHub Stars"></a>
+    <!-- <a href="https://github.com/username/repo-name/stargazers"><img src="https://img.shields.io/github/stars/username/repo-name?style=flat-square" alt="GitHub Stars"></a>
+
   </p>
+    -->
+
 </div>
 
 ## Key Features
