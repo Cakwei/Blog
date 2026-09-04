@@ -193,7 +193,8 @@ function LoginPage() {
 										</p>
 									) : null}
 									<Link
-										to="/"
+										to="/reset-password"
+										search={{ token: "" }}
 										className="text-xs font-medium text-(--link) hover:underline"
 									>
 										<span className="text-(--link) text-xs hover:underline">

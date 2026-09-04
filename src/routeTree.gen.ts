@@ -17,13 +17,13 @@ import { Route as ArticlesIndexRouteImport } from './routes/articles/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as RegisterIndexRouteImport } from './routes/register/index'
+import { Route as ResetPasswordIndexRouteImport } from './routes/reset-password/index'
 import { Route as ProtectedPostsIndexRouteImport } from './routes/_protected/posts/index'
 import { Route as ProtectedProfileIndexRouteImport } from './routes/_protected/profile/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPostsIndexRouteImport } from './routes/api/posts/index'
 import { Route as ProtectedPostsCreateIndexRouteImport } from './routes/_protected/posts/create/index'
 import { Route as ProtectedPostsEditPostIdRouteImport } from './routes/_protected/posts/edit/$postId'
-import { Route as ProtectedProfileResetPasswordIndexRouteImport } from './routes/_protected/profile/reset-password/index'
 import { Route as ApiPostsUserIdIndexRouteImport } from './routes/api/posts/$userId/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +65,11 @@ const RegisterIndexRoute = RegisterIndexRouteImport.update({
   path: '/register/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordIndexRoute = ResetPasswordIndexRouteImport.update({
+  id: '/reset-password/',
+  path: '/reset-password/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedPostsIndexRoute = ProtectedPostsIndexRouteImport.update({
   id: '/posts/',
   path: '/posts/',
@@ -97,12 +102,6 @@ const ProtectedPostsEditPostIdRoute =
     path: '/posts/edit/$postId',
     getParentRoute: () => ProtectedRoute,
   } as any)
-const ProtectedProfileResetPasswordIndexRoute =
-  ProtectedProfileResetPasswordIndexRouteImport.update({
-    id: '/profile/reset-password/',
-    path: '/profile/reset-password/',
-    getParentRoute: () => ProtectedRoute,
-  } as any)
 const ApiPostsUserIdIndexRoute = ApiPostsUserIdIndexRouteImport.update({
   id: '/api/posts/$userId/',
   path: '/api/posts/$userId/',
@@ -117,13 +116,13 @@ export interface FileRoutesByFullPath {
   '/articles/': typeof ArticlesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/register/': typeof RegisterIndexRoute
+  '/reset-password/': typeof ResetPasswordIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/posts/': typeof ProtectedPostsIndexRoute
   '/profile/': typeof ProtectedProfileIndexRoute
   '/api/posts/': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create/': typeof ProtectedPostsCreateIndexRoute
-  '/profile/reset-password/': typeof ProtectedProfileResetPasswordIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -134,13 +133,13 @@ export interface FileRoutesByTo {
   '/articles': typeof ArticlesIndexRoute
   '/login': typeof LoginIndexRoute
   '/register': typeof RegisterIndexRoute
+  '/reset-password': typeof ResetPasswordIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/posts': typeof ProtectedPostsIndexRoute
   '/profile': typeof ProtectedProfileIndexRoute
   '/api/posts': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create': typeof ProtectedPostsCreateIndexRoute
-  '/profile/reset-password': typeof ProtectedProfileResetPasswordIndexRoute
   '/api/posts/$userId': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesById {
@@ -153,13 +152,13 @@ export interface FileRoutesById {
   '/articles/': typeof ArticlesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/register/': typeof RegisterIndexRoute
+  '/reset-password/': typeof ResetPasswordIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_protected/posts/': typeof ProtectedPostsIndexRoute
   '/_protected/profile/': typeof ProtectedProfileIndexRoute
   '/api/posts/': typeof ApiPostsIndexRoute
   '/_protected/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/_protected/posts/create/': typeof ProtectedPostsCreateIndexRoute
-  '/_protected/profile/reset-password/': typeof ProtectedProfileResetPasswordIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -172,13 +171,13 @@ export interface FileRouteTypes {
     | '/articles/'
     | '/login/'
     | '/register/'
+    | '/reset-password/'
     | '/api/auth/$'
     | '/posts/'
     | '/profile/'
     | '/api/posts/'
     | '/posts/edit/$postId'
     | '/posts/create/'
-    | '/profile/reset-password/'
     | '/api/posts/$userId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -189,13 +188,13 @@ export interface FileRouteTypes {
     | '/articles'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/api/auth/$'
     | '/posts'
     | '/profile'
     | '/api/posts'
     | '/posts/edit/$postId'
     | '/posts/create'
-    | '/profile/reset-password'
     | '/api/posts/$userId'
   id:
     | '__root__'
@@ -207,13 +206,13 @@ export interface FileRouteTypes {
     | '/articles/'
     | '/login/'
     | '/register/'
+    | '/reset-password/'
     | '/api/auth/$'
     | '/_protected/posts/'
     | '/_protected/profile/'
     | '/api/posts/'
     | '/_protected/posts/edit/$postId'
     | '/_protected/posts/create/'
-    | '/_protected/profile/reset-password/'
     | '/api/posts/$userId/'
   fileRoutesById: FileRoutesById
 }
@@ -226,6 +225,7 @@ export interface RootRouteChildren {
   ArticlesIndexRoute: typeof ArticlesIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   RegisterIndexRoute: typeof RegisterIndexRoute
+  ResetPasswordIndexRoute: typeof ResetPasswordIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPostsIndexRoute: typeof ApiPostsIndexRoute
   ApiPostsUserIdIndexRoute: typeof ApiPostsUserIdIndexRoute
@@ -289,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password/': {
+      id: '/reset-password/'
+      path: '/reset-password'
+      fullPath: '/reset-password/'
+      preLoaderRoute: typeof ResetPasswordIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_protected/posts/': {
       id: '/_protected/posts/'
       path: '/posts'
@@ -331,13 +338,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedPostsEditPostIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
-    '/_protected/profile/reset-password/': {
-      id: '/_protected/profile/reset-password/'
-      path: '/profile/reset-password'
-      fullPath: '/profile/reset-password/'
-      preLoaderRoute: typeof ProtectedProfileResetPasswordIndexRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
     '/api/posts/$userId/': {
       id: '/api/posts/$userId/'
       path: '/api/posts/$userId'
@@ -353,7 +353,6 @@ interface ProtectedRouteChildren {
   ProtectedProfileIndexRoute: typeof ProtectedProfileIndexRoute
   ProtectedPostsEditPostIdRoute: typeof ProtectedPostsEditPostIdRoute
   ProtectedPostsCreateIndexRoute: typeof ProtectedPostsCreateIndexRoute
-  ProtectedProfileResetPasswordIndexRoute: typeof ProtectedProfileResetPasswordIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -361,8 +360,6 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedProfileIndexRoute: ProtectedProfileIndexRoute,
   ProtectedPostsEditPostIdRoute: ProtectedPostsEditPostIdRoute,
   ProtectedPostsCreateIndexRoute: ProtectedPostsCreateIndexRoute,
-  ProtectedProfileResetPasswordIndexRoute:
-    ProtectedProfileResetPasswordIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
@@ -378,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArticlesIndexRoute: ArticlesIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
+  ResetPasswordIndexRoute: ResetPasswordIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPostsIndexRoute: ApiPostsIndexRoute,
   ApiPostsUserIdIndexRoute: ApiPostsUserIdIndexRoute,
