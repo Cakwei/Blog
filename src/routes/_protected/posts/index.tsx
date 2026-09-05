@@ -84,7 +84,10 @@ function AdminPostsPage() {
 						<div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-(--link)/10 border border-(--link)/20 text-(--link) text-[11px] font-bold uppercase tracking-widest">
 							<Sparkles className="w-3 h-3" /> Dashboard
 						</div>
-						<h1 className="text-3xl sm:text-4xl font-black tracking-tight text-(--text)">
+						<h1
+							data-testid="yourPostsHeadingTitle"
+							className="text-3xl sm:text-4xl font-black tracking-tight text-(--text)"
+						>
 							Your Articles.
 						</h1>
 						<p className="text-(--text-secondary) text-xs sm:text-sm">

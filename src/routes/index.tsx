@@ -132,11 +132,15 @@ function HomeContent() {
 					<div className="flex items-center gap-2 text-xs font-semibold text-(--link) tracking-widest uppercase mb-2">
 						<Sparkles className="w-3.5 h-3.5" /> Journal & Thoughts
 					</div>
-					<h1 className="text-4xl sm:text-5xl font-black tracking-tight text-(--text)">
+					<h1
+						data-testid="homeHeading"
+						className="text-4xl sm:text-5xl font-black tracking-tight text-(--text)"
+					>
 						Curated Stories.
 					</h1>
 				</div>
 				<Link
+					data-testid="exploreArchiveBtn"
 					search={{ category: "ALL", search: "" }}
 					to="/articles"
 					className="text-xs font-bold text-(--text-secondary) hover:text-(--link) transition-colors flex items-center gap-1 uppercase tracking-wider"

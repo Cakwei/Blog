@@ -5,6 +5,7 @@ import {
 	HeadContent,
 	Link,
 	Scripts,
+	useHydrated,
 	useLocation,
 	useNavigate,
 } from "@tanstack/react-router";
@@ -56,6 +57,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	const { session } = Route.useRouteContext();
+	const hydrated = useHydrated();
 	const location = useLocation();
 	const isCurrentRoute = location.pathname === "/";
 	const navigate = useNavigate();
@@ -64,7 +66,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body className="bg-(--bg) text-(--text) selection:bg-(--link)/20 selection:text-(--link) min-h-screen flex flex-col antialiased">
+			<body
+				data-hydrated={hydrated || undefined}
+				className="bg-(--bg) text-(--text) selection:bg-(--link)/20 selection:text-(--link) min-h-screen flex flex-col antialiased"
+			>
 				{/* HEADER */}
 				<header className="border-b border-(--border)/60 backdrop-blur-xl sticky top-0 left-0 z-50 w-full px-4 sm:px-6 lg:px-8 bg-(--bg-secondary)/70 transition-all">
 					<div className="h-18 w-full max-w-7xl mx-auto flex items-center justify-between">

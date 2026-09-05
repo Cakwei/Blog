@@ -258,7 +258,7 @@ function FilterControlsBar() {
 			<div className="relative w-full md:w-[420px]">
 				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--link)" />
 				<Input
-				data-testid="searchPostInput"
+					data-testid="searchPostInput"
 					type="text"
 					placeholder="Search by title, topic, or keyword..."
 					value={searchTerm}
@@ -315,7 +315,10 @@ function CategoryDropdown() {
 			</Button>
 
 			{categoryOpen && (
-				<div data-testid="dropdownContent" className="absolute right-0 z-50 mt-2 w-full bg-(--bg-secondary) border border-(--border) rounded-md shadow-2xl overflow-hidden p-3 backdrop-blur-2xl">
+				<div
+					data-testid="dropdownContent"
+					className="absolute right-0 z-50 mt-2 w-full bg-(--bg-secondary) border border-(--border) rounded-md shadow-2xl overflow-hidden p-3 backdrop-blur-2xl"
+				>
 					<input
 						type="text"
 						placeholder="Filter categories..."

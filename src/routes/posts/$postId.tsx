@@ -135,7 +135,7 @@ function PostContent({ postId }: { postId: string }) {
 						</Badge>
 					)}
 				</div>
-				<h1 className="text-4xl md:text-5xl text-(--text) font-extrabold tracking-tight">
+				<h1 data-testid="postTitle" className="text-4xl md:text-5xl text-(--text) font-extrabold tracking-tight">
 					{post.title}
 				</h1>
 				<div className="text-(--text-secondary) text-xs flex items-center justify-center gap-2">
