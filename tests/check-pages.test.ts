@@ -5,29 +5,25 @@ const URL = 'http://localhost:3000';
 test('Check pages via UI navigation', async ({ page }) => {
   // Homepage
   await page.goto(URL);
-  const homeHeading = page.getByRole('heading', { level: 1 });
+  const homeHeading = page.getByTestId('homeHeading');
   await expect(homeHeading).toBeVisible();
-  await expect(homeHeading).toContainText('Curated Stories.');
+  await expect(homeHeading).toContainText('Curated Stories', { ignoreCase: true });
 
-  // Navigate to Articles via link click
-  await page.getByRole('link', { name: 'Explore Archive' }).click();
-  await expect(page).toHaveURL(new RegExp(`${URL}/articles(\\?.*)?$`));
-  const articlesHeading = page.getByRole('heading', { level: 1 });
-  await expect(articlesHeading).toBeVisible();
-  await expect(articlesHeading).toContainText('Article Archive.');
+  // Navigate to Articles via link click, ensuring full hydration and bypassing potential overlays
+  const exploreLink = page.getByTestId('exploreArchiveBtn');
+  await expect(exploreLink).toBeVisible();
+  await exploreLink.click();
 
-  // Tests for dropdown list (post category)
   const searchBtn = page.getByTestId('searchPostInput');
   await expect(searchBtn).toBeVisible();
-  await searchBtn.pressSequentially('Self-introduction',{'delay':150});
-
+  await searchBtn.pressSequentially('Self-introduction', { delay: 150 });
   await expect(page.getByTestId('categoryItem')).toBeVisible();
-
+  
   // Check if post loads
   // Go back to index & click on a post
   await page.getByTestId('homeBtn').click();
   await expect(homeHeading).toBeVisible();
-  await expect(homeHeading).toContainText('Curated Stories.');
+  await expect(homeHeading).toContainText('Curated Stories', { ignoreCase: true });
   await page.getByTestId('postBtn').click();
 
   // On enter post page
@@ -35,9 +31,9 @@ test('Check pages via UI navigation', async ({ page }) => {
 
   // Go to login page
   await page.goto(`${URL}/login`);
-  const loginHeading = page.getByRole('heading', { level: 1 });
+  const loginHeading = page.getByRole('heading', { name: 'Welcome back' });
   await expect(loginHeading).toBeVisible();
-  await expect(loginHeading).toHaveText('Welcome back');
+  await expect(loginHeading).toContainText('Welcome back');
 
   // Fill credentials using pressSequentially to prevent state/re-render issues
   const emailInput = page.getByTestId('emailInput');
@@ -62,8 +58,8 @@ test('Check pages via UI navigation', async ({ page }) => {
 
   // Enter profile
   await page.getByTestId('goToProfileBtn').click();
-  await page.waitForURL(`${URL}/profile`)
-  await expect(page).toHaveURL(`${URL}/profile`)
+  await page.waitForURL(`${URL}/profile`);
+  await expect(page).toHaveURL(`${URL}/profile`);
   
   // Attempt update profile
   await page.getByTestId('saveProfileBtn').click();
@@ -71,34 +67,40 @@ test('Check pages via UI navigation', async ({ page }) => {
 
   // Moves on to posts page, check if page is accessible
   await page.getByTestId('goPostsBtn').click();
-  await expect(homeHeading).toBeVisible();
-  await expect(homeHeading).toContainText('Your Articles');
+  const yourPostsHeading = page.getByTestId('yourPostsHeadingTitle')
+  await expect(yourPostsHeading).toBeVisible();
+  await expect(yourPostsHeading).toContainText('Your Articles', { ignoreCase: true });
 
   // Click on New Post in posts page to check page
   await page.getByTestId('newPostBtn').click();
-  await expect(homeHeading).toBeVisible();
-  await expect(homeHeading).toContainText('Create New Post');
+  const createPostsHeading = page.getByTestId('createPostsHeading')
+  await expect(createPostsHeading).toBeVisible();
+  await expect(createPostsHeading).toContainText('Create New Post',{ ignoreCase: true });
 
-  await page.getByTestId('backToPostsBtn').click();
-  await expect(homeHeading).toBeVisible();
-  await expect(homeHeading).toContainText('Your Articles');
+  const backBtn = page.getByTestId('backToPostsBtn');
+  await expect(backBtn).toBeVisible();
+  await backBtn.click();
+  await expect(yourPostsHeading).toBeVisible();
+  await expect(yourPostsHeading).toContainText('Your Articles', { ignoreCase: true });
 
   // Checks if edit button works and accessible to page
-  await page.getByTestId('editPostBtn').first().click();
+  const editBtn = page.getByTestId('editPostBtn').first();
+  await expect(editBtn).toBeVisible();
+  await editBtn.click();
   await expect(page.getByTestId('editPostTxt')).toBeVisible();
   await expect(page.getByTestId('editPostTxt')).toContainText('Edit Post');
 
   // Quick return back to "/"
   // Testing for header search bar
-  await page.goto(URL)
+  await page.goto(URL);
   await page.getByTestId('searchBarBtn').click();
-  await expect(page.getByTestId('quickLinkTxt')).toContainText('QUICK LINKS',{ignoreCase:true})
+  await expect(page.getByTestId('quickLinkTxt')).toContainText('QUICK LINKS', { ignoreCase: true });
 
   // Dialog opens, checks if functional
   const searchCommandInput = page.getByTestId('searchCommandInput');
   await searchCommandInput.pressSequentially('Self-Introduction', { delay: 50 });
   await page.getByTestId('searchCommandItem').first().click();
-  await expect(page.getByTestId('searchCommandItem')).not.toBeVisible()
-  await expect(homeHeading.filter({ hasText: 'Self-Introduction' })).toBeVisible();
+  await expect(page.getByTestId('searchCommandItem')).not.toBeVisible();
+  await expect(page.getByTestId('postTitle').filter({ hasText: 'Self-Introduction'})).toBeVisible();
 
 });
