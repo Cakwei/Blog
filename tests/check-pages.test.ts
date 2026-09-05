@@ -5,7 +5,7 @@ const URL = 'http://localhost:3000';
 test('Check pages via UI navigation', async ({ page }) => {
   // Homepage
   await page.goto(URL);
-    await page.locator("[data-hydrated]").waitFor();
+  await page.locator("[data-hydrated]").waitFor();
 
   const homeHeading = page.getByTestId('homeHeading');
   await expect(homeHeading).toBeVisible();

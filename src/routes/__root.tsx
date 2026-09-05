@@ -56,8 +56,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-	const { session } = Route.useRouteContext();
 	const hydrated = useHydrated();
+	const { session } = Route.useRouteContext();
 	const location = useLocation();
 	const isCurrentRoute = location.pathname === "/";
 	const navigate = useNavigate();
