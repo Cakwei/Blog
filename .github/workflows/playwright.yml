@@ -15,18 +15,10 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      - name: Build application
+      - name: Generate prisma client
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          VITE_RUSTFS_ACCESS_KEY_ID: ${{ secrets.VITE_RUSTFS_ACCESS_KEY_ID }}
-          VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
-          VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        run: npm run build
-
+        run: npx dotenv -e .env -- prisma generate
       - name: Run Playwright tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -37,10 +29,7 @@ jobs:
           VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
           VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        run: |
-          npm run start &
-          npx wait-on http://localhost:3000
-          npm run test
+        run: npm run test
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
