@@ -19,19 +19,6 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npx dotenv -e .env -- prisma generate
-      - name: Run development server
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          VITE_RUSTFS_ACCESS_KEY_ID: ${{ secrets.VITE_RUSTFS_ACCESS_KEY_ID }}
-          VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
-          VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        run: |
-          npm run dev &
-          npx wait-on http://localhost:3000
       - name: Run Playwright tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -43,7 +30,6 @@ jobs:
           VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: npm run test
-
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

@@ -8,7 +8,8 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
 const config = defineConfig({
-	resolve: { tsconfigPaths: true, dedupe: ["react", "react-dom"] },
+	resolve: { tsconfigPaths: true },
+
 	plugins: [
 		devtools(),
 		nitro({ rollupConfig: { external: [/^@sentry\//] } }),
