@@ -95,6 +95,7 @@ test('Check pages via UI navigation', async ({ page }) => {
   const backBtn = page.getByTestId('backToPostsBtn');
   await expect(backBtn).toBeVisible();
   await backBtn.click();
+  await page.waitForURL(`${URL}/posts`);
   await expect(yourPostsHeading).toBeVisible();
   await expect(yourPostsHeading).toContainText('Your Articles', { ignoreCase: true });
 
