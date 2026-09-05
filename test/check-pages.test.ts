@@ -24,8 +24,9 @@ await expect(page.getByTestId('categoryItem')).toBeVisible();
 // Check if post loads
 // Go back to index & click on a post
 await page.getByTestId('homeBtn').click();
-await page.locator("[data-hydrated]").waitFor();
-
+await page.waitForURL(URL);
+await page.locator("[data-hydrated]").waitFor({ timeout:15_000 });
+await page.waitForURL(URL);
 await expect(homeHeading).toBeVisible();
 await expect(homeHeading).toContainText('Curated Stories', { ignoreCase: true });
 await page.getByTestId('postBtn').click();

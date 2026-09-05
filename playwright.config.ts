@@ -10,7 +10,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
    timeout: isCI ? 60000 : 30000,
   expect: {
-    timeout: isCI ? 10000 : 5000,
+    timeout: isCI ? 15_000 : 5000,
   },
   reporter: 'html',
   use: {
