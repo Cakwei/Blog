@@ -27,7 +27,6 @@ export const getSessionFn = createServerFn({ method: "GET" }).handler(
 export const getHeadersCookieFn = createServerFn().handler<Promise<string>>(
 	async () => {
 		const cookie = getRequestHeader("Cookie");
-		logger("debug", "getHeadersCookie utils.ts @ ", cookie);
 		return cookie || "";
 	},
 );

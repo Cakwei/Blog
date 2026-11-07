@@ -133,15 +133,15 @@ export default function ImageUploader({
 				);
 			}
 
-			// Rule D: Sanitize file identity for S3
-			const s3SafeName = sanitizeFileName(file.name);
-
 			// Passed all client-side security guardrails!
-			const url = URL.createObjectURL(file);
+			const safeFile = new File([file], sanitizeFileName(file.name), {
+				type: file.type,
+			});
+			const url = URL.createObjectURL(safeFile);
 			setPreviewUrl(url);
 
 			if (onImageReadyForS3) {
-				onImageReadyForS3(file);
+				onImageReadyForS3(safeFile);
 			}
 		} catch (err: any) {
 			setError(err.message || "An error occurred during verification.");

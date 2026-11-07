@@ -83,7 +83,7 @@ export const auth = betterAuth({
 		enabled: true,
 		revokeSessionsOnPasswordReset: true, // Revoke all other sessions when resetting password
 		requireEmailVerification: true,
-		sendResetPassword: async ({ user, url, token }, request) => {
+		sendResetPassword: async ({ user, url, token: _token }, _request) => {
 			void resend.emails.send({
 				from: "Cakwei <auth@cakwei.dev>",
 				to: user.email,
@@ -145,7 +145,7 @@ export const auth = betterAuth({
                 `,
 			});
 		},
-		onPasswordReset: async ({ user }, request) => {
+		onPasswordReset: async ({ user }, _request) => {
 			// your logic here
 			console.log(`Password for user ${user.email} has been reset.`);
 		},

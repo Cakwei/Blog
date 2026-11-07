@@ -34,12 +34,15 @@ export const Route = createFileRoute("/api/posts/$userId/")({
 						});*/
 
 						if (userId !== session.user.id)
-							return Response.json({
-								success: false,
-								data: {},
-								message:
-									"Logged in user ID and requested user ID is different, please login using the same account.",
-							});
+							return Response.json(
+								{
+									success: false,
+									data: {},
+									message:
+										"Logged in user ID and requested user ID is different, please login using the same account.",
+								},
+								{ status: 403 },
+							);
 
 						const [posts, totalPosts] = await Promise.all([
 							prisma.post.findMany({
@@ -71,6 +74,61 @@ export const Route = createFileRoute("/api/posts/$userId/")({
 							totalCount: totalPosts,
 							currentPage: page,
 							message: MESSAGE.FETCH_SUCCESS,
+						});
+					},
+				},
+				DELETE: {
+					middleware: [authMiddleware],
+					handler: async ({ request, context, params }) => {
+						const session = context.session;
+						const userId = params.userId;
+						if (userId !== session.user.id) {
+							return Response.json(
+								{
+									success: false,
+									message: "Logged in user ID and requested user ID is different",
+								},
+								{ status: 403 },
+							);
+						}
+
+						const url = new URL(request.url);
+						const postId = safeParseInt(url.searchParams.get("postId"));
+						if (!postId) {
+							return Response.json(
+								{ success: false, message: "Valid postId is required" },
+								{ status: 400 },
+							);
+						}
+
+						const post = await prisma.post.findUnique({
+							where: { id: postId },
+						});
+
+						if (!post) {
+							return Response.json(
+								{ success: false, message: "Post not found" },
+								{ status: 404 },
+							);
+						}
+
+						if (post.userId !== session.user.id) {
+							return Response.json(
+								{
+									success: false,
+									message: "Forbidden: You cannot delete another user's post",
+								},
+								{ status: 403 },
+							);
+						}
+
+						await prisma.post.delete({
+							where: { id: postId },
+						});
+
+						return Response.json({
+							success: true,
+							message: "Post successfully deleted",
 						});
 					},
 				},

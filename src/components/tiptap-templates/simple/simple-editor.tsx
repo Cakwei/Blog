@@ -59,14 +59,26 @@ export const getEditorImageUploadUrlServerFn = createServerFn({ method: 'POST' }
   .validator(uploadImageSchema)
   .handler(async ({ data }) => {
     try {
+      const { getSessionFn } = await import('#/lib/utils');
+      const session = await getSessionFn();
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          uploadUrl: '',
+          publicUrl: '',
+          message: 'Unauthorized: You must be logged in to upload images.',
+        };
+      }
+
       const { s3Client } = await import('#/lib/s3');
 
       const uuid = crypto.randomUUID();
       const cleanFileName = data.fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
       const s3Key = `editor/${uuid}-${cleanFileName}`;
+      const bucketName = process.env.S3_BUCKET || 'blog';
 
       const command = new PutObjectCommand({
-        Bucket: 'blog',
+        Bucket: bucketName,
         Key: s3Key,
         ContentType: data.fileType,
       });
@@ -75,10 +87,13 @@ export const getEditorImageUploadUrlServerFn = createServerFn({ method: 'POST' }
         expiresIn: 300,
       });
 
+      const baseUrl = process.env.S3_PUBLIC_URL || 'https://s3.cakwei.dev/blog';
+      const publicUrl = `${baseUrl.replace(/\/$/, '')}/${s3Key}`;
+
       return {
         success: true,
         uploadUrl,
-        publicUrl: `https://cakwei.dev{s3Key}`,
+        publicUrl,
       };
     } catch (error: any) {
       console.error('Editor Image Presign URL Error:', error);
@@ -227,7 +242,7 @@ const MainToolbarContent = ({
   );
 };
 
-const MobileToolbarContent = ({ type, onBack }: { type: 'link'; onBack: () => void }) => (
+const MobileToolbarContent = ({ type: _type, onBack }: { type: 'link'; onBack: () => void }) => (
   <>
     <ToolbarGroup>
       <Button variant="ghost" onClick={onBack}>
