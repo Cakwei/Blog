@@ -6,10 +6,8 @@ import {
 	ArrowLeft,
 	Calendar,
 	ChevronDown,
-	Compass,
 	ImageIcon,
 	Search,
-	Sparkles,
 	User,
 } from "lucide-react";
 import {
@@ -51,6 +49,7 @@ const getFilteredPosts = createServerFn({ method: "GET" })
 
 		const posts = await prisma.post.findMany({
 			where: {
+				published: true,
 				AND: [
 					search
 						? {
@@ -197,38 +196,24 @@ function AllArticlesPage() {
 				isPending,
 			}}
 		>
-			{/* Removed overflow-hidden from root to prevent clipping absolute elements */}
 			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative">
-				{/* Modern Atmospheric Gradient Background */}
-				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-(--link)/10 via-(--link)/5 to-transparent blur-[120px] pointer-events-none -z-10" />
+				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
+					{/* Minimalist Header */}
+					<div className="border-b border-(--border) pb-6 space-y-2">
+						<Link
+							to="/"
+							className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--text) transition-colors mb-2"
+						>
+							<ArrowLeft className="w-3.5 h-3.5" />
+							<span>Home</span>
+						</Link>
 
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 space-y-12">
-					{/* Editorial Header Block */}
-					<div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-(--border)/60 pb-10">
-						<div className="space-y-4 max-w-2xl">
-							<Link
-								to="/"
-								className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
-							>
-								<ArrowLeft className="w-3.5 h-3.5 text-(--text-secondary) transition-colors group-hover:text-(--link)" />{" "}
-								<span className="text-(--text-secondary) transition-colors group-hover:text-(--link)">
-									Back to Home
-								</span>
-							</Link>
-
-							<div className="space-y-2">
-								<div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-(--link)/10 border border-(--link)/20 text-(--link) text-[11px] font-bold uppercase tracking-widest">
-									<Compass className="w-3 h-3" /> Explore Index
-								</div>
-								<h1 className="text-4xl sm:text-6xl font-black tracking-tight text-(--text)">
-									Article Archive.
-								</h1>
-								<p className="text-(--text-secondary) text-sm sm:text-base leading-relaxed">
-									Browse through our full directory of engineering write-ups,
-									deep-dives, and personal notes.
-								</p>
-							</div>
-						</div>
+						<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)">
+							Articles
+						</h1>
+						<p className="text-(--text-secondary) text-sm">
+							All posts, essays, and engineering notes.
+						</p>
 					</div>
 
 					<ArticlesContent />

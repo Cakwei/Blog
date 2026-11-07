@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import axios from "axios";
 import {
@@ -9,14 +9,14 @@ import {
 	ChevronRight,
 	ImageIcon,
 	Plus,
-	Sparkles,
+	Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
 import { API_URL } from "#/lib/const";
 import type { IResponse } from "#/lib/types";
-import { getHeadersCookieFn } from "#/lib/utils";
 
 const myPostsCourseQueryOptions = ({
 	userId = "",
@@ -45,10 +45,15 @@ async function fetchPaginatedPosts({
 	page: number;
 	limit: number;
 }) {
+	let cookie = "";
+	if (typeof window === "undefined") {
+		const { getRequestHeader } = await import("@tanstack/react-start/server");
+		cookie = getRequestHeader("Cookie") || "";
+	}
 	const response = await axios.get(`${API_URL}/api/posts/${userId}`, {
 		params: { page, limit },
 		...(typeof window === "undefined"
-			? { headers: { cookie: await getHeadersCookieFn() } }
+			? { headers: { cookie } }
 			: { withCredentials: true }),
 	});
 	const posts = response.data;
@@ -74,30 +79,25 @@ function AdminPostsPage() {
 
 	return (
 		<div className="flex justify-center w-full bg-(--bg)">
-			<div className="w-full max-w-6xl portrait:min-h-[75vh] landscape:min-h-[60vh] px-4 sm:px-6 lg:px-8 py-12 lg:py-16 space-y-10 text-(--text) selection:bg-(--link)/20 selection:text-(--link)">
-				{/* Ambient Background Glow */}
-				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-(--link)/10 via-transparent to-transparent blur-3xl pointer-events-none -z-10" />
-
+			<div className="w-full max-w-4xl px-4 sm:px-6 py-8 space-y-8 text-(--text)">
 				{/* Header Section */}
-				<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-(--border)/60 pb-8">
-					<div className="space-y-2">
-						<div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-(--link)/10 border border-(--link)/20 text-(--link) text-[11px] font-bold uppercase tracking-widest">
-							<Sparkles className="w-3 h-3" /> Dashboard
-						</div>
+				<div className="flex items-center justify-between border-b border-(--border) pb-6">
+					<div className="space-y-1">
 						<h1
 							data-testid="yourPostsHeadingTitle"
-							className="text-3xl sm:text-4xl font-black tracking-tight text-(--text)"
+							className="text-2xl font-bold tracking-tight text-(--text)"
 						>
-							Your Articles.
+							Your Articles
 						</h1>
 						<p className="text-(--text-secondary) text-xs sm:text-sm">
-							Create, edit, manage, and publish your personal blog content.
+							Manage, edit, and publish your articles.
 						</p>
 					</div>
 					<Button
 						data-testid="newPostBtn"
 						onClick={() => navigate({ to: "/posts/create" })}
-						className="px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all duration-300 flex items-center gap-2 cursor-pointer"
+						size="sm"
+						className="px-4 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-md transition-all flex items-center gap-2 cursor-pointer"
 					>
 						<Plus className="w-4 h-4" />
 						<span>New Post</span>
@@ -182,8 +182,41 @@ function PostListContent() {
 }
 
 function PostRow({ post }: { post: any }) {
+	const queryClient = useQueryClient();
 	const isDraft = !post.published;
 	const [imageError, setImageError] = useState(false);
+
+	const deleteMutation = useMutation({
+		mutationFn: async () => {
+			const res = await axios.delete(
+				`${API_URL}/api/posts/${post.userId}?postId=${post.id}`,
+				{ withCredentials: true },
+			);
+			return res.data;
+		},
+		onSuccess: (data) => {
+			if (data.success) {
+				toast.success("Post deleted successfully", { position: "top-center" });
+				queryClient.invalidateQueries({ queryKey: ["myPosts"] });
+			} else {
+				toast.error(data.message || "Failed to delete post", {
+					position: "top-center",
+				});
+			}
+		},
+		onError: (err: any) => {
+			toast.error(
+				err?.response?.data?.message || err?.message || "Failed to delete post",
+				{ position: "top-center" },
+			);
+		},
+	});
+
+	const handleDelete = () => {
+		if (window.confirm(`Are you sure you want to delete "${post.title}"?`)) {
+			deleteMutation.mutate();
+		}
+	};
 
 	return (
 		<div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 hover:bg-(--bg-secondary) transition-all group">
@@ -266,6 +299,17 @@ function PostRow({ post }: { post: any }) {
 						Edit
 					</span>
 				</Link>
+				<Button
+					data-testid="deletePostBtn"
+					onClick={handleDelete}
+					disabled={deleteMutation.isPending}
+					variant="ghost"
+					size="sm"
+					className="h-8 px-2.5 rounded-md text-red-500 hover:text-white hover:bg-red-500/90 border border-transparent hover:border-red-600 text-xs transition-all cursor-pointer"
+					title="Delete Post"
+				>
+					<Trash2 className="w-3.5 h-3.5" />
+				</Button>
 			</div>
 		</div>
 	);
@@ -302,8 +346,6 @@ function PostListSkeletonContainer({ count = 4 }: { count?: number }) {
 }
 
 function EmptyState() {
-	const navigate = useNavigate();
-
 	return (
 		<div className="relative overflow-hidden rounded-md border border-dashed border-(--border) p-8 sm:p-14 text-center backdrop-blur-2xl shadow-xl transition-all">
 			{/* Soft Ambient Glow Effect */}

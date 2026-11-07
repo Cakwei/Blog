@@ -12,14 +12,14 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import type { Session } from "better-auth";
 import { Button } from "#/components/ui/button";
+import { NotFound } from "#/components/ui/errorComponent";
 import BetterAuthHeader from "#/components/ui/headers";
+import { SearchDialog } from "#/components/ui/searchBar";
 import { Toaster } from "#/components/ui/sonner";
+import { ThemeToggle } from "#/components/ui/themeToggle";
 import { getSessionFn } from "#/lib/utils";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
-//import appCss from "../styles.css?url";
 import "../styles.css";
-import { NotFound } from "#/components/ui/errorComponent";
-import { Label } from "#/components/ui/label";
 
 export interface MyRouterContext {
 	queryClient: QueryClient;
@@ -44,12 +44,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				title: "Charlee's Blog",
 			},
 		],
-		/*	links: [
-			{
-				rel: "stylesheet",
-				href: appCss,
-			},
-		],*/
 	}),
 	notFoundComponent: NotFound,
 	shellComponent: RootDocument,
@@ -61,19 +55,38 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	const location = useLocation();
 	const isCurrentRoute = location.pathname === "/";
 	const navigate = useNavigate();
+
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
+				{/* Non-blocking anti-FOUC theme initialization script */}
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `
+							(function() {
+								try {
+									var theme = localStorage.getItem('theme');
+									var supportDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+									if (theme === 'dark' || (!theme && supportDark)) {
+										document.documentElement.classList.add('dark');
+									} else {
+										document.documentElement.classList.remove('dark');
+									}
+								} catch (e) {}
+							})();
+						`,
+					}}
+				/>
 				<HeadContent />
 			</head>
 			<body
 				data-hydrated={hydrated || undefined}
-				className="bg-(--bg) text-(--text) selection:bg-(--link)/20 selection:text-(--link) min-h-screen flex flex-col antialiased"
+				className="bg-(--bg) text-(--text) selection:bg-(--link)/20 selection:text-(--link) min-h-screen flex flex-col antialiased transition-colors duration-200"
 			>
-				{/* HEADER */}
-				<header className="border-b border-(--border)/60 backdrop-blur-xl sticky top-0 left-0 z-50 w-full px-4 sm:px-6 lg:px-8 bg-(--bg-secondary)/70 transition-all">
-					<div className="h-18 w-full max-w-7xl mx-auto flex items-center justify-between">
-						<div className="flex items-center gap-10">
+				{/* MINIMALIST HEADER */}
+				<header className="border-b border-(--border) sticky top-0 left-0 z-50 w-full px-4 sm:px-6 bg-(--header-bg) backdrop-blur-md transition-colors">
+					<div className="h-14 w-full max-w-3xl mx-auto flex items-center justify-between">
+						<div className="flex items-center gap-6">
 							<Link
 								data-testid="homeBtn"
 								to="/"
@@ -85,159 +98,84 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 									}
 									navigate({ to: "/" });
 								}}
-								className="text-lg font-black tracking-tight group flex items-center gap-2"
+								className="text-sm font-semibold tracking-tight text-(--text) hover:opacity-75 transition-opacity"
 							>
-								<span className="text-(--text) group-hover:text-(--link) transition-colors">
-									Charlee's <span className="text-(--link)">Blog</span>
-								</span>
+								Charlee
 							</Link>
-							{/*
-							<nav className="hidden md:flex items-center gap-1 text-xs font-semibold">
+
+							<nav className="flex items-center gap-1 text-xs text-(--text-secondary)">
 								<Link
-									to="/"
-									className="px-3 py-2 rounded-xl text-(--text-secondary) hover:text-(--text) hover:bg-(--bg-secondary) transition-all"
+									to="/articles"
+									className="px-2.5 py-1 rounded-md hover:text-(--text) transition-colors"
 								>
 									Articles
 								</Link>
-								<Link
-									to="/articles"
-									className="px-3 py-2 rounded-xl text-(--text-secondary) hover:text-(--text) hover:bg-(--bg-secondary) transition-all"
-								>
-									Archive
-								</Link>
-							</nav>*/}
+							</nav>
 						</div>
 
-						{/* Auth / Header Actions */}
-						{session ? (
-							<BetterAuthHeader />
-						) : (
-							<div className="flex items-center gap-2.5">
-								<Link to="/login">
-									<Button
-										variant="ghost"
-										className="font-semibold text-xs h-9 px-4 rounded-xl text-(--text-secondary) hover:text-(--text) hover:bg-(--bg-secondary) transition-all"
-									>
-										Log in
-									</Button>
-								</Link>
+						{/* Header Controls & Auth */}
+						<div className="flex items-center gap-2">
+							{/* Global Search Dialog for all visitors */}
+							{!session && <SearchDialog />}
 
-								<Link to="/register">
-									<Button
-										data-testid="registerBtn"
-										className="bg-(--link) hover:bg-(--link)/90 text-white text-xs h-9 px-4 rounded-md shadow-lg shadow-(--link)/20 transition-all"
-									>
-										Sign up
-									</Button>
-								</Link>
-							</div>
-						)}
+							{/* Theme Switcher */}
+							<ThemeToggle />
+
+							{session ? (
+								<BetterAuthHeader />
+							) : (
+								<div className="flex items-center gap-1.5 ml-1">
+									<Link to="/login">
+										<Button
+											variant="ghost"
+											size="sm"
+											className="text-xs h-8 px-2.5 rounded-md text-(--text-secondary) hover:text-(--text) transition-colors"
+										>
+											Log in
+										</Button>
+									</Link>
+
+									<Link to="/register">
+										<Button
+											data-testid="registerBtn"
+											size="sm"
+											className="bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs h-8 px-3 rounded-md transition-all cursor-pointer"
+										>
+											Sign up
+										</Button>
+									</Link>
+								</div>
+							)}
+						</div>
 					</div>
 				</header>
 
 				{/* MAIN CONTENT WRAPPER */}
-				{children}
+				<main className="flex-1 py-10 px-4 sm:px-6 max-w-3xl mx-auto w-full">
+					{children}
+				</main>
 
 				<Toaster data-testid="toast" closeButton={true} duration={1600} />
 
-				{/* FOOTER */}
-				<footer className="border-t border-(--border)/60 py-16 bg-(--bg-secondary)/40 backdrop-blur-md">
-					<div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-						<div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-16">
-							<div className="md:col-span-6 space-y-3">
-								<div className="flex items-center gap-2">
-									<span className="text-base font-black tracking-tight text-(--text)">
-										Charlee's<span className="text-(--link)"> Blog</span>
-									</span>
-								</div>
-								<p className="text-xs text-(--text-secondary) max-w-sm leading-relaxed">
-									A space where I share my personal experience & thoughts.
-								</p>
-							</div>
-
-							<div className="md:col-span-3 space-y-3">
-								<h3 className="text-xs font-extrabold uppercase tracking-widest text-(--text)">
-									Navigation
-								</h3>
-								<ul className="space-y-2 text-xs text-(--text-secondary)">
-									<li>
-										<Link
-											to="/posts"
-											className="hover:text-(--link) transition-colors"
-										>
-											<span className="hover:text-(--link) text-(--text-secondary)">
-												My Posts
-											</span>
-										</Link>
-									</li>
-									<li>
-										<Link
-											to="/articles"
-											className="hover:text-(--link) transition-colors"
-										>
-											<span className="hover:text-(--link) text-(--text-secondary)">
-												Explore Articles
-											</span>
-										</Link>
-									</li>
-								</ul>
-							</div>
-
-							<div className="md:col-span-3 space-y-3">
-								<h3 className="text-xs font-extrabold uppercase tracking-widest text-(--text)">
-									Connect
-								</h3>
-								<ul className="space-y-2 text-xs">
-									<li>
-										<a
-											href="https://github.com/cakwei"
-											target="_blank"
-											rel="noopener noreferrer"
-											onClick={(e) => e.stopPropagation()}
-											className="inline-flex items-center rounded-md bg-transparent text-(--secondary-text) transition-colors hover:text-(--link)"
-										>
-											<span className="hover:text-(--link) transition-colors cursor-pointer text-(--text-secondary)">
-												GitHub
-											</span>
-										</a>
-									</li>
-									<li>
-										<a
-											href="https://my.linkedin.com/in/charlee-tan-1833902b6"
-											target="_blank"
-											rel="noopener noreferrer"
-											onClick={(e) => e.stopPropagation()}
-											className="inline-flex items-center rounded-md bg-transparent text-(--secondary-text) transition-colors hover:text-(--link)"
-										>
-											<span className="hover:text-(--link) transition-colors cursor-pointer text-(--text-secondary)">
-												LinkedIn
-											</span>
-										</a>
-									</li>
-								</ul>
-							</div>
-						</div>
-
-						<div className="mt-14 pt-8 border-t border-(--border)/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
-							<p>
-								{new Date().getFullYear()} • Built with{" "}
-								<span className="text-(--link)">Tanstack Start</span>. Hosted on{" "}
-								<span className="text-(--link)">Oracle Cloud.</span>
-							</p>
-							<div className="flex items-center gap-6">
-								<Label
-									onClick={() => {
-										navigate({ to: "/privacy-policy" });
-									}}
-									className="hover:text-(--link) text-xs transition-colors cursor-pointer"
-								>
-									Privacy Policy
-								</Label>
-								{/* <span>•</span>
-               <span className="hover:text-(--text) transition-colors cursor-pointer">
-                  Terms of Service
-                </span>*/}
-							</div>
+				{/* MINIMALIST FOOTER */}
+				<footer className="border-t border-(--border) py-8 mt-auto">
+					<div className="max-w-3xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
+						<p>© {new Date().getFullYear()} Charlee. All rights reserved.</p>
+						<div className="flex items-center gap-5">
+							<Link to="/articles" className="hover:text-(--text) transition-colors">
+								Articles
+							</Link>
+							<Link to="/privacy-policy" className="hover:text-(--text) transition-colors">
+								Privacy
+							</Link>
+							<a
+								href="https://github.com/cakwei"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="hover:text-(--text) transition-colors"
+							>
+								GitHub
+							</a>
 						</div>
 					</div>
 				</footer>

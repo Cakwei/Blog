@@ -29,7 +29,7 @@ import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { CATEGORIES } from "#/lib/const";
 import type { IEditorSavingContext, IResponse } from "#/lib/types";
-import { getHeadersCookieFn, logger } from "#/lib/utils";
+import { logger } from "#/lib/utils";
 
 export const Route = createFileRoute("/_protected/posts/create/")({
 	component: NewPostPage,
@@ -38,11 +38,8 @@ export const Route = createFileRoute("/_protected/posts/create/")({
 function NewPostPage() {
 	return (
 		<EditorProvider>
-			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/20 selection:text-(--link) relative overflow-hidden">
-				{/* Atmospheric Ambient Glow Background */}
-				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-(--link)/10 via-(--link)/5 to-transparent blur-[120px] pointer-events-none -z-10" />
-
-				<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+			<div className="min-h-screen text-(--text) bg-(--bg) relative">
+				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 					<NewPostForm />
 				</div>
 			</div>
@@ -105,7 +102,6 @@ function NewPostForm() {
 
 				validateFile(blogHeroImg);
 				const base64Data = await fileToBase64(blogHeroImg);
-				const cookie = await getHeadersCookieFn();
 				// Send streamlined request to the single API endpoint handling S3 upload & DB storage sequentially
 				const response = await axios.post<IResponse>(
 					"/api/posts",
@@ -119,7 +115,6 @@ function NewPostForm() {
 					},
 					{
 						withCredentials: true,
-						headers: { cookie: cookie },
 					},
 				);
 

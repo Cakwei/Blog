@@ -23,25 +23,63 @@ import { Separator } from "@/components/ui/separator";
 export const getPostById = createServerFn({ method: "GET" })
 	.validator((postId: string) => postId)
 	.handler(async ({ data: postId }) => {
+		const parsedId = parseInt(postId, 10);
+		if (isNaN(parsedId) || parsedId <= 0) {
+			throw new Error("Invalid post ID");
+		}
+
 		const post = await prisma.post.findUnique({
-			where: { id: parseInt(postId, 10) },
+			where: { id: parsedId },
 			include: {
 				categories: true,
-				user: true,
+				user: {
+					select: {
+						id: true,
+						name: true,
+						displayUsername: true,
+						image: true,
+					},
+				},
 			},
 		});
 
 		if (!post) throw new Error("Post not found");
-		return post;
+
+		// If post is a draft, only the author can view it
+		if (!post.published) {
+			const { getRequestHeader } = await import("@tanstack/react-start/server");
+			const { auth } = await import("#/lib/auth");
+			const cookie = getRequestHeader("Cookie") || "";
+			const session = await auth.api.getSession({
+				headers: { cookie },
+			});
+			if (!session?.user?.id || session.user.id !== post.userId) {
+				throw new Error("Post not found");
+			}
+			return post;
+		}
+
+		// Decoupled view counting (Phase 3 performance optimization)
+		const { cache } = await import("#/lib/cache");
+		const { getRequestHeader } = await import("@tanstack/react-start/server");
+		const clientIp =
+			getRequestHeader("x-forwarded-for") ||
+			getRequestHeader("cf-connecting-ip") ||
+			"anonymous";
+		const { totalViews } = await cache.recordPostView(post.id, clientIp);
+
+		return {
+			...post,
+			views: post.views + totalViews,
+		};
 	});
 
 const postQueryOptions = (postId: string) =>
 	queryOptions({
 		queryKey: ["post", postId],
 		queryFn: () => getPostById({ data: postId }),
-		staleTime: 15000,
-		gcTime: 15000,
-		refetchInterval: 15000,
+		staleTime: 60000,
+		gcTime: 300000,
 	});
 
 export const Route = createFileRoute("/posts/$postId")({
@@ -135,7 +173,10 @@ function PostContent({ postId }: { postId: string }) {
 						</Badge>
 					)}
 				</div>
-				<h1 data-testid="postTitle" className="text-4xl md:text-5xl text-(--text) font-extrabold tracking-tight">
+				<h1
+					data-testid="postTitle"
+					className="text-4xl md:text-5xl text-(--text) font-extrabold tracking-tight"
+				>
 					{post.title}
 				</h1>
 				<div className="text-(--text-secondary) text-xs flex items-center justify-center gap-2">
@@ -154,6 +195,14 @@ function PostContent({ postId }: { postId: string }) {
 							year: "numeric",
 						})}
 					</span>
+					{post.views !== undefined && post.views > 0 && (
+						<>
+							<span>•</span>
+							<span data-testid="viewCountText">
+								{post.views.toLocaleString()} {post.views === 1 ? "view" : "views"}
+							</span>
+						</>
+					)}
 				</div>
 			</div>
 
@@ -180,7 +229,7 @@ function PostContent({ postId }: { postId: string }) {
 				<div
 					/* biome-ignore lint/security/noDangerouslySetInnerHtml: Sanitized via DOMPurify */
 					dangerouslySetInnerHTML={{ __html: renderedHTML }}
-					className="prose prose-invert max-w-none text-(--text) prose-li:marker:text-(--text-secondary) prose-quotes:text-(--text-secondary) prose-blockquote:border-(--border) mt-5"
+					className="prose dark:prose-invert max-w-none text-(--text) prose-headings:text-(--text) prose-p:text-(--text) prose-a:text-(--link) hover:prose-a:underline prose-li:marker:text-(--text-secondary) prose-quotes:text-(--text-secondary) prose-blockquote:border-(--border) prose-code:text-(--link) mt-8 leading-relaxed"
 				/>
 			) : (
 				<div className="h-32 flex items-center justify-center text-(--text-secondary) text-sm animate-pulse">

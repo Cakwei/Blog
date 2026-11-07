@@ -7,7 +7,6 @@ import {
 	Compass,
 	FileText,
 	Loader2,
-	Search,
 	Terminal,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -40,6 +39,7 @@ const searchDatabaseFn = createServerFn()
 
 		const data = await prisma.post.findMany({
 			where: {
+				published: true,
 				title: { contains: safeQuery },
 			},
 			take: 5,

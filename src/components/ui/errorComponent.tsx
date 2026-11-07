@@ -1,6 +1,5 @@
 /** biome-ignore-all lint/a11y/noSvgWithoutTitle: <explanation> */
 import { Link, type NotFoundRouteProps } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { Label } from "./label";
 

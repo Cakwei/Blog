@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, AtSign, Lock, Mail, User } from "lucide-react";
+import { ArrowRight, AtSign, Lock, Mail, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import {
@@ -68,10 +68,10 @@ function RegisterPage() {
 							logger("error", "", error);
 							toast.error(
 								<div className="flex flex-col gap-1">
-									<span className="text-(--link) font-semibold text-xs">
+									<span className="font-semibold text-xs text-(--link)">
 										Registration failed
 									</span>
-									<span className="text-white text-xs">
+									<span className="text-xs text-(--text)">
 										{error.message ||
 											"Account with this username or email already exists."}
 									</span>
@@ -87,10 +87,10 @@ function RegisterPage() {
 				logger("error", "Sign up failed:", error);
 				toast.error(
 					<div className="flex flex-col gap-1">
-						<span className="text-(--link) font-semibold text-xs">
+						<span className="font-semibold text-xs text-(--link)">
 							An unexpected error occurred
 						</span>
-						<span className="text-white text-sm">
+						<span className="text-xs text-(--text)">
 							Please check your network connection and try again.
 						</span>
 					</div>,

@@ -240,10 +240,8 @@ function EditPostRoutePage() {
 
 	return (
 		<EditorProvider initialContent={post.content}>
-			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden">
-				<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-(--link)/10 via-(--link)/5 to-transparent blur-[120px] pointer-events-none -z-10" />
-
-				<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+			<div className="min-h-screen text-(--text) bg-(--bg) relative">
+				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 					<EditPostForm postId={postId} />
 				</div>
 			</div>

@@ -1,13 +1,12 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Lock, Mail } from "lucide-react";
+import { ArrowRight, Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card";
@@ -39,10 +38,10 @@ function LoginPage() {
 						onSuccess: () => {
 							toast.success(
 								<div className="flex flex-col gap-1">
-									<span className="text-(--link) font-semibold text-xs">
+									<span className="font-semibold text-xs text-(--link)">
 										Welcome back!
 									</span>
-									<span className="text-white text-sm">
+									<span className="text-xs text-(--text)">
 										Successfully signed in to your account.
 									</span>
 								</div>,
@@ -197,7 +196,7 @@ function LoginPage() {
 										data-testid="submitLoginBtn"
 										type="submit"
 										disabled={!canSubmit}
-										className="w-full mt-2 py-2.5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+										className="w-full mt-2 py-2.5 bg-(--link) hover:bg-(--link)/90 text-(--bg) font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
 									>
 										{isSubmitting ? (
 											"Signing in..."
