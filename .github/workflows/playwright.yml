@@ -1,38 +1,31 @@
-name: Playwright Tests
+name: Unit Tests
 on:
   push:
     branches: '**'
+  pull_request:
+    branches: [main]
+
 jobs:
   test:
-    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Generate prisma client
+
+      - name: Generate Prisma client
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'mariadb://root:pass@localhost:3306/blog' }}
         run: npx dotenv -e .env -- prisma generate
-      - name: Run Playwright tests
+
+      - name: Run Unit Tests
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          VITE_RUSTFS_ACCESS_KEY_ID: ${{ secrets.VITE_RUSTFS_ACCESS_KEY_ID }}
-          VITE_RUSTFS_SECRET_ACCESS_KEY: ${{ secrets.VITE_RUSTFS_SECRET_ACCESS_KEY }}
-          VITE_RUSTFS_ENDPOINT_URL: ${{ secrets.VITE_RUSTFS_ENDPOINT_URL }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        run: npm run test
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || 're_mock_test_key' }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'mock_secret_key_12345678901234567890' }}
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL || 'http://localhost:3000' }}
+        run: npm test

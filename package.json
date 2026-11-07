@@ -12,7 +12,8 @@
     "generate-routes": "tsr generate",
     "build": "dotenv -e .env -- prisma generate && vite build",
     "preview": "vite preview",
-    "test": "dotenv -e .env -- playwright test",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
@@ -85,7 +86,6 @@
   "devDependencies": {
     "@base-ui/react": "^1.7.0",
     "@biomejs/biome": "2.5.11",
-    "@playwright/test": "^1.62.1",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/router-cli": "^1.167.33",
@@ -112,6 +112,12 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "lightningcss"
-    ]
+    ],
+    "overrides": {
+      "seroval": "^1.7.10"
+    }
+  },
+  "overrides": {
+    "seroval": "^1.7.10"
   }
 }
