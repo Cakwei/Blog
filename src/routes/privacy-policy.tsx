@@ -9,28 +9,25 @@ function PrivacyPolicyPage() {
   const lastUpdated = '3 September 2026';
 
   return (
-    <div className="min-h-screen text-(--text) bg-(--bg)">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 space-y-10">
-        {/* Navigation / Back Button */}
-        <div>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-(--text-secondary) transition-colors group-hover:text-(--link)" />{' '}
-            <span className="text-(--text-secondary) transition-colors group-hover:text-(--link)">
-              Back to Home
-            </span>
-          </Link>
-        </div>
+    <div className="w-full max-w-3xl mx-auto space-y-8">
+      {/* Navigation / Back Button */}
+      <div>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--text) transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Home</span>
+        </Link>
+      </div>
 
-        {/* Header */}
-        <header className="border-b border-(--border) pb-6 space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-(--text)">
-            Privacy Policy.
-          </h1>
-          <p className="text-xs text-(--text-secondary)">Last updated: {lastUpdated}</p>
-        </header>
+      {/* Header */}
+      <header className="border-b border-(--border) pb-6 space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)">
+          Privacy Policy
+        </h1>
+        <p className="text-xs text-(--text-secondary)">Last updated: {lastUpdated}</p>
+      </header>
 
         {/* Content Sections */}
         <div className="space-y-8 text-sm sm:text-base text-(--text-secondary) leading-relaxed">
@@ -124,7 +121,6 @@ function PrivacyPolicyPage() {
             </p>
           </section>
         </div>
-      </div>
     </div>
   );
 }

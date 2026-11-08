@@ -168,7 +168,7 @@ export function SearchDialog() {
 						shouldFilter={false}
 					>
 						{/* Immersive Spotlight Header */}
-						<div className="flex items-center px-4 py-3 bg-(--bg-secondary)/60 border-b border-(--border)">
+						<div className="flex items-center px-4 py-3 bg-(--bg-secondary)/60">
 							<CommandInput
 								data-testid="searchCommandInput"
 								value={inputValue}

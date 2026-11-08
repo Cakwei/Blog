@@ -57,12 +57,10 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
 	return (
-		<div className="min-h-screen text-(--text) bg-(--bg)">
-			<div className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
-				<Suspense fallback={<HomeSkeleton />}>
-					<HomeContent />
-				</Suspense>
-			</div>
+		<div className="w-full">
+			<Suspense fallback={<HomeSkeleton />}>
+				<HomeContent />
+			</Suspense>
 		</div>
 	);
 }
@@ -107,7 +105,7 @@ function HomeContent() {
 						data-testid="homeHeading"
 						className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)"
 					>
-						Charlee's <span className="text-(--text)">Blog</span>: Curated Stories.
+						Charlee's <span className="text-(--text)">Blog</span>: Curated Stories
 					</h1>
 					<p className="text-(--text-secondary) text-sm leading-relaxed max-w-xl">
 						Software engineer writing about web architecture, cloud systems, and design.

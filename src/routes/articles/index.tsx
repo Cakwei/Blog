@@ -196,28 +196,26 @@ function AllArticlesPage() {
 				isPending,
 			}}
 		>
-			<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative">
-				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
-					{/* Minimalist Header */}
-					<div className="border-b border-(--border) pb-6 space-y-2">
-						<Link
-							to="/"
-							className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--text) transition-colors mb-2"
-						>
-							<ArrowLeft className="w-3.5 h-3.5" />
-							<span>Home</span>
-						</Link>
+			<div className="w-full space-y-8">
+				{/* Minimalist Header */}
+				<div className="border-b border-(--border) pb-6 space-y-2">
+					<Link
+						to="/"
+						className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--text) transition-colors mb-2"
+					>
+						<ArrowLeft className="w-3.5 h-3.5" />
+						<span>Home</span>
+					</Link>
 
-						<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)">
-							Articles
-						</h1>
-						<p className="text-(--text-secondary) text-sm">
-							All posts, essays, and engineering notes.
-						</p>
-					</div>
-
-					<ArticlesContent />
+					<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)">
+						Articles
+					</h1>
+					<p className="text-(--text-secondary) text-xs sm:text-sm">
+						All posts, essays, and engineering notes.
+					</p>
 				</div>
+
+				<ArticlesContent />
 			</div>
 		</ArticlesContext.Provider>
 	);
@@ -238,17 +236,17 @@ function FilterControlsBar() {
 	const { searchTerm, setSearchTerm } = useArticlesContext();
 
 	return (
-		<div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-(--bg-secondary)/60 p-3 sm:p-4 rounded-md border border-(--border) backdrop-blur-2xl shadow-xl relative z-30">
+		<div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-(--bg-secondary)/30 p-2 sm:p-2.5 rounded-xl border border-(--border) relative z-30">
 			{/* Search Input */}
-			<div className="relative w-full md:w-[420px]">
-				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--link)" />
+			<div className="relative w-full sm:w-[420px]">
+				<Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-secondary)" />
 				<Input
 					data-testid="searchPostInput"
 					type="text"
 					placeholder="Search by title, topic, or keyword..."
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
-					className="w-full bg-(--bg) border-(--border) rounded-md pl-11 pr-4 py-3 text-xs sm:text-sm text-(--text) placeholder:text-(--text-secondary) focus-visible:ring-(--link)/50 shadow-inner"
+					className="w-full bg-(--bg) border-(--border) rounded-lg pl-10 pr-4 py-2 text-xs sm:text-sm text-(--text) placeholder:text-(--text-secondary) focus-visible:ring-(--link)/50 shadow-none"
 				/>
 			</div>
 
@@ -291,7 +289,7 @@ function CategoryDropdown() {
 				type="button"
 				variant="outline"
 				onClick={() => setCategoryOpen(!categoryOpen)}
-				className="w-full justify-between items-center bg-(--bg) border-(--border) hover:bg-(--bg-secondary) rounded-md px-4 py-3 text-xs sm:text-sm text-(--text) capitalize font-semibold shadow-sm"
+				className="w-full justify-between items-center bg-(--bg) border-(--border) hover:bg-(--bg-secondary) rounded-md px-4 py-3 text-xs sm:text-sm text-(--text) capitalize font-semibold"
 			>
 				<span className="truncate text-(--text-secondary)">
 					{selectedCategory === "all" ? "All Categories" : selectedCategory}
@@ -314,14 +312,13 @@ function CategoryDropdown() {
 					<div className="max-h-52 overflow-y-auto space-y-1">
 						<Button
 							type="button"
-							variant="ghost"
 							onClick={() => {
 								setSelectedCategory("all");
 								setCategoryOpen(false);
 							}}
 							className={`w-full justify-start px-3.5 py-2.5 text-xs rounded-md transition-all font-semibold ${
 								selectedCategory === "all"
-									? "bg-(--link) text-white hover:bg-(--link) shadow-md shadow-(--link)/20 hover:text-(--text)/80"
+									? "bg-(--bg-secondary) text-white hover:bg-(--bg) shadow-md shadow-(--link)/20 hover:text-(--text)/80"
 									: "text-(--text-secondary) hover:bg-(--border)/60 hover:text-(--text)"
 							}`}
 						>
@@ -398,7 +395,7 @@ function ArticleCard({ post }: { post: any }) {
 			>
 				<Card
 					data-testid="categoryItem"
-					className="w-full bg-(--bg-secondary)/40 hover:bg-(--bg-secondary)/80 border-(--border) hover:border-(--link)/50 transition-all duration-300 hover:shadow-2xl hover:shadow-(--link)/10 flex flex-col overflow-hidden rounded-3xl"
+					className="w-full bg-(--bg-secondary)/30 hover:bg-(--bg-secondary)/60 border-(--border) hover:border-(--border-hover) transition-all flex flex-col overflow-hidden rounded-xl shadow-none"
 				>
 					<div className="overflow-hidden aspect-[16/10] bg-(--bg) relative border-b border-(--border)">
 						{post.image && !imageError ? (
@@ -406,49 +403,51 @@ function ArticleCard({ post }: { post: any }) {
 								src={post.image}
 								alt={post.title}
 								onError={() => setImageError(true)}
-								className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+								className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 ease-out"
 							/>
 						) : (
-							<div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-(--bg-secondary) to-(--bg) text-(--text-secondary)">
-								<div className="p-3 rounded-2xl bg-(--bg) border border-(--border) shadow-inner text-(--link)">
-									<ImageIcon className="w-5 h-5" />
+							<div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-(--bg-secondary)/40 text-(--text-secondary)">
+								<div className="p-2.5 rounded-lg bg-(--bg) border border-(--border) text-(--text-muted)">
+									<ImageIcon className="w-4 h-4" />
 								</div>
-								<span className="text-[11px] font-mono tracking-wider uppercase text-(--text-secondary)/80">
+								<span className="text-[10px] font-mono tracking-wider uppercase text-(--text-muted)">
 									Charlee's Archive
 								</span>
 							</div>
 						)}
 					</div>
 
-					<CardHeader className="p-6 pb-3 space-y-3 flex-1">
+					<CardHeader className="p-5 pb-3 space-y-2.5 flex-1">
 						<div className="flex flex-wrap gap-1.5">
 							{primaryCategory ? (
-								<span className="rounded-full bg-(--bg) border border-(--border) px-3 py-1 text-[11px] font-bold text-(--link) capitalize tracking-wide shadow-sm">
+								<span className="rounded-md bg-(--bg) border border-(--border) px-2 py-0.5 text-[11px] font-medium text-(--text-secondary) capitalize shadow-none">
 									{primaryCategory.name}
 								</span>
 							) : (
-								<span className="rounded-full bg-(--bg) border border-(--border) px-3 py-1 text-[11px] font-bold text-(--text-secondary) capitalize tracking-wide shadow-sm">
+								<span className="rounded-md bg-(--bg) border border-(--border) px-2 py-0.5 text-[11px] font-medium text-(--text-muted) capitalize shadow-none">
 									General
 								</span>
 							)}
 						</div>
 
-						<h3 className="text-xl font-bold tracking-tight text-(--text) group-hover:text-(--link) transition-colors line-clamp-2 leading-snug">
+						<h3 className="text-base sm:text-lg font-semibold tracking-tight text-(--text) group-hover:underline underline-offset-4 line-clamp-2 leading-snug">
 							{post.title}
 						</h3>
-						<p className="text-(--text-secondary) line-clamp-2 text-xs sm:text-sm leading-relaxed">
-							{post.excerpt}
-						</p>
+						{post.excerpt && (
+							<p className="text-(--text-secondary) line-clamp-2 text-xs leading-relaxed">
+								{post.excerpt}
+							</p>
+						)}
 					</CardHeader>
 
-					<CardFooter className="p-6 pt-0 border-t border-(--border)/40 mt-auto flex items-center justify-between text-xs text-(--text-secondary)">
-						<div className="flex items-center gap-1.5 pt-4 font-medium">
-							<Calendar className="w-3.5 h-3.5 text-(--link)" />
-							<span>{new Date(post.date).toLocaleDateString()}</span>
+					<CardFooter className="p-5 pt-0 border-t border-(--border)/50 mt-auto flex items-center justify-between text-[11px] text-(--text-secondary)">
+						<div className="flex items-center gap-1.5 pt-3 font-normal">
+							<Calendar className="w-3.5 h-3.5 text-(--text-muted)" />
+							<span>{new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
 						</div>
-						<div className="flex items-center gap-1.5 pt-4 font-medium">
-							<User className="w-3.5 h-3.5 text-(--link)" />
-							<span>{post.user?.displayUsername || "Anonymous"}</span>
+						<div className="flex items-center gap-1.5 pt-3 font-normal">
+							<User className="w-3.5 h-3.5 text-(--text-muted)" />
+							<span>{post.user?.displayUsername || "Author"}</span>
 						</div>
 					</CardFooter>
 				</Card>
@@ -463,20 +462,20 @@ function ArticleCard({ post }: { post: any }) {
 
 function ArticleCardSkeleton() {
 	return (
-		<div className="rounded-3xl bg-(--bg-secondary)/40 border border-(--border) p-6 space-y-4 animate-pulse flex flex-col h-full">
-			<Skeleton className="w-full aspect-[16/10] rounded-2xl bg-(--bg)" />
-			<div className="space-y-3 flex-1">
-				<Skeleton className="h-6 w-20 rounded-full bg-(--bg)" />
-				<Skeleton className="h-7 w-full bg-(--bg)" />
-				<Skeleton className="h-7 w-4/5 bg-(--bg)" />
-				<div className="space-y-2 pt-1">
-					<Skeleton className="h-4 w-full bg-(--bg)" />
-					<Skeleton className="h-4 w-2/3 bg-(--bg)" />
+		<div className="rounded-xl bg-(--bg-secondary)/30 border border-(--border) p-5 space-y-4 animate-pulse flex flex-col h-full">
+			<Skeleton className="w-full aspect-[16/10] rounded-lg bg-(--bg)" />
+			<div className="space-y-2.5 flex-1">
+				<Skeleton className="h-5 w-16 rounded bg-(--bg)" />
+				<Skeleton className="h-6 w-full bg-(--bg)" />
+				<Skeleton className="h-6 w-3/4 bg-(--bg)" />
+				<div className="space-y-1.5 pt-1">
+					<Skeleton className="h-3 w-full bg-(--bg)" />
+					<Skeleton className="h-3 w-2/3 bg-(--bg)" />
 				</div>
 			</div>
-			<div className="pt-4 border-t border-(--border)/50 flex items-center justify-between">
-				<Skeleton className="h-3.5 w-24 bg-(--bg)" />
-				<Skeleton className="h-3.5 w-20 bg-(--bg)" />
+			<div className="pt-3 border-t border-(--border)/40 flex items-center justify-between">
+				<Skeleton className="h-3 w-20 bg-(--bg)" />
+				<Skeleton className="h-3 w-16 bg-(--bg)" />
 			</div>
 		</div>
 	);

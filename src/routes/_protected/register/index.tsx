@@ -103,14 +103,14 @@ function RegisterPage() {
 	});
 
 	return (
-		<div className="min-h-[calc(100vh-10rem)] flex items-center justify-center px-4 py-12 bg-(--bg) relative overflow-hidden">
-			<div className="w-full max-w-md relative z-10">
-				<Card className="bg-(--bg-secondary)/40 border-border rounded-xl backdrop-blur-2xl shadow-xl">
-					<CardHeader className="space-y-3 text-center pb-4">
-						<div className="mx-auto inline-flex items-center justify-center w-12 h-12 rounded-xl bg-(--link)/10 border border-(--link)/30 text-(--link)">
-							<User className="w-5 h-5" />
+		<div className="w-full flex items-center justify-center py-6 sm:py-12">
+			<div className="w-full max-w-md">
+				<Card className="bg-(--bg-secondary)/30 border-(--border) rounded-xl shadow-none">
+					<CardHeader className="space-y-2 text-center pb-4">
+						<div className="mx-auto inline-flex items-center justify-center w-10 h-10 rounded-lg bg-(--bg) border border-(--border) text-(--text)">
+							<User className="w-4 h-4" />
 						</div>
-						<CardTitle className="text-2xl font-black tracking-tight text-(--text)">
+						<CardTitle className="text-2xl font-bold tracking-tight text-(--text)">
 							<h1>Create an account</h1>
 						</CardTitle>
 						<CardDescription className="text-(--text-secondary) text-xs sm:text-sm">
@@ -287,14 +287,14 @@ function RegisterPage() {
 									<Button
 										type="submit"
 										disabled={!canSubmit}
-										className="w-full mt-2 py-2.5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+										className="w-full mt-2 py-2 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
 									>
 										{isSubmitting ? (
 											"Creating account..."
 										) : (
 											<>
 												Sign Up
-												<ArrowRight className="w-4 h-4" />
+												<ArrowRight className="w-3.5 h-3.5" />
 											</>
 										)}
 									</Button>
@@ -303,24 +303,23 @@ function RegisterPage() {
 						</form>
 
 						{/* Footer Links */}
-						<div className="space-y-3 pt-2 text-center">
-							<div className="text-xs text-(--text-secondary)">
+						<div className="space-y-3 pt-2 text-center text-xs">
+							<div className="text-(--text-secondary)">
 								Already have an account?{" "}
 								<Link
 									to="/login"
-									className="text-(--link) font-semibold hover:underline"
+									className="text-(--text) font-medium hover:underline"
 								>
-									<Label className="inline text-(--link) font-semibold hover:underline text-xs cursor-pointer">
-										Login
-									</Label>
+									Login
 								</Link>
 							</div>
 
 							<div className="pt-2 border-t border-(--border)">
-								<Link to="/" className="inline-flex items-center gap-1.5">
-									<Label className="text-(--link) text-xs hover:underline">
-										← Back to Homepage
-									</Label>
+								<Link
+									to="/"
+									className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--text) hover:underline"
+								>
+									← Back to Homepage
 								</Link>
 							</div>
 						</div>

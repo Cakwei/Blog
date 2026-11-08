@@ -1,6 +1,7 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { ArrowLeft } from "lucide-react";
 import type { JSONContent } from "@tiptap/core";
 import { generateHTML } from "@tiptap/core";
 import { Highlight } from "@tiptap/extension-highlight";
@@ -14,11 +15,17 @@ import Typography from "@tiptap/extension-typography";
 import { Selection } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
 import DOMPurify from "dompurify";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { prisma } from "#/db";
+import {
+	calculateReadingTime,
+	extractHeadingsFromTiptap,
+	injectHeadingIdsIntoHtml,
+} from "#/lib/reading-time";
 import { logger } from "#/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { TableOfContents } from "@/components/ui/tableOfContents";
 
 export const getPostById = createServerFn({ method: "GET" })
 	.validator((postId: string) => postId)
@@ -84,7 +91,29 @@ const postQueryOptions = (postId: string) =>
 
 export const Route = createFileRoute("/posts/$postId")({
 	loader: async ({ context, params }) => {
-		await context.queryClient.ensureQueryData(postQueryOptions(params.postId));
+		return await context.queryClient.ensureQueryData(postQueryOptions(params.postId));
+	},
+	head: ({ loaderData, params }) => {
+		const post = loaderData;
+		const title = post?.title ? `${post.title} | Charlee's Blog` : "Post | Charlee's Blog";
+		const description =
+			post?.excerpt || post?.title || "Read this article on Charlee's Blog";
+		const ogImage = `/api/og/${params.postId}`;
+
+		return {
+			meta: [
+				{ title },
+				{ name: "description", content: description },
+				{ property: "og:title", content: title },
+				{ property: "og:description", content: description },
+				{ property: "og:type", content: "article" },
+				{ property: "og:image", content: ogImage },
+				{ name: "twitter:card", content: "summary_large_image" },
+				{ name: "twitter:title", content: title },
+				{ name: "twitter:description", content: description },
+				{ name: "twitter:image", content: ogImage },
+			],
+		};
 	},
 	component: PostRoutePage,
 });
@@ -93,7 +122,7 @@ function PostRoutePage() {
 	const { postId } = Route.useParams();
 
 	return (
-		<div className="bg-(--bg) min-h-screen text-(--text)">
+		<div className="w-full">
 			<Suspense fallback={<PostSkeleton />}>
 				<PostContent postId={postId} />
 			</Suspense>
@@ -127,140 +156,175 @@ function PostContent({ postId }: { postId: string }) {
 	const { data: post } = useSuspenseQuery(postQueryOptions(postId));
 	const [renderedHTML, setRenderedHTML] = useState<string>("");
 
+	const parsedContent = useMemo(() => {
+		if (!post.content) return null;
+		try {
+			return typeof post.content === "string"
+				? JSON.parse(post.content)
+				: (post.content as JSONContent);
+		} catch {
+			return null;
+		}
+	}, [post.content]);
+
+	const readingTime = useMemo(
+		() => calculateReadingTime(parsedContent),
+		[parsedContent],
+	);
+
+	const tocHeadings = useMemo(
+		() => extractHeadingsFromTiptap(parsedContent),
+		[parsedContent],
+	);
+
 	useEffect(() => {
-		if (!post.content) {
+		if (!parsedContent) {
 			setRenderedHTML(
 				"<p class='text-(--text-secondary) italic'>No content provided for this post.</p>",
 			);
 			return;
 		}
 		try {
-			const jsonContent: JSONContent =
-				typeof post.content === "string"
-					? JSON.parse(post.content)
-					: (post.content as JSONContent);
-
-			const rawHtml = generateHTML(jsonContent, tptExtensions);
-			setRenderedHTML(DOMPurify.sanitize(rawHtml));
+			const rawHtml = generateHTML(parsedContent, tptExtensions);
+			const htmlWithAnchors = injectHeadingIdsIntoHtml(rawHtml, tocHeadings);
+			setRenderedHTML(DOMPurify.sanitize(htmlWithAnchors));
 		} catch (e) {
 			logger("error", "Failed to parse or render post content", e);
 			setRenderedHTML(
 				"<p class='text-red-400'>Failed to load post content.</p>",
 			);
 		}
-	}, [post.content]);
+	}, [parsedContent, tocHeadings]);
 
 	return (
-		<article className="container max-w-3xl mx-auto py-20 px-4">
-			<div className="space-y-4 text-center mb-8">
-				<div className="flex w-full gap-2.5 justify-center flex-wrap">
-					{post.categories && post.categories.length > 0 ? (
-						post.categories.map((cat) => (
-							<Badge
-								key={cat.id}
-								variant="secondary"
-								className="rounded-full bg-(--bg-secondary) border border-(--border) px-3.5 py-1 text-xs font-bold text-(--link) capitalize"
-							>
-								{cat.name}
-							</Badge>
-						))
-					) : (
-						<Badge
-							variant="secondary"
-							className="rounded-full bg-(--bg-secondary) border border-(--border) px-3.5 py-1 text-xs font-bold text-(--text-secondary)"
-						>
-							No tag
-						</Badge>
-					)}
-				</div>
-				<h1
-					data-testid="postTitle"
-					className="text-4xl md:text-5xl text-(--text) font-extrabold tracking-tight"
+		<div className="w-full space-y-6">
+			{/* Top breadcrumb / navigation */}
+			<div className="flex items-center justify-between text-xs text-(--text-secondary)">
+				<Link
+					to="/articles"
+					className="inline-flex items-center gap-1.5 hover:text-(--text) transition-colors"
 				>
-					{post.title}
-				</h1>
-				<div className="text-(--text-secondary) text-xs flex items-center justify-center gap-2">
-					<span>
-						By{" "}
-						<strong className="text-(--text)">
-							{post.user?.displayUsername || post.user?.name || "Author"}
-						</strong>
-					</span>
-					<span>•</span>
-					<span data-testid="publishedText">
-						Published on{" "}
-						{new Date(post.date).toLocaleDateString("en", {
-							day: "numeric",
-							month: "long",
-							year: "numeric",
-						})}
-					</span>
-					{post.views !== undefined && post.views > 0 && (
-						<>
-							<span>•</span>
-							<span data-testid="viewCountText">
-								{post.views.toLocaleString()} {post.views === 1 ? "view" : "views"}
-							</span>
-						</>
-					)}
-				</div>
+					<ArrowLeft className="w-3.5 h-3.5" />
+					<span>All articles</span>
+				</Link>
 			</div>
 
-			{post.image && (
-				<div className="w-full flex justify-center items-center mb-8">
-					<img
-						src={post.image}
-						alt={post.title}
-						className="max-h-[400px] w-full object-cover rounded-2xl border border-(--border) shadow-xl bg-(--bg-secondary)"
-					/>
-				</div>
-			)}
+			<div className="flex flex-col lg:flex-row gap-8 xl:gap-10 justify-between relative">
+				<article className="w-full flex-1 min-w-0 max-w-3xl">
+					<header className="space-y-4 mb-8">
+						<div className="flex w-full gap-2 items-center flex-wrap">
+							{post.categories && post.categories.length > 0 ? (
+								post.categories.map((cat) => (
+									<Badge
+										key={cat.id}
+										variant="secondary"
+										className="rounded-md bg-(--bg-secondary) border border-(--border) px-2.5 py-0.5 text-xs font-medium text-(--text-secondary) capitalize shadow-none"
+									>
+										{cat.name}
+									</Badge>
+								))
+							) : (
+								<Badge
+									variant="secondary"
+									className="rounded-md bg-(--bg-secondary) border border-(--border) px-2.5 py-0.5 text-xs font-medium text-(--text-muted) shadow-none"
+								>
+									General
+								</Badge>
+							)}
+						</div>
 
-			{post.excerpt && (
-				<div className="mb-8">
-					<p className="text-xl leading-relaxed italic text-(--text-secondary)">
-						{post.excerpt}
-					</p>
-					<Separator className="bg-(--border) my-6" />
-				</div>
-			)}
+						<h1
+							data-testid="postTitle"
+							className="text-3xl sm:text-4xl md:text-5xl text-(--text) font-bold tracking-tight leading-tight"
+						>
+							{post.title}
+						</h1>
 
-			{renderedHTML ? (
-				<div
-					/* biome-ignore lint/security/noDangerouslySetInnerHtml: Sanitized via DOMPurify */
-					dangerouslySetInnerHTML={{ __html: renderedHTML }}
-					className="prose dark:prose-invert max-w-none text-(--text) prose-headings:text-(--text) prose-p:text-(--text) prose-a:text-(--link) hover:prose-a:underline prose-li:marker:text-(--text-secondary) prose-quotes:text-(--text-secondary) prose-blockquote:border-(--border) prose-code:text-(--link) mt-8 leading-relaxed"
-				/>
-			) : (
-				<div className="h-32 flex items-center justify-center text-(--text-secondary) text-sm animate-pulse">
-					Loading content...
-				</div>
-			)}
-		</article>
+						<div className="text-(--text-secondary) text-xs flex items-center flex-wrap gap-2 pt-1 border-b border-(--border) pb-4">
+							<span>
+								By{" "}
+								<strong className="text-(--text) font-medium">
+									{post.user?.displayUsername || post.user?.name || "Author"}
+								</strong>
+							</span>
+							<span>•</span>
+							<span data-testid="publishedText">
+								{new Date(post.date).toLocaleDateString("en-US", {
+									day: "numeric",
+									month: "short",
+									year: "numeric",
+								})}
+							</span>
+							<span>•</span>
+							<span data-testid="readingTimeText">{readingTime.text}</span>
+							{post.views !== undefined && post.views > 0 && (
+								<>
+									<span>•</span>
+									<span data-testid="viewCountText">
+										{post.views.toLocaleString()} {post.views === 1 ? "view" : "views"}
+									</span>
+								</>
+							)}
+						</div>
+					</header>
+
+					{/* Mobile Collapsible TOC */}
+					<TableOfContents headings={tocHeadings} variant="mobile" />
+
+					{post.image && (
+						<div className="w-full overflow-hidden rounded-xl border border-(--border) mb-8 bg-(--bg-secondary)">
+							<img
+								src={post.image}
+								alt={post.title}
+								className="max-h-[420px] w-full object-cover"
+							/>
+						</div>
+					)}
+
+					{post.excerpt && (
+						<div className="mb-8">
+							<p className="text-lg leading-relaxed text-(--text-secondary) font-normal">
+								{post.excerpt}
+							</p>
+							<Separator className="bg-(--border) my-6" />
+						</div>
+					)}
+
+					{renderedHTML ? (
+						<div
+							/* biome-ignore lint/security/noDangerouslySetInnerHtml: Sanitized via DOMPurify */
+							dangerouslySetInnerHTML={{ __html: renderedHTML }}
+							className="prose dark:prose-invert max-w-none text-(--text) prose-headings:text-(--text) prose-headings:font-bold prose-headings:tracking-tight prose-headings:scroll-mt-24 prose-p:text-(--text) prose-p:leading-relaxed prose-a:text-(--link) hover:prose-a:underline prose-li:marker:text-(--text-secondary) prose-quotes:text-(--text-secondary) prose-blockquote:border-(--border) prose-code:text-(--link) mt-8"
+						/>
+					) : (
+						<div className="h-32 flex items-center justify-center text-(--text-secondary) text-xs animate-pulse">
+							Loading content...
+						</div>
+					)}
+				</article>
+
+				{/* Desktop Sticky Sidebar TOC */}
+				<TableOfContents headings={tocHeadings} variant="desktop" />
+			</div>
+		</div>
 	);
 }
 
 function PostSkeleton() {
 	return (
-		<article className="container max-w-3xl mx-auto py-20 px-4 animate-pulse">
-			<div className="space-y-4 text-center mb-8 flex flex-col items-center">
-				<div className="h-6 w-28 bg-(--bg-secondary) border border-(--border) rounded-full" />
-				<div className="h-12 w-4/5 bg-(--bg-secondary) border border-(--border) rounded-lg" />
-				<div className="h-4 w-36 bg-(--bg-secondary) rounded" />
-			</div>
-
-			<div className="w-full h-[350px] bg-(--bg-secondary) border border-(--border) rounded-2xl mb-8" />
-
-			<div className="space-y-3 mb-8">
-				<div className="h-5 w-full bg-(--bg-secondary) rounded" />
-				<div className="h-5 w-2/3 bg-(--bg-secondary) rounded" />
-				<Separator className="bg-(--border) my-6" />
-			</div>
-
+		<article className="max-w-3xl space-y-6 animate-pulse">
 			<div className="space-y-4">
+				<div className="h-5 w-24 bg-(--bg-secondary) border border-(--border) rounded" />
+				<div className="h-10 w-4/5 bg-(--bg-secondary) border border-(--border) rounded" />
+				<div className="h-4 w-48 bg-(--bg-secondary) rounded" />
+			</div>
+
+			<div className="w-full h-[320px] bg-(--bg-secondary) border border-(--border) rounded-xl" />
+
+			<div className="space-y-3 pt-4">
 				<div className="h-4 w-full bg-(--bg-secondary) rounded" />
 				<div className="h-4 w-full bg-(--bg-secondary) rounded" />
-				<div className="h-4 w-5/6 bg-(--bg-secondary) rounded" />
+				<div className="h-4 w-2/3 bg-(--bg-secondary) rounded" />
 			</div>
 		</article>
 	);

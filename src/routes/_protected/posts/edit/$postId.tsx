@@ -1,10 +1,12 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import type { Editor } from "@tiptap/core";
-import { Sparkles } from "lucide-react";
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+	EditorProvider,
+	useEditorSavingState,
+} from "#/components/tiptap-templates/simple/editor-context";
 import { SimpleEditor } from "#/components/tiptap-templates/simple/simple-editor";
 import { Button } from "#/components/ui/button";
 import {
@@ -19,13 +21,32 @@ import {
 	ComboboxValue,
 	useComboboxAnchor,
 } from "#/components/ui/combobox";
+import {
+	DraftAutosaveStatus,
+	DraftRecoveryBanner,
+} from "#/components/ui/draftRecovery";
 import ImageUploader from "#/components/ui/fileUpload";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { prisma } from "#/db";
 import { CATEGORIES } from "#/lib/const";
-import type { IEditorSavingContext, IResponse } from "#/lib/types";
+import {
+	clearLocalDraft,
+	deleteRedisDraftServerFn,
+	getLocalDraft,
+	getRedisDraftServerFn,
+	type PostDraft,
+	saveLocalDraft,
+	saveRedisDraftServerFn,
+} from "#/lib/draft-autosave";
+import type { IResponse } from "#/lib/types";
 import { getSessionFn, logger } from "#/lib/utils";
+
+export {
+	EditorProvider,
+	EditorSavingContext,
+	useEditorSavingState,
+} from "#/components/tiptap-templates/simple/editor-context";
 
 const getPostForEdit = createServerFn({ method: "GET" })
 	.validator((postId: string) => {
@@ -240,10 +261,8 @@ function EditPostRoutePage() {
 
 	return (
 		<EditorProvider initialContent={post.content}>
-			<div className="min-h-screen text-(--text) bg-(--bg) relative">
-				<div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-					<EditPostForm postId={postId} />
-				</div>
+			<div className="w-full max-w-4xl mx-auto">
+				<EditPostForm postId={postId} />
 			</div>
 		</EditorProvider>
 	);
@@ -283,6 +302,110 @@ function EditPostForm({ postId }: { postId: string }) {
 	const [editorData, setEditorData] = useState<any>(null);
 	const { isSaving, editor } = useEditorSavingState();
 
+	// Draft Autosave & Recovery State
+	const [detectedDraft, setDetectedDraft] = useState<PostDraft | null>(null);
+	const [autosaveStatus, setAutosaveStatus] = useState<
+		"idle" | "saving" | "saved" | "unsaved"
+	>("idle");
+	const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+
+	const localDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const redisDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	// Detect unsaved draft on mount
+	useEffect(() => {
+		const local = getLocalDraft(postId);
+		if (
+			local &&
+			(local.title?.trim() !== (post.title || "") ||
+				JSON.stringify(local.tags) !==
+					JSON.stringify(
+						post.categories ? post.categories.map((c) => c.name) : [],
+					) ||
+				(local.content &&
+					JSON.stringify(local.content) !== JSON.stringify(post.content)))
+		) {
+			setDetectedDraft(local);
+			return;
+		}
+
+		void getRedisDraftServerFn({ data: postId }).then((remote) => {
+			if (
+				remote &&
+				(remote.title?.trim() !== (post.title || "") ||
+					JSON.stringify(remote.tags) !==
+						JSON.stringify(
+							post.categories ? post.categories.map((c) => c.name) : [],
+						) ||
+					(remote.content &&
+						JSON.stringify(remote.content) !== JSON.stringify(post.content)))
+			) {
+				setDetectedDraft(remote);
+			}
+		});
+	}, [postId, post.title, post.categories, post.content]);
+
+	const handleRestoreDraft = () => {
+		if (!detectedDraft) return;
+
+		if (detectedDraft.title) setTitle(detectedDraft.title);
+		if (detectedDraft.tags) setTags(detectedDraft.tags);
+		if (detectedDraft.content) {
+			setEditorData(detectedDraft.content);
+			if (editor) {
+				editor.commands.setContent(detectedDraft.content);
+			}
+		}
+		setLastSavedAt(detectedDraft.updatedAt);
+		setAutosaveStatus("saved");
+		setDetectedDraft(null);
+		toast.success("Draft restored from previous session!");
+	};
+
+	const handleDiscardDraft = () => {
+		clearLocalDraft(postId);
+		void deleteRedisDraftServerFn({ data: postId });
+		setDetectedDraft(null);
+		toast.info("Draft discarded.");
+	};
+
+	// Debounced autosave
+	useEffect(() => {
+		const currentContent = editorData || (editor && !editor.isEmpty ? editor.getJSON() : null);
+		if (!currentContent && !title) return;
+
+		setAutosaveStatus("unsaved");
+
+		if (localDebounceRef.current) clearTimeout(localDebounceRef.current);
+		localDebounceRef.current = setTimeout(() => {
+			setAutosaveStatus("saving");
+			const saved = saveLocalDraft(postId, {
+				title,
+				tags,
+				content: currentContent,
+			});
+			setLastSavedAt(saved.updatedAt);
+			setAutosaveStatus("saved");
+		}, 1200);
+
+		if (redisDebounceRef.current) clearTimeout(redisDebounceRef.current);
+		redisDebounceRef.current = setTimeout(() => {
+			void saveRedisDraftServerFn({
+				data: {
+					postId,
+					title,
+					tags,
+					content: currentContent,
+				},
+			});
+		}, 20000);
+
+		return () => {
+			if (localDebounceRef.current) clearTimeout(localDebounceRef.current);
+			if (redisDebounceRef.current) clearTimeout(redisDebounceRef.current);
+		};
+	}, [title, tags, editorData, postId, editor]);
+
 	return (
 		<div className="space-y-8">
 			<Link
@@ -294,25 +417,37 @@ function EditPostForm({ postId }: { postId: string }) {
 				</span>
 			</Link>
 
-			<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-(--border)/60 pb-8">
-				<div className="space-y-2">
-					<div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-(--link)/10 border border-(--link)/20 text-(--link) text-[11px] font-bold uppercase tracking-widest">
-						<Sparkles className="w-3 h-3" /> Editor Studio
+			{/* Draft Recovery Banner */}
+			<DraftRecoveryBanner
+				draft={detectedDraft}
+				onRestore={handleRestoreDraft}
+				onDiscard={handleDiscardDraft}
+			/>
+
+			<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-(--border) pb-6">
+				<div className="space-y-1.5">
+					<div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-(--bg-secondary) border border-(--border) text-(--text-secondary) text-[11px] font-medium uppercase tracking-wider">
+						Editor Studio
 					</div>
 					<h1
 						data-testid="editPostTxt"
-						className="text-3xl sm:text-4xl font-black tracking-tight text-(--text)"
+						className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)"
 					>
-						Edit Post.
+						Edit Post
 					</h1>
 					<p className="text-(--text-secondary) text-xs sm:text-sm">
 						Update your article content, configuration tags, and media assets.
 					</p>
 				</div>
-				<Button
-					disabled={isSaving}
-					className="h-9 px-6 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
-					onClick={() => {
+				<div className="flex items-center gap-4">
+					<DraftAutosaveStatus
+						status={autosaveStatus}
+						lastSavedAt={lastSavedAt}
+					/>
+					<Button
+						disabled={isSaving}
+						className="h-9 px-5 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all cursor-pointer"
+						onClick={() => {
 						toast.promise(
 							async () => {
 								let blogHeroImgUrl = existingImgUrl;
@@ -360,11 +495,10 @@ function EditPostForm({ postId }: { postId: string }) {
 									throw new Error(result.message || "Failed to update post.");
 								}
 
-								try {
-									localStorage.removeItem(`tiptapDraftContent-${postId}`);
-								} catch (e) {
-									logger("error", "Failed to clear local storage draft", e);
-								}
+								// Clean up draft upon successful update
+								clearLocalDraft(postId);
+								void deleteRedisDraftServerFn({ data: postId });
+
 								queryClient.invalidateQueries({
 									queryKey: ["editPost", postId],
 								});
@@ -382,9 +516,10 @@ function EditPostForm({ postId }: { postId: string }) {
 				>
 					{isSaving ? "Saving..." : "Update Post"}
 				</Button>
+				</div>
 			</div>
 
-			<div className="space-y-6 bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
+			<div className="space-y-6 bg-(--bg-secondary)/30 border border-(--border) rounded-xl p-5 sm:p-6">
 				<div className="flex flex-col gap-2.5">
 					<Label className="text-xs font-bold uppercase tracking-wider text-(--text)">
 						Post Title
@@ -476,55 +611,14 @@ function EditPostForm({ postId }: { postId: string }) {
 				</div>
 			</div>
 
-			<div className="w-full bg-(--bg-secondary)/40 border border-(--border) rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-3">
-				<Label className="text-xs font-bold uppercase tracking-wider text-(--text) block">
+			<div className="w-full bg-(--bg-secondary)/30 border border-(--border) rounded-xl p-5 sm:p-6 space-y-3">
+				<Label className="text-xs font-medium uppercase tracking-wider text-(--text-muted) block">
 					Post Content
 				</Label>
-				<div className="w-full rounded-2xl overflow-hidden border border-(--border) bg-(--bg)">
-					<SimpleEditor
-						setData={(data) => {
-							setEditorData(data);
-							try {
-								localStorage.setItem(
-									`tiptapDraftContent-${postId}`,
-									JSON.stringify(data),
-								);
-							} catch (e) {
-								logger("error", "Failed to save local draft", e);
-							}
-						}}
-					/>
+				<div className="w-full rounded-lg overflow-hidden border border-(--border) bg-(--bg)">
+					<SimpleEditor setData={setEditorData} />
 				</div>
 			</div>
 		</div>
 	);
 }
-
-export const EditorSavingContext = createContext<IEditorSavingContext>({
-	isSaving: false,
-	setIsSaving: () => {},
-	editor: null,
-	setEditor: () => {},
-	initialContent: null,
-});
-
-export const EditorProvider = ({
-	children,
-	initialContent,
-}: {
-	children: ReactNode;
-	initialContent: any;
-}) => {
-	const [isSaving, setIsSaving] = useState(false);
-	const [editor, setEditor] = useState<Editor | null>(null);
-
-	return (
-		<EditorSavingContext.Provider
-			value={{ isSaving, setIsSaving, editor, setEditor, initialContent }}
-		>
-			{children}
-		</EditorSavingContext.Provider>
-	);
-};
-
-export const useEditorSavingState = () => useContext(EditorSavingContext);

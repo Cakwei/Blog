@@ -24,6 +24,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPostsIndexRouteImport } from './routes/api/posts/index'
 import { Route as ProtectedPostsCreateIndexRouteImport } from './routes/_protected/posts/create/index'
 import { Route as ProtectedPostsEditPostIdRouteImport } from './routes/_protected/posts/edit/$postId'
+import { Route as ApiOgPostIdIndexRouteImport } from './routes/api/og/$postId/index'
 import { Route as ApiPostsUserIdIndexRouteImport } from './routes/api/posts/$userId/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -102,6 +103,11 @@ const ProtectedPostsEditPostIdRoute =
     path: '/posts/edit/$postId',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ApiOgPostIdIndexRoute = ApiOgPostIdIndexRouteImport.update({
+  id: '/api/og/$postId/',
+  path: '/api/og/$postId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPostsUserIdIndexRoute = ApiPostsUserIdIndexRouteImport.update({
   id: '/api/posts/$userId/',
   path: '/api/posts/$userId/',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/api/og/$postId/': typeof ApiOgPostIdIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/api/posts': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create': typeof ProtectedPostsCreateIndexRoute
+  '/api/og/$postId': typeof ApiOgPostIdIndexRoute
   '/api/posts/$userId': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRoutesById {
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/_protected/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/_protected/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/api/og/$postId/': typeof ApiOgPostIdIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/posts/edit/$postId'
     | '/posts/create/'
+    | '/api/og/$postId/'
     | '/api/posts/$userId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/api/posts'
     | '/posts/edit/$postId'
     | '/posts/create'
+    | '/api/og/$postId'
     | '/api/posts/$userId'
   id:
     | '__root__'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/_protected/posts/edit/$postId'
     | '/_protected/posts/create/'
+    | '/api/og/$postId/'
     | '/api/posts/$userId/'
   fileRoutesById: FileRoutesById
 }
@@ -226,6 +238,7 @@ export interface RootRouteChildren {
   ResetPasswordIndexRoute: typeof ResetPasswordIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPostsIndexRoute: typeof ApiPostsIndexRoute
+  ApiOgPostIdIndexRoute: typeof ApiOgPostIdIndexRoute
   ApiPostsUserIdIndexRoute: typeof ApiPostsUserIdIndexRoute
 }
 
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedPostsEditPostIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/api/og/$postId/': {
+      id: '/api/og/$postId/'
+      path: '/api/og/$postId'
+      fullPath: '/api/og/$postId/'
+      preLoaderRoute: typeof ApiOgPostIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/posts/$userId/': {
       id: '/api/posts/$userId/'
       path: '/api/posts/$userId'
@@ -378,6 +398,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordIndexRoute: ResetPasswordIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPostsIndexRoute: ApiPostsIndexRoute,
+  ApiOgPostIdIndexRoute: ApiOgPostIdIndexRoute,
   ApiPostsUserIdIndexRoute: ApiPostsUserIdIndexRoute,
 }
 export const routeTree = rootRouteImport

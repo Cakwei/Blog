@@ -122,20 +122,20 @@ function ResetPasswordPage() {
 	};
 
 	return (
-		<div className="min-h-[calc(100vh-10rem)] text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden flex items-center justify-center px-4 py-12">
-			<div className="w-full max-w-md relative z-10">
-				<Card className="gap-2.5 bg-(--bg-secondary)/40 border-border rounded-xl backdrop-blur-2xl shadow-xl">
-					<CardHeader className="space-y-3 text-center pb-4">
-						<div className="mx-auto inline-flex items-center justify-center w-12 h-12 rounded-xl bg-(--link)/10 border border-(--link)/30 text-(--link)">
-							<KeyRound className="w-6 h-6" />
+		<div className="w-full flex items-center justify-center py-6 sm:py-12">
+			<div className="w-full max-w-md">
+				<Card className="gap-2.5 bg-(--bg-secondary)/30 border-(--border) rounded-xl shadow-none">
+					<CardHeader className="space-y-2 text-center pb-4">
+						<div className="mx-auto inline-flex items-center justify-center w-10 h-10 rounded-lg bg-(--bg) border border-(--border) text-(--text)">
+							<KeyRound className="w-4 h-4" />
 						</div>
-						<CardTitle className="text-2xl font-black tracking-tight text-(--text)">
+						<CardTitle className="text-2xl font-bold tracking-tight text-(--text)">
 							Reset Password
 						</CardTitle>
 						<CardDescription className="text-(--text-secondary) text-xs sm:text-sm">
 							{token
-								? "Enter your new secure password credentials below."
-								: "Enter your email address to receive a new password reset link."}
+								? "Enter your new password below."
+								: "Enter your email address to receive a password reset link."}
 						</CardDescription>
 					</CardHeader>
 
@@ -195,7 +195,7 @@ function ResetPasswordPage() {
 								<Button
 									type="submit"
 									disabled={isPending}
-									className="w-full mt-2 py-2.5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer disabled:opacity-50"
+									className="w-full mt-2 py-2 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all cursor-pointer disabled:opacity-50"
 								>
 									{isPending ? "Updating Password..." : "Update Password"}
 								</Button>
@@ -214,7 +214,7 @@ function ResetPasswordPage() {
 										<div className="space-y-2">
 											<Label
 												htmlFor={field.name}
-												className="text-xs font-bold uppercase tracking-wider text-(--text-secondary)"
+												className="text-xs font-medium text-(--text-secondary)"
 											>
 												Email Address
 											</Label>
@@ -229,7 +229,7 @@ function ResetPasswordPage() {
 													onChange={(e) => field.handleChange(e.target.value)}
 													required
 													placeholder="name@example.com"
-													className="text-xs pl-9 rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
+													className="text-xs pl-9 rounded-lg border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
 												/>
 											</div>
 										</div>
@@ -239,19 +239,20 @@ function ResetPasswordPage() {
 								<Button
 									type="submit"
 									disabled={isResending}
-									className="w-full mt-2 py-2.5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer disabled:opacity-50"
+									className="w-full mt-2 py-2 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all cursor-pointer disabled:opacity-50"
 								>
-									{isResending ? "Sending Link..." : "Request New Reset Link"}
+									{isResending ? "Sending Link..." : "Request Reset Link"}
 								</Button>
 							</form>
 						)}
 
 						{/* Footer Link */}
 						<div className="pt-2 border-t border-(--border) text-center">
-							<Link to="/login" className="inline-flex items-center gap-1.5">
-								<Label className="text-(--link) font-semibold hover:underline text-xs">
-									← Back to Login
-								</Label>
+							<Link
+								to="/login"
+								className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--text) hover:underline"
+							>
+								← Back to Login
 							</Link>
 						</div>
 					</CardContent>

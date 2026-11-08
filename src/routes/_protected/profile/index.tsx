@@ -136,173 +136,165 @@ function ProfilePage() {
 	};
 
 	return (
-		<div className="min-h-screen text-(--text) bg-(--bg) selection:bg-(--link)/25 selection:text-(--link) relative overflow-hidden">
-			{/* Soft Ambient Top Glow */}
-			<div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[450px] bg-gradient-to-b from-(--link)/10 via-transparent to-transparent blur-[100px] pointer-events-none -z-10" />
+		<div className="w-full max-w-3xl mx-auto space-y-8">
+			{/* Minimalist Top Back & Title Bar */}
+			<div className="space-y-4">
+				<button
+					type="button"
+					onClick={() => navigate({ to: "/" })}
+					className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--text) transition-colors cursor-pointer"
+				>
+					← Return Home
+				</button>
 
-			<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 space-y-10">
-				{/* Minimalist Top Back & Title Bar */}
-				<div className="space-y-4">
-					<button
-						type="button"
-						onClick={() => navigate({ to: "/" })}
-						className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--text-secondary) hover:text-(--link) transition-colors group cursor-pointer"
-					>
-						← Return Home
-					</button>
+				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-(--border) pb-6">
+					<div>
+						<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)">
+							Account Settings
+						</h1>
+						<p className="text-(--text-secondary) text-xs sm:text-sm mt-1">
+							Manage your profile credentials and security.
+						</p>
+					</div>
 
-					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-(--border)/60 pb-8">
-						<div>
-							<h1 className="text-3xl sm:text-4xl font-black tracking-tight text-(--text)">
-								Account Settings.
-							</h1>
-							<p className="text-(--text-secondary) text-xs sm:text-sm mt-1">
-								Customize your personal identity and security infrastructure.
-							</p>
-						</div>
-
-						{/* Mini Identity Chip */}
-						<div className="flex items-center gap-3 bg-(--bg-secondary)/60 border border-(--border) p-2.5 rounded-md backdrop-blur-md">
-							{user?.image ? (
-								<img
-									src={user.image}
-									alt={user.name || "Avatar"}
-									className="w-10 h-10 rounded-md object-cover border border-(--border)"
-								/>
-							) : (
-								<div className="w-10 h-10 rounded-md bg-(--link)/10 border border-(--link)/30 flex items-center justify-center text-(--link) font-bold text-xs">
-									{user?.name?.charAt(0).toUpperCase() || "U"}
-								</div>
-							)}
-							<div className="pr-3">
-								<p className="text-xs font-bold text-(--text) truncate max-w-[140px]">
-									{user?.name}
-								</p>
-								<p className="text-[10px] text-(--text-secondary) truncate max-w-[140px]">
-									{user?.email}
-								</p>
+					{/* Mini Identity Chip */}
+					<div className="flex items-center gap-3 bg-(--bg-secondary)/40 border border-(--border) p-2 rounded-xl">
+						{user?.image ? (
+							<img
+								src={user.image}
+								alt={user.name || "Avatar"}
+								className="w-9 h-9 rounded-lg object-cover border border-(--border)"
+							/>
+						) : (
+							<div className="w-9 h-9 rounded-lg bg-(--bg) border border-(--border) flex items-center justify-center text-(--text) font-semibold text-xs">
+								{user?.name?.charAt(0).toUpperCase() || "U"}
 							</div>
+						)}
+						<div className="pr-2">
+							<p className="text-xs font-medium text-(--text) truncate max-w-[140px]">
+								{user?.name}
+							</p>
+							<p className="text-[11px] text-(--text-secondary) truncate max-w-[140px]">
+								{user?.email}
+							</p>
 						</div>
 					</div>
 				</div>
+			</div>
 
-				{/* Settings Form Wrapper */}
-				<form
-					onSubmit={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						form.handleSubmit();
-					}}
-					className="space-y-8"
-				>
-					{message && (
-						<div
-							data-testid="statusMsg"
-							className={`p-4 rounded-md text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
-								message.type === "success"
-									? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/5"
-									: "bg-(--error)/15 text-(--error) border border-(--error)/30 shadow-lg shadow-(--error)/5"
-							}`}
-						>
-							{message.text}
-						</div>
-					)}
+			{/* Settings Form Wrapper */}
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					form.handleSubmit();
+				}}
+				className="space-y-6"
+			>
+				{message && (
+					<div
+						data-testid="statusMsg"
+						className={`p-3.5 rounded-lg text-xs font-medium transition-all ${
+							message.type === "success"
+								? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+								: "bg-(--error)/10 text-(--error) border border-(--error)/20"
+						}`}
+					>
+						{message.text}
+					</div>
+				)}
 
-					{/* Section 1: General Credentials */}
-					<div className="bg-(--bg-secondary)/40 border border-(--border) rounded-md p-6 sm:p-8 backdrop-blur-2xl shadow-xl space-y-6">
-						<div className="flex items-center gap-2 pb-4 border-b border-(--border)/60">
-							<UserIcon className="w-4 h-4 text-(--link)" />
-							<h2 className="text-sm font-extrabold uppercase tracking-widest text-(--text)">
-								Personal Credentials
-							</h2>
-						</div>
-
-						<div className="grid sm:grid-cols-2 gap-6">
-							<form.Field name="name">
-								{(field) => (
-									<div className="space-y-2">
-										<Label
-											htmlFor="name"
-											className="text-xs font-bold uppercase tracking-wider text-(--text-secondary)"
-										>
-											Display Name
-										</Label>
-										<Input
-											id="name"
-											type="text"
-											value={field.state.value}
-											onChange={(e) => field.handleChange(e.target.value)}
-											required
-											className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
-										/>
-									</div>
-								)}
-							</form.Field>
-
-							<form.Field name="email">
-								{(field) => (
-									<div className="space-y-2">
-										<Label
-											htmlFor="email"
-											className="text-xs font-bold uppercase tracking-wider text-(--text-secondary)"
-										>
-											Email Address
-										</Label>
-										<Input
-											id="email"
-											type="email"
-											value={field.state.value}
-											onChange={(e) => field.handleChange(e.target.value)}
-											required
-											className="text-xs rounded-md border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
-										/>
-									</div>
-								)}
-							</form.Field>
-						</div>
+				{/* Section 1: General Credentials */}
+				<div className="bg-(--bg-secondary)/30 border border-(--border) rounded-xl p-5 sm:p-6 space-y-4">
+					<div className="flex items-center gap-2 pb-3 border-b border-(--border)">
+						<UserIcon className="w-4 h-4 text-(--text-muted)" />
+						<h2 className="text-xs font-semibold uppercase tracking-wider text-(--text-muted)">
+							Personal Credentials
+						</h2>
 					</div>
 
-					{/* Section 2: Security & Password Reset */}
-					<div className="bg-(--bg-secondary)/40 border border-(--border) rounded-md p-6 sm:p-8 backdrop-blur-2xl shadow-xl space-y-6">
-						<div className="flex items-center gap-2 pb-4 border-b border-(--border)/60">
-							<KeyRound className="w-4 h-4 text-(--link)" />
-							<h2 className="text-sm font-extrabold uppercase tracking-widest text-(--text)">
-								Password & Authentication
-							</h2>
-						</div>
+					<div className="grid sm:grid-cols-2 gap-4">
+						<form.Field name="name">
+							{(field) => (
+								<div className="space-y-1.5">
+									<Label
+										htmlFor="name"
+										className="text-xs font-medium text-(--text-secondary)"
+									>
+										Display Name
+									</Label>
+									<Input
+										id="name"
+										type="text"
+										value={field.state.value}
+										onChange={(e) => field.handleChange(e.target.value)}
+										required
+										className="text-xs rounded-lg border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
+									/>
+								</div>
+							)}
+						</form.Field>
 
-						<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-							<p className="text-xs text-(--text-secondary) max-w-md">
-								Need to update your password? Request a secure password reset
-								link to be sent to your registered email address.
-							</p>
-							<Button
-								type="button"
-								variant="outline"
-								disabled={isResettingPassword}
-								onClick={handlePasswordReset}
-								className="text-xs font-semibold hover:text-(--text) border-border bg-(--bg) hover:bg-(--bg-secondary) text-(--text) cursor-pointer shrink-0"
-							>
-								{isResettingPassword
-									? "Sending Link..."
-									: "Reset Password via Email"}
-							</Button>
-						</div>
+						<form.Field name="email">
+							{(field) => (
+								<div className="space-y-1.5">
+									<Label
+										htmlFor="email"
+										className="text-xs font-medium text-(--text-secondary)"
+									>
+										Email Address
+									</Label>
+									<Input
+										id="email"
+										type="email"
+										value={field.state.value}
+										onChange={(e) => field.handleChange(e.target.value)}
+										required
+										className="text-xs rounded-lg border-(--border) bg-(--bg) text-(--text) focus-visible:ring-(--link)/50"
+									/>
+								</div>
+							)}
+						</form.Field>
+					</div>
+				</div>
+
+				{/* Section 2: Security & Password Reset */}
+				<div className="bg-(--bg-secondary)/30 border border-(--border) rounded-xl p-5 sm:p-6 space-y-4">
+					<div className="flex items-center gap-2 pb-3 border-b border-(--border)">
+						<KeyRound className="w-4 h-4 text-(--text-muted)" />
+						<h2 className="text-xs font-semibold uppercase tracking-wider text-(--text-muted)">
+							Password & Authentication
+						</h2>
 					</div>
 
-					{/* Submit Action Bar */}
-					<div className="flex items-center justify-end pt-2">
+					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+						<p className="text-xs text-(--text-secondary) max-w-md">
+							Need to update your password? Request a secure password reset link to be sent to your registered email address.
+						</p>
 						<Button
-							data-testid="saveProfileBtn"
-							type="submit"
-							disabled={isPending}
-							className="px-5 bg-(--link) hover:bg-(--link)/90 text-white font-semibold text-xs rounded-md shadow-lg shadow-(--link)/20 transition-all cursor-pointer"
+							type="button"
+							variant="outline"
+							disabled={isResettingPassword}
+							onClick={handlePasswordReset}
+							className="text-xs font-medium hover:text-(--text) border-(--border) bg-(--bg) hover:bg-(--bg-secondary) text-(--text) cursor-pointer shrink-0 rounded-lg"
 						>
-							{isPending ? "Saving Modifications..." : "Save Modifications"}
+							{isResettingPassword ? "Sending Link..." : "Reset Password via Email"}
 						</Button>
 					</div>
-				</form>
-			</div>
+				</div>
+
+				{/* Submit Action Bar */}
+				<div className="flex items-center justify-end pt-2">
+					<Button
+						data-testid="saveProfileBtn"
+						type="submit"
+						disabled={isPending}
+						className="px-5 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all cursor-pointer"
+					>
+						{isPending ? "Saving..." : "Save Changes"}
+					</Button>
+				</div>
+			</form>
 		</div>
 	);
 }

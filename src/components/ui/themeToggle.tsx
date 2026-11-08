@@ -50,11 +50,10 @@ export function ThemeToggle() {
 	if (!mounted) {
 		return (
 			<Button
-				variant="ghost"
 				size="sm"
 				className="h-9 w-9 rounded-xl border border-(--border) bg-(--bg-secondary)/50 text-(--text-secondary) p-0"
 			>
-				<Sun className="h-4 w-4" />
+				<Sun className="h-4 w-4"/>
 			</Button>
 		);
 	}
@@ -80,7 +79,7 @@ export function ThemeToggle() {
 			>
 				<DropdownMenuItem
 					onClick={() => handleThemeChange("light")}
-					className={`flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+					className={`flex items-center gap-2 rounded-tl-xl rounded-tr-xl px-2.5 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
 						theme === "light"
 							? "bg-(--link)/15 text-(--link) font-semibold"
 							: "hover:bg-(--bg) text-(--text)"
@@ -91,7 +90,7 @@ export function ThemeToggle() {
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => handleThemeChange("dark")}
-					className={`flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+					className={`flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
 						theme === "dark"
 							? "bg-(--link)/15 text-(--link) font-semibold"
 							: "hover:bg-(--bg) text-(--text)"
@@ -102,13 +101,13 @@ export function ThemeToggle() {
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => handleThemeChange("system")}
-					className={`flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+					className={`flex items-center gap-2 rounded-bl-xl rounded-br-xl  px-2.5 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
 						theme === "system"
 							? "bg-(--link)/15 text-(--link) font-semibold"
 							: "hover:bg-(--bg) text-(--text)"
 					}`}
 				>
-					<Laptop className="h-3.5 w-3.5 text-(--text-secondary)" />
+					<Laptop className="h-3.5 w-3.5 text-(--text)" />
 					<span>System</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>

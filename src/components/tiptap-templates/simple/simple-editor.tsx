@@ -15,7 +15,7 @@ import { ImageUploadNode } from '#/components/tiptap-node/image-upload-node/imag
 import { Button } from '#/components/tiptap-ui-primitive/button';
 import { Spacer } from '#/components/tiptap-ui-primitive/spacer';
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from '#/components/tiptap-ui-primitive/toolbar';
-import { useEditorSavingState } from '#/routes/_protected/posts/edit/$postId';
+import { useEditorSavingState } from './editor-context';
 import '#/components/tiptap-node/blockquote-node/blockquote-node.scss';
 import '#/components/tiptap-node/code-block-node/code-block-node.scss';
 import '#/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss';

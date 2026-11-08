@@ -1,13 +1,20 @@
-/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: Ignore */
+import {
+	queryOptions,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import axios from "axios";
+import { createServerFn } from "@tanstack/react-start";
 import {
 	ArrowUpRight,
 	Calendar,
 	ChevronLeft,
 	ChevronRight,
+	Eye,
 	ImageIcon,
+	PenSquare,
 	Plus,
 	Trash2,
 } from "lucide-react";
@@ -15,8 +22,97 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
-import { API_URL } from "#/lib/const";
+import { prisma } from "#/db";
 import type { IResponse } from "#/lib/types";
+import { getSessionFn } from "#/lib/utils";
+
+export const getMyPostsServerFn = createServerFn({ method: "GET" })
+	.validator(
+		(data: {
+			userId?: string;
+			page?: number;
+			limit?: number;
+			search?: string;
+		}) => data,
+	)
+	.handler(async ({ data }) => {
+		const session = await getSessionFn();
+		if (!session?.user?.id) {
+			return {
+				success: false,
+				data: [],
+				totalPages: 1,
+				totalCount: "0",
+				currentPage: 1,
+				message: "Unauthorized",
+			} as IResponse;
+		}
+
+		const page = data.page && data.page > 0 ? data.page : 1;
+		const limit = data.limit && data.limit > 0 ? data.limit : 5;
+		const search = data.search?.trim() || "";
+		const skip = (page - 1) * limit;
+
+		const whereClause = {
+			userId: session.user.id,
+			...(search ? { title: { contains: search } } : {}),
+		};
+
+		const [posts, totalPosts] = await Promise.all([
+			prisma.post.findMany({
+				take: limit,
+				skip,
+				where: whereClause,
+				include: {
+					categories: true,
+				},
+				orderBy: { date: "desc" },
+			}),
+			prisma.post.count({ where: whereClause }),
+		]);
+
+		const totalPages = Math.max(1, Math.ceil(totalPosts / limit));
+
+		return {
+			success: true,
+			data: posts,
+			totalPages,
+			totalCount: totalPosts.toString(),
+			currentPage: page,
+			message: "Successfully fetched posts",
+		} as IResponse;
+	});
+
+export const deleteMyPostServerFn = createServerFn({ method: "POST" })
+	.validator((postId: number) => postId)
+	.handler(async ({ data: postId }) => {
+		const session = await getSessionFn();
+		if (!session?.user?.id) {
+			throw new Error("Unauthorized");
+		}
+
+		const post = await prisma.post.findUnique({
+			where: { id: postId },
+			select: { userId: true },
+		});
+
+		if (!post) {
+			throw new Error("Post not found");
+		}
+
+		if (post.userId !== session.user.id) {
+			throw new Error("Forbidden: You cannot delete another user's post");
+		}
+
+		await prisma.post.delete({ where: { id: postId } });
+
+		// Invalidate cache
+		const { redis } = await import("#/lib/redis");
+		await redis.invalidate(`posts:*`);
+		await redis.invalidate(`og:svg:${postId}`);
+
+		return { success: true, message: "Post deleted successfully" };
+	});
 
 const myPostsCourseQueryOptions = ({
 	userId = "",
@@ -29,41 +125,11 @@ const myPostsCourseQueryOptions = ({
 }) =>
 	queryOptions({
 		queryKey: ["myPosts", userId, page, limit],
-		queryFn: async () => await fetchPaginatedPosts({ userId, page, limit }),
+		queryFn: () => getMyPostsServerFn({ data: { userId, page, limit } }),
 		placeholderData: (prev) => prev,
 		staleTime: 15000,
 		gcTime: 15000,
-		refetchInterval: 15000,
 	});
-
-async function fetchPaginatedPosts({
-	userId,
-	page,
-	limit,
-}: {
-	userId: string;
-	page: number;
-	limit: number;
-}) {
-	let cookie = "";
-	if (typeof window === "undefined") {
-		const { getRequestHeader } = await import("@tanstack/react-start/server");
-		cookie = getRequestHeader("Cookie") || "";
-	}
-	const response = await axios.get(`${API_URL}/api/posts/${userId}`, {
-		params: { page, limit },
-		...(typeof window === "undefined"
-			? { headers: { cookie } }
-			: { withCredentials: true }),
-	});
-	const posts = response.data;
-
-	if (!posts.success) {
-		return { data: [], totalPages: 1, totalCount: 0, currentPage: 1 };
-	}
-
-	return posts as IResponse;
-}
 
 export const Route = createFileRoute("/_protected/posts/")({
 	component: AdminPostsPage,
@@ -78,35 +144,33 @@ function AdminPostsPage() {
 	const navigate = useNavigate();
 
 	return (
-		<div className="flex justify-center w-full bg-(--bg)">
-			<div className="w-full max-w-4xl px-4 sm:px-6 py-8 space-y-8 text-(--text)">
-				{/* Header Section */}
-				<div className="flex items-center justify-between border-b border-(--border) pb-6">
-					<div className="space-y-1">
-						<h1
-							data-testid="yourPostsHeadingTitle"
-							className="text-2xl font-bold tracking-tight text-(--text)"
-						>
-							Your Articles
-						</h1>
-						<p className="text-(--text-secondary) text-xs sm:text-sm">
-							Manage, edit, and publish your articles.
-						</p>
-					</div>
-					<Button
-						data-testid="newPostBtn"
-						onClick={() => navigate({ to: "/posts/create" })}
-						size="sm"
-						className="px-4 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-md transition-all flex items-center gap-2 cursor-pointer"
+		<div className="w-full text-(--text) space-y-8">
+			{/* Modern Dashboard Header */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-(--border) pb-6">
+				<div className="space-y-1">
+					<h1
+						data-testid="yourPostsHeadingTitle"
+						className="text-2xl sm:text-3xl font-bold tracking-tight text-(--text)"
 					>
-						<Plus className="w-4 h-4" />
-						<span>New Post</span>
-					</Button>
+						Your Articles
+					</h1>
+					<p className="text-(--text-secondary) text-xs sm:text-sm">
+						Manage, edit, and publish your essays, drafts, and technical notes.
+					</p>
 				</div>
-
-				{/* Content Listing & Pagination */}
-				<PostListContent />
+				<Button
+					data-testid="newPostBtn"
+					onClick={() => navigate({ to: "/posts/create" })}
+					size="sm"
+					className="px-4 h-9 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-sm shrink-0"
+				>
+					<Plus className="w-4 h-4" />
+					<span>New Article</span>
+				</Button>
 			</div>
+
+			{/* Content Listing & Pagination */}
+			<PostListContent />
 		</div>
 	);
 }
@@ -120,11 +184,10 @@ function PostListContent() {
 
 	const { data, isLoading, isError, isPlaceholderData } = useQuery({
 		queryKey: ["myPosts", userId, page, limit],
-		queryFn: async () => await fetchPaginatedPosts({ userId, page, limit }),
+		queryFn: () => getMyPostsServerFn({ data: { userId, page, limit } }),
 		placeholderData: (prev) => prev,
 		staleTime: 15000,
 		gcTime: 15000,
-		refetchInterval: 15000,
 	});
 
 	if (isLoading) {
@@ -132,7 +195,7 @@ function PostListContent() {
 	}
 
 	const posts = data?.data;
-	const totalPages = data?.totalPages;
+	const totalPages = data?.totalPages || 1;
 
 	if (isError || !data || !Array.isArray(posts) || posts.length === 0) {
 		return <EmptyState />;
@@ -140,39 +203,43 @@ function PostListContent() {
 
 	return (
 		<div className="space-y-6">
-			<div className="rounded-3xl overflow-hidden divide-y divide-(--border)/60 bg-(--bg-secondary)/40 border border-(--border) backdrop-blur-2xl shadow-2xl">
+			<div className="rounded-2xl overflow-hidden divide-y divide-(--border) bg-(--bg-secondary)/40 border border-(--border) backdrop-blur-md">
 				{posts.map((post: any) => (
 					<PostRow key={post.id} post={post} />
 				))}
 			</div>
 
 			{/* Pagination Controls */}
-			{totalPages && totalPages > 1 && (
-				<div className="flex items-center justify-between border-t border-(--border)/60 pt-4 px-2">
-					<p className="text-xs text-(--text-secondary)">
+			{totalPages > 1 && (
+				<div className="flex items-center justify-between border-t border-(--border) pt-4 px-1 text-xs text-(--text-secondary)">
+					<p>
 						Page <span className="font-semibold text-(--text)">{page}</span> of{" "}
 						<span className="font-semibold text-(--text)">{totalPages}</span>
 					</p>
 
 					<div className="flex items-center gap-2">
 						<Button
+							variant="outline"
+							size="sm"
 							onClick={() => setPage((old) => Math.max(old - 1, 1))}
 							disabled={page === 1}
-							className="h-8 px-3 text-xs border-(--border) bg-(--bg-secondary) hover:bg-(--bg-secondary)/80 disabled:opacity-50 cursor-pointer"
+							className="h-8 px-3 text-xs border-(--border) bg-(--bg) hover:bg-(--bg-secondary) disabled:opacity-40 cursor-pointer rounded-lg"
 						>
-							<ChevronLeft className="w-4 h-4 mr-1" /> Previous
+							<ChevronLeft className="w-3.5 h-3.5 mr-1" /> Previous
 						</Button>
 
 						<Button
+							variant="outline"
+							size="sm"
 							onClick={() => {
 								if (!isPlaceholderData && page < totalPages) {
 									setPage((old) => old + 1);
 								}
 							}}
 							disabled={isPlaceholderData || page >= totalPages}
-							className="h-8 px-3 text-xs border-(--border) bg-(--bg-secondary) hover:bg-(--bg-secondary)/80 disabled:opacity-50 cursor-pointer"
+							className="h-8 px-3 text-xs border-(--border) bg-(--bg) hover:bg-(--bg-secondary) disabled:opacity-40 cursor-pointer rounded-lg"
 						>
-							Next <ChevronRight className="w-4 h-4 ml-1" />
+							Next <ChevronRight className="w-3.5 h-3.5 ml-1" />
 						</Button>
 					</div>
 				</div>
@@ -188,27 +255,24 @@ function PostRow({ post }: { post: any }) {
 
 	const deleteMutation = useMutation({
 		mutationFn: async () => {
-			const res = await axios.delete(
-				`${API_URL}/api/posts/${post.userId}?postId=${post.id}`,
-				{ withCredentials: true },
-			);
-			return res.data;
+			return await deleteMyPostServerFn({ data: post.id });
 		},
-		onSuccess: (data) => {
-			if (data.success) {
-				toast.success("Post deleted successfully", { position: "top-center" });
+		onSuccess: (res) => {
+			if (res.success) {
+				toast.success("Article deleted successfully", {
+					position: "top-center",
+				});
 				queryClient.invalidateQueries({ queryKey: ["myPosts"] });
 			} else {
-				toast.error(data.message || "Failed to delete post", {
+				toast.error(res.message || "Failed to delete article", {
 					position: "top-center",
 				});
 			}
 		},
 		onError: (err: any) => {
-			toast.error(
-				err?.response?.data?.message || err?.message || "Failed to delete post",
-				{ position: "top-center" },
-			);
+			toast.error(err?.message || "Failed to delete article", {
+				position: "top-center",
+			});
 		},
 	});
 
@@ -219,31 +283,31 @@ function PostRow({ post }: { post: any }) {
 	};
 
 	return (
-		<div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 hover:bg-(--bg-secondary) transition-all group">
+		<div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 hover:bg-(--bg-secondary) transition-colors group">
 			{/* Post Thumbnail / Fallback */}
-			<div className="w-full sm:w-16 h-28 sm:h-16 rounded-2xl overflow-hidden bg-(--bg) border border-(--border) flex-shrink-0 relative">
+			<div className="w-full sm:w-20 h-28 sm:h-20 rounded-xl overflow-hidden bg-(--bg) border border-(--border) shrink-0 relative">
 				{post.image && !imageError ? (
 					<img
 						src={post.image}
 						alt=""
 						onError={() => setImageError(true)}
-						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 					/>
 				) : (
-					<div className="w-full h-full flex items-center justify-center bg-(--bg-secondary) text-(--text-secondary)">
-						<ImageIcon className="w-4 h-4 text-(--link)" />
+					<div className="w-full h-full flex items-center justify-center bg-(--bg-secondary) text-(--text-muted)">
+						<ImageIcon className="w-5 h-5" />
 					</div>
 				)}
 			</div>
 
 			{/* Details & Tags */}
-			<div className="flex-1 min-w-0 space-y-1.5">
+			<div className="flex-1 min-w-0 space-y-2">
 				<div className="flex flex-wrap items-center gap-2">
 					<span
-						className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+						className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
 							isDraft
-								? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
-								: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+								? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+								: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
 						}`}
 					>
 						{isDraft ? "Draft" : "Published"}
@@ -254,50 +318,63 @@ function PostRow({ post }: { post: any }) {
 							post.categories.map((cat: any) => (
 								<span
 									key={cat.id}
-									className="rounded-full border border-(--border) bg-(--bg) px-2.5 py-0.5 text-[10px] font-bold text-(--link) capitalize tracking-wide shadow-xs"
+									className="rounded-full border border-(--border) bg-(--bg) px-2 py-0.5 text-[10px] font-medium text-(--text-secondary) capitalize"
 								>
 									{cat.name}
 								</span>
 							))
 						) : (
-							<span className="rounded-full border border-(--border) bg-(--bg) px-2.5 py-0.5 text-[10px] font-bold text-(--text-secondary) capitalize tracking-wide">
+							<span className="rounded-full border border-(--border) bg-(--bg) px-2 py-0.5 text-[10px] font-medium text-(--text-muted) capitalize">
 								General
 							</span>
 						)}
 					</div>
 				</div>
 
-				<h3 className="font-bold text-sm sm:text-base text-(--text) truncate group-hover:text-(--link) transition-colors">
+				<h3 className="font-semibold text-sm sm:text-base text-(--text) truncate group-hover:text-(--link) transition-colors">
 					{post.title}
 				</h3>
 
-				<div className="flex items-center gap-1.5 text-xs text-(--text-secondary) font-medium">
-					<Calendar className="w-3.5 h-3.5 text-(--link)" />
-					<span>{new Date(post.date).toLocaleDateString("en-MY")}</span>
+				<div className="flex items-center gap-3 text-xs text-(--text-secondary)">
+					<div className="flex items-center gap-1.5">
+						<Calendar className="w-3.5 h-3.5 text-(--text-muted)" />
+						<span>
+							{new Date(post.date).toLocaleDateString("en-US", {
+								month: "short",
+								day: "numeric",
+								year: "numeric",
+							})}
+						</span>
+					</div>
+					{post.views !== undefined && (
+						<div className="flex items-center gap-1">
+							<Eye className="w-3.5 h-3.5 text-(--text-muted)" />
+							<span>
+								{post.views} {post.views === 1 ? "view" : "views"}
+							</span>
+						</div>
+					)}
 				</div>
 			</div>
 
-			{/* Actions */}
-			<div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0 pt-2 sm:pt-0">
+			{/* Action Buttons */}
+			<div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 justify-end sm:justify-start">
 				<Link
 					to="/posts/$postId"
 					params={{ postId: post.id.toString() }}
-					className="group/2 inline-flex items-center gap-1 px-3.5 py-2 text-xs font-semibold rounded-full bg-(--bg) border border-(--border) text-(--text) hover:text-(--link) hover:border-(--link)/40 transition-all shadow-xs"
+					className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-(--bg) border border-(--border) text-(--text-secondary) hover:text-(--text) hover:bg-(--bg-secondary) transition-colors"
 				>
-					<span className="text-(--link) group-hover/2:text-(--text)">
-						View
-					</span>
-					<ArrowUpRight className="w-3 h-3 group-hover/2:text-(--text) text-(--link)" />
+					<span>View</span>
+					<ArrowUpRight className="w-3 h-3" />
 				</Link>
 				<Link
 					data-testid="editPostBtn"
 					to="/posts/edit/$postId"
 					params={{ postId: post.id.toString() }}
-					className="group/2 inline-flex items-center px-3.5 py-2 text-xs font-semibold rounded-md bg-(--link)/10 text-(--link) border border-(--link)/20 hover:bg-(--link) hover:text-white transition-all shadow-xs"
+					className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-(--text) text-(--bg) hover:opacity-90 transition-opacity"
 				>
-					<span className="text-(--link) group-hover/2:text-(--text)">
-						Edit
-					</span>
+					<PenSquare className="w-3 h-3" />
+					<span>Edit</span>
 				</Link>
 				<Button
 					data-testid="deletePostBtn"
@@ -305,8 +382,8 @@ function PostRow({ post }: { post: any }) {
 					disabled={deleteMutation.isPending}
 					variant="ghost"
 					size="sm"
-					className="h-8 px-2.5 rounded-md text-red-500 hover:text-white hover:bg-red-500/90 border border-transparent hover:border-red-600 text-xs transition-all cursor-pointer"
-					title="Delete Post"
+					className="h-8 px-2.5 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-500/10 text-xs transition-colors cursor-pointer"
+					title="Delete Article"
 				>
 					<Trash2 className="w-3.5 h-3.5" />
 				</Button>
@@ -317,8 +394,8 @@ function PostRow({ post }: { post: any }) {
 
 function PostListSkeleton() {
 	return (
-		<div className="w-full flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 animate-pulse">
-			<Skeleton className="w-full sm:w-16 h-28 sm:h-16 rounded-2xl bg-(--bg) flex-shrink-0" />
+		<div className="w-full flex flex-col sm:flex-row sm:items-center gap-4 p-5 animate-pulse">
+			<Skeleton className="w-full sm:w-20 h-28 sm:h-20 rounded-xl bg-(--bg) shrink-0" />
 			<div className="flex-1 min-w-0 space-y-2">
 				<div className="flex items-center gap-2">
 					<Skeleton className="h-4 w-16 rounded-full bg-(--bg)" />
@@ -327,9 +404,9 @@ function PostListSkeleton() {
 				<Skeleton className="h-5 w-3/5 rounded-md bg-(--bg)" />
 				<Skeleton className="h-3.5 w-24 rounded-md bg-(--bg)" />
 			</div>
-			<div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0 pt-2 sm:pt-0">
-				<Skeleton className="h-8 w-14 rounded-xl bg-(--bg)" />
-				<Skeleton className="h-8 w-14 rounded-xl bg-(--bg)" />
+			<div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0">
+				<Skeleton className="h-8 w-14 rounded-lg bg-(--bg)" />
+				<Skeleton className="h-8 w-14 rounded-lg bg-(--bg)" />
 			</div>
 		</div>
 	);
@@ -337,7 +414,7 @@ function PostListSkeleton() {
 
 function PostListSkeletonContainer({ count = 4 }: { count?: number }) {
 	return (
-		<div className="rounded-3xl w-full overflow-hidden divide-y divide-(--border)/60 bg-(--bg-secondary)/40 border border-(--border) backdrop-blur-2xl shadow-2xl">
+		<div className="rounded-2xl w-full overflow-hidden divide-y divide-(--border) bg-(--bg-secondary)/40 border border-(--border)">
 			{Array.from({ length: count }).map((_, index) => (
 				<PostListSkeleton key={index} />
 			))}
@@ -347,21 +424,18 @@ function PostListSkeletonContainer({ count = 4 }: { count?: number }) {
 
 function EmptyState() {
 	return (
-		<div className="relative overflow-hidden rounded-md border border-dashed border-(--border) p-8 sm:p-14 text-center backdrop-blur-2xl shadow-xl transition-all">
-			{/* Soft Ambient Glow Effect */}
-			<div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-(--link)/10 blur-3xl rounded-full pointer-events-none" />
-
-			<div className="relative z-10 flex flex-col items-center max-w-sm mx-auto space-y-5">
-				{/* Typography */}
-				<div className="space-y-1.5">
-					<h3 className="text-xl font-bold text-(--text)">
-						No articles published yet
-					</h3>
-					<p className="text-xs sm:text-sm text-(--text-secondary) leading-relaxed">
-						Your dashboard is empty. Start writing today to share your knowledge
-						and engage with your readers.
-					</p>
+		<div className="rounded-2xl border border-dashed border-(--border) p-8 sm:p-14 text-center bg-(--bg-secondary)/20">
+			<div className="flex flex-col items-center max-w-sm mx-auto space-y-3">
+				<div className="w-12 h-12 rounded-full bg-(--bg-secondary) border border-(--border) flex items-center justify-center text-(--text-muted)">
+					<PenSquare className="w-5 h-5" />
 				</div>
+				<h3 className="text-lg font-semibold text-(--text)">
+					No articles published yet
+				</h3>
+				<p className="text-xs sm:text-sm text-(--text-secondary) leading-relaxed">
+					Your author dashboard is empty. Create your first article to share
+					your ideas and research.
+				</p>
 			</div>
 		</div>
 	);

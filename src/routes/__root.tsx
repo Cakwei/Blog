@@ -84,8 +84,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				className="bg-(--bg) text-(--text) selection:bg-(--link)/20 selection:text-(--link) min-h-screen flex flex-col antialiased transition-colors duration-200"
 			>
 				{/* MINIMALIST HEADER */}
-				<header className="border-b border-(--border) sticky top-0 left-0 z-50 w-full px-4 sm:px-6 bg-(--header-bg) backdrop-blur-md transition-colors">
-					<div className="h-14 w-full max-w-3xl mx-auto flex items-center justify-between">
+				<header className="border-b border-(--border) sticky top-0 left-0 z-50 w-full px-4 sm:px-6 lg:px-8 bg-(--header-bg) backdrop-blur-md transition-colors">
+					<div className="h-16 w-full max-w-5xl mx-auto flex items-center justify-between">
 						<div className="flex items-center gap-6">
 							<Link
 								data-testid="homeBtn"
@@ -151,7 +151,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				</header>
 
 				{/* MAIN CONTENT WRAPPER */}
-				<main className="flex-1 py-10 px-4 sm:px-6 max-w-3xl mx-auto w-full">
+				<main className="flex-1 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
 					{children}
 				</main>
 
@@ -159,7 +159,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 				{/* MINIMALIST FOOTER */}
 				<footer className="border-t border-(--border) py-8 mt-auto">
-					<div className="max-w-3xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
+					<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--text-secondary)">
 						<p>© {new Date().getFullYear()} Charlee. All rights reserved.</p>
 						<div className="flex items-center gap-5">
 							<Link to="/articles" className="hover:text-(--text) transition-colors">
