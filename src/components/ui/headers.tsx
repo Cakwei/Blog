@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { LogOut, PenSquare, User as UserIcon } from "lucide-react";
+import { LogOut, PenSquare, Sparkles, User as UserIcon } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import {
 	DropdownMenu,
@@ -95,6 +95,14 @@ export default function BetterAuthHeader() {
 							>
 								<UserIcon className="w-3.5 h-3.5 text-(--link)" />
 								<span>Profile</span>
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								data-testid="goToFeaturedBtn"
+								onClick={() => navigate({ to: "/posts/featured" })}
+								className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-(--text) focus:bg-(--link)/15 focus:text-(--link) cursor-pointer transition-colors"
+							>
+								<Sparkles className="w-3.5 h-3.5 text-amber-400" />
+								<span>Featured Stories</span>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 

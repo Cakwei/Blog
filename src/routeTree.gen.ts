@@ -24,6 +24,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPostsIndexRouteImport } from './routes/api/posts/index'
 import { Route as ProtectedPostsCreateIndexRouteImport } from './routes/_protected/posts/create/index'
 import { Route as ProtectedPostsEditPostIdRouteImport } from './routes/_protected/posts/edit/$postId'
+import { Route as ProtectedPostsFeaturedIndexRouteImport } from './routes/_protected/posts/featured/index'
 import { Route as ApiOgPostIdIndexRouteImport } from './routes/api/og/$postId/index'
 import { Route as ApiPostsUserIdIndexRouteImport } from './routes/api/posts/$userId/index'
 
@@ -103,6 +104,12 @@ const ProtectedPostsEditPostIdRoute =
     path: '/posts/edit/$postId',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedPostsFeaturedIndexRoute =
+  ProtectedPostsFeaturedIndexRouteImport.update({
+    id: '/posts/featured/',
+    path: '/posts/featured/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 const ApiOgPostIdIndexRoute = ApiOgPostIdIndexRouteImport.update({
   id: '/api/og/$postId/',
   path: '/api/og/$postId/',
@@ -129,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/posts/featured/': typeof ProtectedPostsFeaturedIndexRoute
   '/api/og/$postId/': typeof ApiOgPostIdIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
@@ -147,6 +155,7 @@ export interface FileRoutesByTo {
   '/api/posts': typeof ApiPostsIndexRoute
   '/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/posts/create': typeof ProtectedPostsCreateIndexRoute
+  '/posts/featured': typeof ProtectedPostsFeaturedIndexRoute
   '/api/og/$postId': typeof ApiOgPostIdIndexRoute
   '/api/posts/$userId': typeof ApiPostsUserIdIndexRoute
 }
@@ -167,6 +176,7 @@ export interface FileRoutesById {
   '/api/posts/': typeof ApiPostsIndexRoute
   '/_protected/posts/edit/$postId': typeof ProtectedPostsEditPostIdRoute
   '/_protected/posts/create/': typeof ProtectedPostsCreateIndexRoute
+  '/_protected/posts/featured/': typeof ProtectedPostsFeaturedIndexRoute
   '/api/og/$postId/': typeof ApiOgPostIdIndexRoute
   '/api/posts/$userId/': typeof ApiPostsUserIdIndexRoute
 }
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/posts/edit/$postId'
     | '/posts/create/'
+    | '/posts/featured/'
     | '/api/og/$postId/'
     | '/api/posts/$userId/'
   fileRoutesByTo: FileRoutesByTo
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/api/posts'
     | '/posts/edit/$postId'
     | '/posts/create'
+    | '/posts/featured'
     | '/api/og/$postId'
     | '/api/posts/$userId'
   id:
@@ -224,6 +236,7 @@ export interface FileRouteTypes {
     | '/api/posts/'
     | '/_protected/posts/edit/$postId'
     | '/_protected/posts/create/'
+    | '/_protected/posts/featured/'
     | '/api/og/$postId/'
     | '/api/posts/$userId/'
   fileRoutesById: FileRoutesById
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedPostsEditPostIdRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/posts/featured/': {
+      id: '/_protected/posts/featured/'
+      path: '/posts/featured'
+      fullPath: '/posts/featured/'
+      preLoaderRoute: typeof ProtectedPostsFeaturedIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/api/og/$postId/': {
       id: '/api/og/$postId/'
       path: '/api/og/$postId'
@@ -373,6 +393,7 @@ interface ProtectedRouteChildren {
   ProtectedRegisterIndexRoute: typeof ProtectedRegisterIndexRoute
   ProtectedPostsEditPostIdRoute: typeof ProtectedPostsEditPostIdRoute
   ProtectedPostsCreateIndexRoute: typeof ProtectedPostsCreateIndexRoute
+  ProtectedPostsFeaturedIndexRoute: typeof ProtectedPostsFeaturedIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
@@ -382,6 +403,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedRegisterIndexRoute: ProtectedRegisterIndexRoute,
   ProtectedPostsEditPostIdRoute: ProtectedPostsEditPostIdRoute,
   ProtectedPostsCreateIndexRoute: ProtectedPostsCreateIndexRoute,
+  ProtectedPostsFeaturedIndexRoute: ProtectedPostsFeaturedIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

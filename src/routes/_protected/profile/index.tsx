@@ -7,8 +7,9 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { KeyRound, User as UserIcon } from "lucide-react";
-import { useState } from "react";
+import { Camera, KeyRound, Loader2, User as UserIcon } from "lucide-react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
@@ -33,7 +34,9 @@ const getUserProfile = createServerFn().handler(async () => {
 });
 
 const updateProfileServerFn = createServerFn()
-	.validator((data: { name: string; email: string }) => data)
+	.validator(
+		(data: { name: string; email: string; image?: string | null }) => data,
+	)
 	.handler(async ({ data }) => {
 		const session = await getSessionFn();
 		if (!session?.user?.id) throw new Error("Unauthorized");
@@ -43,10 +46,89 @@ const updateProfileServerFn = createServerFn()
 			data: {
 				name: data.name,
 				email: data.email,
+				...(data.image !== undefined ? { image: data.image } : {}),
 			},
 		});
 
 		return { success: true, user: updatedUser };
+	});
+
+const uploadProfileAvatarServerFn = createServerFn({ method: "POST" })
+	.validator(
+		(data: { fileName: string; fileType: string; base64Data: string }) => {
+			if (!data.fileName || !data.fileType || !data.base64Data) {
+				throw new Error("Missing avatar upload payload data");
+			}
+			if (!data.fileType.startsWith("image/")) {
+				throw new Error("Invalid file type. Only images are permitted.");
+			}
+			return data;
+		},
+	)
+	.handler(async ({ data }) => {
+		try {
+			const session = await getSessionFn();
+			if (!session?.user?.id) {
+				return {
+					success: false,
+					url: "",
+					message: "Unauthorized upload session",
+				};
+			}
+
+			const { Upload } = await import("@aws-sdk/lib-storage");
+			const { s3Client } = await import("#/lib/s3");
+
+			const uuid = crypto.randomUUID();
+			const cleanFileName = data.fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+			const s3Key = `avatars/${uuid}-${cleanFileName}`;
+
+			const base64Content = data.base64Data.includes(",")
+				? data.base64Data.split(",")[1]
+				: data.base64Data;
+
+			if (!base64Content) {
+				throw new Error("Corrupted base64 payload data");
+			}
+
+			const buffer = Buffer.from(base64Content, "base64");
+			if (buffer.length > 5 * 1024 * 1024) {
+				throw new Error("File payload exceeds 5MB limit.");
+			}
+
+			const uploader = new Upload({
+				client: s3Client,
+				params: {
+					Bucket: "blog",
+					Key: s3Key,
+					Body: buffer,
+					ContentType: data.fileType,
+				},
+				queueSize: 4,
+				partSize: 5 * 1024 * 1024,
+			});
+
+			await uploader.done();
+			const avatarUrl = `https://s3.cakwei.dev/blog/${s3Key}`;
+
+			// Update user record immediately in DB
+			await prisma.user.update({
+				where: { id: session.user.id },
+				data: { image: avatarUrl },
+			});
+
+			return {
+				success: true,
+				url: avatarUrl,
+				message: "Avatar uploaded successfully",
+			};
+		} catch (error: any) {
+			return {
+				success: false,
+				url: "",
+				message: error?.message || "Failed to upload avatar to S3 storage",
+			};
+		}
 	});
 
 const profileQueryOptions = () =>
@@ -70,11 +152,70 @@ function ProfilePage() {
 	const queryClient = useQueryClient();
 	const { data: user } = useSuspenseQuery(profileQueryOptions());
 
+	const avatarInputRef = useRef<HTMLInputElement>(null);
+	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 	const [isResettingPassword, setIsResettingPassword] = useState(false);
 	const [message, setMessage] = useState<{
 		type: "success" | "error";
 		text: string;
 	} | null>(null);
+
+	const handleAvatarFileChange = async (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		// Validation: Image types only
+		if (!file.type.startsWith("image/")) {
+			toast.error("Please upload a valid image file (JPG, PNG, WebP, etc.).");
+			return;
+		}
+
+		// Validation: 5MB limit
+		if (file.size > 5 * 1024 * 1024) {
+			toast.error("Profile picture size must be under 5MB.");
+			return;
+		}
+
+		try {
+			setIsUploadingAvatar(true);
+			const reader = new FileReader();
+
+			reader.onload = async () => {
+				try {
+					const base64Data = reader.result as string;
+					const res = await uploadProfileAvatarServerFn({
+						data: {
+							fileName: file.name,
+							fileType: file.type,
+							base64Data,
+						},
+					});
+
+					if (!res.success) {
+						toast.error(res.message || "Failed to upload avatar");
+						return;
+					}
+
+					await queryClient.invalidateQueries({ queryKey: ["profile"] });
+					toast.success("Profile picture updated successfully!");
+				} catch (err: any) {
+					toast.error(err?.message || "Failed to upload avatar.");
+				} finally {
+					setIsUploadingAvatar(false);
+					if (avatarInputRef.current) {
+						avatarInputRef.current.value = "";
+					}
+				}
+			};
+
+			reader.readAsDataURL(file);
+		} catch (err: any) {
+			toast.error(err?.message || "Failed reading image file.");
+			setIsUploadingAvatar(false);
+		}
+	};
 
 	const { mutate, isPending } = useMutation({
 		mutationFn: (variables: { name: string; email: string }) =>
@@ -157,23 +298,65 @@ function ProfilePage() {
 						</p>
 					</div>
 
-					{/* Mini Identity Chip */}
-					<div className="flex items-center gap-3 bg-(--bg-secondary)/40 border border-(--border) p-2 rounded-xl">
-						{user?.image ? (
-							<img
-								src={user.image}
-								alt={user.name || "Avatar"}
-								className="w-9 h-9 rounded-lg object-cover border border-(--border)"
-							/>
-						) : (
-							<div className="w-9 h-9 rounded-lg bg-(--bg) border border-(--border) flex items-center justify-center text-(--text) font-semibold text-xs">
-								{user?.name?.charAt(0).toUpperCase() || "U"}
+					{/* Mini Identity Chip with Avatar Upload */}
+					<div className="flex items-center gap-3.5 bg-(--bg-secondary)/40 border border-(--border) p-2.5 rounded-xl">
+						<input
+							type="file"
+							ref={avatarInputRef}
+							onChange={handleAvatarFileChange}
+							accept="image/png,image/jpeg,image/webp,image/gif"
+							className="hidden"
+							disabled={isUploadingAvatar}
+						/>
+						<button
+							type="button"
+							onClick={() => avatarInputRef.current?.click()}
+							disabled={isUploadingAvatar}
+							title="Click to change profile picture"
+							className="relative group w-11 h-11 rounded-lg overflow-hidden border border-(--border) flex-shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-(--text) focus:ring-offset-2 transition-all"
+						>
+							{user?.image ? (
+								<img
+									src={user.image}
+									alt={user.name || "Avatar"}
+									className="w-full h-full object-cover"
+								/>
+							) : (
+								<div className="w-full h-full bg-(--bg) flex items-center justify-center text-(--text) font-semibold text-sm">
+									{user?.name?.charAt(0).toUpperCase() || "U"}
+								</div>
+							)}
+
+							{/* Overlay */}
+							<div
+								className={`absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity ${
+									isUploadingAvatar
+										? "opacity-100"
+										: "opacity-0 group-hover:opacity-100"
+								}`}
+							>
+								{isUploadingAvatar ? (
+									<Loader2 className="w-4 h-4 text-white animate-spin" />
+								) : (
+									<Camera className="w-4 h-4 text-white" />
+								)}
 							</div>
-						)}
+						</button>
+
 						<div className="pr-2">
-							<p className="text-xs font-medium text-(--text) truncate max-w-[140px]">
-								{user?.name}
-							</p>
+							<div className="flex items-center gap-1.5">
+								<p className="text-xs font-medium text-(--text) truncate max-w-[140px]">
+									{user?.name}
+								</p>
+								<button
+									type="button"
+									onClick={() => avatarInputRef.current?.click()}
+									disabled={isUploadingAvatar}
+									className="text-[10px] text-xs font-mono text-(--text-muted) hover:text-(--text) underline cursor-pointer"
+								>
+									{isUploadingAvatar ? "Uploading..." : "Change"}
+								</button>
+							</div>
 							<p className="text-[11px] text-(--text-secondary) truncate max-w-[140px]">
 								{user?.email}
 							</p>

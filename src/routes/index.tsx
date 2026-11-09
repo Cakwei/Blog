@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { Skeleton } from "#/components/ui/skeleton";
 import { prisma } from "#/db";
 import type { Category, Post, User } from "#/generated/prisma/client";
+import { authClient } from "#/lib/auth-client";
 import type { IResponse } from "#/lib/types";
 
 // Interfaces / Types
@@ -21,18 +22,34 @@ interface IPost extends Post {
 // Server Function
 export const getHomePosts = createServerFn({ method: "GET" }).handler(
 	async () => {
-		const posts = await prisma.post.findMany({
-			where: { published: true },
-			orderBy: { date: "desc" },
-			include: {
-				categories: true,
-				user: true,
-			},
-		});
+		const [posts, authorUser] = await Promise.all([
+			prisma.post.findMany({
+				where: { published: true },
+				orderBy: { date: "desc" },
+				include: {
+					categories: true,
+					user: true,
+				},
+			}),
+			prisma.user.findFirst({
+				where: {
+					OR: [
+						{ email: "charleetan2020@gmail.com" },
+						{ username: "cakwei" },
+					],
+				},
+				select: {
+					image: true,
+				},
+			}),
+		]);
 
 		return {
 			success: true,
-			data: posts,
+			data: {
+				posts,
+				authorImage: authorUser?.image || null,
+			},
 			message: "Successfully fetched data",
 		} as IResponse;
 	},
@@ -66,10 +83,11 @@ function HomePage() {
 }
 
 function HomeContent() {
-	const { data: posts } = useSuspenseQuery(postsQueryOptions);
+	const { data: homeRes } = useSuspenseQuery(postsQueryOptions);
+	const { data: session } = authClient.useSession();
 
-	// Ensure postList is always an array
-	const rawData = posts?.data;
+	// Support both { posts, authorImage } structure and legacy array fallback
+	const rawData = homeRes?.data;
 	const postList: IPost[] = Array.isArray(rawData)
 		? rawData
 		: rawData &&
@@ -78,6 +96,23 @@ function HomeContent() {
 				Array.isArray(rawData.posts)
 			? rawData.posts
 			: [];
+
+	const authorImageFromDb =
+		rawData &&
+		typeof rawData === "object" &&
+		"authorImage" in rawData &&
+		typeof rawData.authorImage === "string"
+			? rawData.authorImage
+			: null;
+
+	// Dynamic avatar: 
+	// 1. Logged in session user's image (if viewing their own blog)
+	// 2. Blog author's image fetched from DB
+	// 3. Fallback placeholder
+	const avatarUrl =
+		session?.user?.image ||
+		authorImageFromDb ||
+		"https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80";
 
 	const featuredPosts = postList.filter((post) => post.isFeatured);
 	const activeFeaturedPosts =
@@ -94,7 +129,7 @@ function HomeContent() {
 			<section className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pt-4 pb-8 border-b border-(--border)">
 				<div className="relative w-16 h-16 rounded-full overflow-hidden border border-(--border) bg-(--bg-secondary) flex-shrink-0 shadow-xs">
 					<img
-						src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80"
+						src={avatarUrl}
 						alt="Charlee"
 						className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
 					/>

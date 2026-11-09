@@ -57,6 +57,15 @@ export function extractPlainTextFromTiptap(node: any): string {
 export const DEFAULT_WORDS_PER_MINUTE = 200;
 
 /**
+ * Minimum active dwell time (in milliseconds) required before a user's visit
+ * qualifies as an authentic "read" and increments the post's view counter.
+ * Industry standards:
+ * - Medium / dev.to / Substack: 5,000ms – 10,000ms
+ * Developers can adjust this constant globally or via the useRecordPostView hook.
+ */
+export const POST_VIEW_DWELL_TIME_MS = 5000;
+
+/**
  * Calculates reading time in minutes based on configurable words per minute pace
  */
 export function calculateReadingTime(

@@ -16,6 +16,7 @@ import {
 	ImageIcon,
 	PenSquare,
 	Plus,
+	Sparkles,
 	Trash2,
 } from "lucide-react";
 import { useState } from "react";
@@ -158,15 +159,27 @@ function AdminPostsPage() {
 						Manage, edit, and publish your essays, drafts, and technical notes.
 					</p>
 				</div>
-				<Button
-					data-testid="newPostBtn"
-					onClick={() => navigate({ to: "/posts/create" })}
-					size="sm"
-					className="px-4 h-9 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-sm shrink-0"
-				>
-					<Plus className="w-4 h-4" />
-					<span>New Article</span>
-				</Button>
+				<div className="flex items-center gap-2 shrink-0">
+					<Button
+						data-testid="manageFeaturedBtn"
+						onClick={() => navigate({ to: "/posts/featured" })}
+						variant="outline"
+						size="sm"
+						className="px-3.5 h-9 border-(--border) bg-(--bg) hover:bg-(--bg-secondary) text-(--text-secondary) hover:text-(--text) font-medium text-xs rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+					>
+						<Sparkles className="w-3.5 h-3.5 text-amber-400" />
+						<span>Manage Featured</span>
+					</Button>
+					<Button
+						data-testid="newPostBtn"
+						onClick={() => navigate({ to: "/posts/create" })}
+						size="sm"
+						className="px-4 h-9 bg-(--text) hover:opacity-90 text-(--bg) font-medium text-xs rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+					>
+						<Plus className="w-4 h-4" />
+						<span>New Article</span>
+					</Button>
+				</div>
 			</div>
 
 			{/* Content Listing & Pagination */}

@@ -21,6 +21,7 @@ import {
 	calculateReadingTime,
 	extractHeadingsFromTiptap,
 	injectHeadingIdsIntoHtml,
+	POST_VIEW_DWELL_TIME_MS,
 } from "#/lib/reading-time";
 import { logger } from "#/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -66,19 +67,55 @@ export const getPostById = createServerFn({ method: "GET" })
 			return post;
 		}
 
-		// Decoupled view counting (Phase 3 performance optimization)
-		const { cache } = await import("#/lib/cache");
-		const { getRequestHeader } = await import("@tanstack/react-start/server");
-		const clientIp =
-			getRequestHeader("x-forwarded-for") ||
-			getRequestHeader("cf-connecting-ip") ||
-			"anonymous";
-		const { totalViews } = await cache.recordPostView(post.id, clientIp);
+		// Return post data with current cached or persistent views
+		const { redis } = await import("#/lib/redis");
+		const cachedViews = await redis.get<number>(`post:${post.id}:views`);
+		const liveViews =
+			cachedViews !== null && cachedViews !== undefined
+				? Number(cachedViews)
+				: post.views;
 
 		return {
 			...post,
-			views: post.views + totalViews,
+			views: Math.max(post.views, liveViews),
 		};
+	});
+
+export const incrementPostViewServerFn = createServerFn({ method: "POST" })
+	.validator((postId: number) => postId)
+	.handler(async ({ data: postId }) => {
+		try {
+			if (!postId || isNaN(postId) || postId <= 0) {
+				return { success: false, totalViews: 0 };
+			}
+
+			const { getRequestHeader } = await import("@tanstack/react-start/server");
+			const { cache } = await import("#/lib/cache");
+
+			const clientIp =
+				getRequestHeader("x-forwarded-for") ||
+				getRequestHeader("cf-connecting-ip") ||
+				getRequestHeader("user-agent") ||
+				"anonymous";
+
+			const { totalViews, isNewView } = await cache.recordPostView(
+				postId,
+				clientIp,
+			);
+
+			// Synchronize with database if new view recorded
+			if (isNewView) {
+				await prisma.post.update({
+					where: { id: postId },
+					data: { views: { increment: 1 } },
+				});
+			}
+
+			return { success: true, totalViews, isNewView };
+		} catch (error) {
+			logger("error", "Failed to increment post view:", error);
+			return { success: false, totalViews: 0 };
+		}
 	});
 
 const postQueryOptions = (postId: string) =>
@@ -155,6 +192,39 @@ const tptExtensions = [
 function PostContent({ postId }: { postId: string }) {
 	const { data: post } = useSuspenseQuery(postQueryOptions(postId));
 	const [renderedHTML, setRenderedHTML] = useState<string>("");
+
+	const [liveViews, setLiveViews] = useState<number>(post.views || 0);
+
+	// Synchronize initial views if post object changes
+	useEffect(() => {
+		if (post.views !== undefined) {
+			setLiveViews(post.views);
+		}
+	}, [post.views]);
+
+	// Dwell time detection: Count as an authentic view after user reads for POST_VIEW_DWELL_TIME_MS
+	useEffect(() => {
+		// Only track views for published articles
+		if (!post.published || !post.id) return;
+
+		let hasRecorded = false;
+		const timer = setTimeout(async () => {
+			if (hasRecorded) return;
+			hasRecorded = true;
+			try {
+				const res = await incrementPostViewServerFn({ data: post.id });
+				if (res.success && res.totalViews) {
+					setLiveViews(res.totalViews);
+				}
+			} catch (err) {
+				logger("warn", "Post view record failed:", err);
+			}
+		}, POST_VIEW_DWELL_TIME_MS);
+
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [post.id, post.published]);
 
 	const parsedContent = useMemo(() => {
 		if (!post.content) return null;
@@ -257,11 +327,12 @@ function PostContent({ postId }: { postId: string }) {
 							</span>
 							<span>•</span>
 							<span data-testid="readingTimeText">{readingTime.text}</span>
-							{post.views !== undefined && post.views > 0 && (
+							{liveViews !== undefined && liveViews > 0 && (
 								<>
 									<span>•</span>
 									<span data-testid="viewCountText">
-										{post.views.toLocaleString()} {post.views === 1 ? "view" : "views"}
+										{liveViews.toLocaleString()}{" "}
+										{liveViews === 1 ? "view" : "views"}
 									</span>
 								</>
 							)}
